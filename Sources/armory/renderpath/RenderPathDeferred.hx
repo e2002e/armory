@@ -529,7 +529,6 @@ class RenderPathDeferred {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-
 			var voxelize = true;
 
 			#if arm_voxelgi_temporal
@@ -539,6 +538,8 @@ class RenderPathDeferred {
 				voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 			}
 			#end
+
+
 
 			if(voxelize) {
 				path.clearImage(voxels, 0x00000000);
