@@ -663,9 +663,9 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         vert.write('vec3 P = vec3(W * vec4(spos.xyz, 1.0));')
         vert.write('float dist = max(abs(P.x - eye.x), max(abs(P.y - eye.y), abs(P.z - eye.z)));')
         vert.write('clipmapLevel = vec3(max(log2(dist / voxelgiHalfExtents.x * 2.0), 0.0));')
-        vert.write('float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel.x)) * voxelgiHalfExtents.x / voxelgiResolution.x;')
+        vert.write('float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel.x));')
         vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x) / voxelSize) * voxelSize;')
-        vert.write('voxpos = (P - eyeSnap) / (pow(2.0, floor(clipmapLevel.x)) * voxelgiHalfExtents.x);')
+        vert.write('voxpos = (P - eyeSnap) / voxelSize * 2.0 / voxelgiHalfExtents.x;')
 
         frag.add_include('std/conetrace.glsl')
         frag.add_uniform('sampler3D voxels')

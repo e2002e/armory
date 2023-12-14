@@ -221,17 +221,17 @@ void main() {
 #ifdef _VoxelGI
 	float dist = max(abs(p.x- eye.x), max(abs(p.y - eye.y), abs(p.z - eye.z)));
 	float clipmapLevel = max(log2(dist / voxelgiHalfExtents.x * 2.0), 0.0);
-	float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel)) * voxelgiHalfExtents.x / voxelgiResolution.x;
+	float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel));
 	vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x) / voxelSize) * voxelSize;
-	vec3 voxpos = (p - eyeSnap) / (pow(2.0, floor(clipmapLevel)) * voxelgiHalfExtents.x);
+	vec3 voxpos = (p - eyeSnap) / voxelSize * 2.0 / voxelgiHalfExtents.x;
 #endif
 
 #ifdef _VoxelAOvar
 	float dist = max(abs(p.x- eye.x), max(abs(p.y - eye.y), abs(p.z - eye.z)));
 	float clipmapLevel = max(log2(dist / voxelgiHalfExtents.x * 2.0), 0.0);
-	float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel)) * voxelgiHalfExtents.x / voxelgiResolution.x;
+	float voxelSize = 2.0 * pow(2.0, floor(clipmapLevel));
 	vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x) / voxelSize) * voxelSize;
-	vec3 voxpos = (p - eyeSnap) / (pow(2.0, floor(clipmapLevel)) * voxelgiHalfExtents.x);
+	vec3 voxpos = (p - eyeSnap) / voxelSize * 2.0 / voxelgiHalfExtents.x;
 #endif
 
 #ifdef _VoxelRefract
@@ -412,9 +412,9 @@ void main() {
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel)) * voxelBlend + (1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel) * 1.0 - voxelBlend);
+	svisibility *= (1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel))) * voxelBlend + (1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel)) * 1.0 - voxelBlend);
 	#else
-	svisibility *= 1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel);
+	svisibility *= 1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel));
 	#endif
 	#endif
 	#endif
@@ -422,9 +422,9 @@ void main() {
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel)) * voxelBlend + (1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel) * 1.0 - voxelBlend);
+	svisibility *= (1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel))) * voxelBlend + (1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel)) * 1.0 - voxelBlend);
 	#else
-	svisibility *= 1.0 - traceShadow(voxels, voxpos, sunDir, clipmapLevel);
+	svisibility *= 1.0 - traceShadow(voxels, voxpos, sunDir, int(clipmapLevel));
 	#endif
 	#endif
 	#endif
@@ -496,7 +496,7 @@ void main() {
 		#ifdef _VoxelTemporal
 		, voxelsLast
 		#endif
-		, voxpos, clipmapLevel
+		, voxpos, int(clipmapLevel)
 		#endif
 		#endif
 		#ifdef _VoxelGI
@@ -505,7 +505,7 @@ void main() {
 		#ifdef _VoxelTemporal
 		, voxelsLast
 		#endif
-		, voxpos, clipmapLevel
+		, voxpos, int(clipmapLevel)
 		#endif
 		#endif
 		#ifdef _MicroShadowing
@@ -569,7 +569,7 @@ void main() {
 			#ifdef _VoxelTemporal
 			, voxelsLast
 			#endif
-			, voxpos, clipmapLevel
+			, voxpos, int(clipmapLevel)
 			#endif
 			#endif
 			#ifdef _VoxelGI
@@ -578,7 +578,7 @@ void main() {
 			#ifdef _VoxelTemporal
 			, voxelsLast
 			#endif
-			, voxpos, clipmapLevel
+			, voxpos, int(clipmapLevel)
 			#endif
 			#endif
 			#ifdef _MicroShadowing
