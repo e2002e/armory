@@ -529,11 +529,11 @@ class RenderPathDeferred {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-			var voxelize = true;
+			var voxelize = path.voxelize();
 
 			#if arm_voxelgi_temporal
-			voxelize = ++armory.renderpath.RenderPathCreator.voxelFrame % armory.renderpath.RenderPathCreator.voxelFreq == 0;
 			if(voxelize) {
+				voxelize = ++armory.renderpath.RenderPathCreator.voxelFrame % armory.renderpath.RenderPathCreator.voxelFreq == 0;
 				voxels = voxels == "voxels" ? "voxelsB" : "voxels";
 				voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 			}
@@ -542,7 +542,9 @@ class RenderPathDeferred {
 
 
 			if(voxelize) {
-				path.clearImage(voxels, 0x00000000);
+				if(armory.renderpath.RenderPathCreator.clipmapLevel % Main.voxelgiClipmapCount == 0)
+					path.clearImage(voxels, 0x00000000);
+
 				path.setTarget("");
 				var res = Inc.getVoxelRes();
 				path.setViewport(res, res);
@@ -583,6 +585,7 @@ class RenderPathDeferred {
 				#else
 				path.generateMipmaps(voxels);
 				#end
+				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 			}
 		}
 		#end
