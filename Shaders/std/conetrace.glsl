@@ -60,14 +60,14 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 dir, const float aperture, co
 		float diam = max(voxelSize0, dist * 2.0 * aperture);
         float lod = max(log2(diam / voxelSize0), 0);
 		vec4 mipSample = vec4(0.0);
-		float clipmap_blend = fract(lod);
 
         samplePos = origin + dir * dist;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
-		mipSample = textureLod(voxels, samplePos, lod);
 
+		mipSample = textureLod(voxels, samplePos, lod);
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
+
         dist += diam * voxelgiStep;
 	}
     return sampleCol;
@@ -148,15 +148,15 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 dir, const float aperture,
         float diam = max(voxelSize0, dist * 2.0 * aperture);
         float lod = max(log2(diam / voxelSize0), 0.0);
 		float mipSample = 0.0;
-		float clipmap_blend = fract(lod);
 
 		samplePos = origin + dir * dist;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
-		mipSample = textureLod(voxels, samplePos, lod).r;
 
+		mipSample = textureLod(voxels, samplePos, lod).r;
 		sampleCol += (1.0 - sampleCol) * mipSample;
-        dist += diam * voxelgiStep;
+
+		dist += diam * voxelgiStep;
 	}
     return sampleCol;
 }
@@ -173,19 +173,19 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 dir, const float
         float diam = max(voxelSize0, dist * 2.0 * aperture);
         float lod = max(log2(diam / voxelSize0), 0.0);
 		float mipSample = 0.0;
-		float clipmap_blend = fract(lod);
 
 		samplePos = origin + dir * dist;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
+
 		#ifdef _VoxelAOvar
 		mipSample = textureLod(voxels, samplePos, lod).r;
 		#else
 		mipSample = textureLod(voxels, samplePos, lod).a;
 		#endif
-
 		sampleCol += (1.0 - sampleCol) * mipSample;
-        dist += diam * voxelgiStep;
+
+		dist += diam * voxelgiStep;
 	}
 	return sampleCol;
 }
