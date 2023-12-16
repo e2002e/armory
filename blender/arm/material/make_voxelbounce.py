@@ -56,32 +56,29 @@ def make(context_id):
     vert.add_uniform('mat3 N', '_normalMatrix')
     vert.add_out('vec3 voxpos')
     vert.add_out('vec3 wnormal')
-
     vert.add_out('vec2 texCoord')
-    vert.write('texCoord = pos.xy * 0.5 + 0.5;')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('float voxelSize = 2.0 * pow(2.0, clipmapLevel);')
-    vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiResolution.x) / voxelSize) * voxelSize;')
-    vert.write('voxpos = (P - eyeSnap) / voxelSize * 2.0 / voxelgiResolution.x;')
-
+    vert.write('float lodExp2 = pow(2.0, clipmapLevel);')
+    vert.write('float voxelSize = lodExp2 * 16.0 * voxelgiHalfExtents.x / voxelgiResolution.x;') #snap to three mip-maps
+    vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
+    vert.write('voxpos = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')
     vert.write('wnormal = normalize(N * vec3(nor.xy, pos.w));')
 
-    frag.write('vec4 col = textureLod(voxels, voxpos * 0.5 + 0.5, 0.0);')
-    frag.write('col += traceDiffuse(voxpos, wnormal, voxels);')
-
     frag.add_uniform('vec3 eye', '_cameraPosition')
+    frag.add_uniform('int clipmapLevel', '_clipmapLevel')
+
+    frag.write('vec4 col = textureLod(voxels, voxpos * 0.5 + 0.5, 0.0);')
+    frag.write('col += traceDiffuse(voxpos, wnormal, voxels, clipmapLevel);')
     frag.write('vec3 v = normalize(eye - voxpos);')
-
     frag.write('if(roughness < 1.0 && spec > 0.0)')
-    frag.write('    col += traceSpecular(voxpos, wnormal, voxels, -v, roughness);')
-
+    frag.write('    col += traceSpecular(voxpos, wnormal, voxels, -v, roughness, clipmapLevel);')
     frag.write('#ifdef _VoxelRefract')
     frag.write('vec4 gr = textureLod(gbuffer_refraction, texCoord, 0.0);')
     frag.write('float ior = gr.x;')
     frag.write('float opacity = gr.y;')
     frag.write('if(opacity < 1.0)')
-    frag.write('    col.rgb = mix(traceRefraction(voxpos, wnormal, voxels, -v, ior, roughness) + col.rgb, col.rgb, opacity);')
+    frag.write('    col.rgb = mix(traceRefraction(voxpos, wnormal, voxels, -v, ior, roughness, clipmapLevel) + col.rgb, col.rgb, opacity);')
     frag.write('#endif')
 
     frag.write('imageStore(voxelsBounce, ivec3((voxpos * 0.5 + 0.5) * voxelgiResolution.x), vec4(col.rgb, 1.0));')
