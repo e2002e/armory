@@ -12,10 +12,6 @@
 					"link": "_cameraPosition"
 				},
 				{
-					"name": "clipmapLevel",
-					"link": "_clipmapLevel"
-				},
-				{
 					"name": "voxelBlend",
 					"link": "_voxelBlend",
 					"ifdef": ["_VoxelTemporal"]

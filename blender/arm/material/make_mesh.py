@@ -663,7 +663,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         vert.write('vec3 P = vec3(W * vec4(spos.xyz, 1.0));')
         vert.write('float dist = max(abs(eye.x - P.x), max(abs(eye.y - P.y), abs(eye.z - P.z)));')
         vert.write('clipmapLevel = vec3(int(max(log2(dist / voxelgiHalfExtents.x * 2.0), 0.0)));')
-        vert.write('float lodExp2 = pow(2.0, int(clipmapLevel.x));')
+        vert.write('float lodExp2 = pow(2.0, clipmapLevel.x);')
         vert.write('float voxelSize = lodExp2 * 16.0 * voxelgiHalfExtents.x / voxelgiResolution.x;')
         vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
         vert.write('voxpos = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')

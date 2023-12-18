@@ -326,7 +326,10 @@ def make_gi(context_id):
     frag.write('uvw.y = uvw.y + clipmapLevel;')
     frag.write('uvw = uvw * voxelgiResolution.x;')
     frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
-    frag.write('imageStore(voxels, ivec3(uvw), vec4(min(surfaceAlbedo(col, metallic), vec3(1.0)) + emissionCol, 1.0));')
+    if parse_opacity:
+        frag.write('imageStore(voxels, ivec3(uvw), vec4(min(surfaceAlbedo(col, metallic), vec3(1.0)) + emissionCol, opacity));')
+    else:
+        frag.write('imageStore(voxels, ivec3(uvw), vec4(min(surfaceAlbedo(col, metallic), vec3(1.0)) + emissionCol, 1.0));')
 
     return con_voxel
 
@@ -362,7 +365,7 @@ def make_ao(context_id):
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
     vert.write('float lodExp2 = pow(2.0, clipmapLevel);')
-    vert.write('float voxelSize = lodExp2 * 2.0 * voxelgiHalfExtents.x / voxelgiResolution.x;')
+    vert.write('float voxelSize = lodExp2 * 16.0 * voxelgiHalfExtents.x / voxelgiResolution.x;')
     vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
     vert.write('voxpositionGeom = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')
 
