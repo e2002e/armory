@@ -529,7 +529,7 @@ class RenderPathDeferred {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-			var voxelize = path.voxelize();
+			var voxelize = iron.RenderPath.voxelize();
 
 			#if arm_voxelgi_temporal
 			if(voxelize) {
@@ -563,7 +563,7 @@ class RenderPathDeferred {
 
 				path.drawMeshes("voxel");
 
-				#if (arm_voxelgi_bounces != 1)
+				#if arm_voxelgi_bounces
 				path.clearImage(voxelsBounce, 0x00000000);
 
 				path.setTarget("");
@@ -634,7 +634,7 @@ class RenderPathDeferred {
 			voxelao_pass = true;
 			#end
 
-			#if (arm_voxelgi_bounces != 1)
+			#if arm_voxelgi_bounces
 			path.bindTarget(voxelsBounce, "voxels");
 			#else
 			path.bindTarget(voxels, "voxels");
