@@ -664,7 +664,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         vert.write('float dist = max(abs(eye.x - P.x), max(abs(eye.y - P.y), abs(eye.z - P.z)));')
         vert.write('clipmapLevel = vec3(int(max(log2(dist / voxelgiHalfExtents.x * 2.0), 0.0)));')
         vert.write('float lodExp2 = pow(2.0, clipmapLevel.x);')
-        vert.write('float voxelSize = lodExp2 * 16.0 * voxelgiHalfExtents.x / voxelgiResolution.x;')
+        vert.write('float voxelSize = lodExp2 * 2.0;')
         vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
         vert.write('voxpos = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')
 
@@ -767,8 +767,8 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         if '_VoxelShadow' in wrd.world_defs and ('_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs):
             frag.write(', voxels')
             if '_VoxelTemporal' in wrd.world_defs:
-                frag.write(', voxelsLast, int(clipmapLevel.x)')
-            frag.write(', voxpos')
+                frag.write(', voxelsLast')
+            frag.write(', voxpos, int(clipmapLevel.x)')
         if '_MicroShadowing' in wrd.world_defs:
             frag.write(', occlusion')
         frag.write(');')
