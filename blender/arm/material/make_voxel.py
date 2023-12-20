@@ -123,7 +123,7 @@ def make_gi(context_id):
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
     vert.write('float lodExp2 = pow(2.0, clipmapLevel);')
-    vert.write('float voxelSize = lodExp2 * 2.0;')
+    vert.write('float voxelSize = lodExp2 * voxelgiHalfExtents.x * 16.0 / voxelgiResolution.x;')
     vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
     vert.write('voxpositionGeom = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')
 
@@ -365,7 +365,7 @@ def make_ao(context_id):
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
     vert.write('float lodExp2 = pow(2.0, clipmapLevel);')
-    vert.write('float voxelSize = lodExp2 * 2.0;')
+    vert.write('float voxelSize = lodExp2 * voxelgiHalfExtents.x * 16.0 / voxelgiResolution.x;')
     vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiHalfExtents.x * lodExp2) / voxelSize) * voxelSize;')
     vert.write('voxpositionGeom = (P - eyeSnap) / lodExp2 * 1.0 / voxelgiHalfExtents.x;')
 
