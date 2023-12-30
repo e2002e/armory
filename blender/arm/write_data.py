@@ -475,8 +475,7 @@ class Main {
 
         if rpdat.rp_voxels == 'Voxel GI' or rpdat.rp_voxels == 'Voxel AO':
             f.write("""
-            public static inline var voxelgiClipmapCount = """ + str(rpdat.arm_voxelgi_clipmap_count) + """;
-            public static inline var voxelgiHalfExtents = """ + str(round(rpdat.arm_voxelgi_dimensions / 2.0)) + """;""")
+            public static inline var voxelgiClipmapCount = """ + str(rpdat.arm_voxelgi_clipmap_count) + """;""")
 
         if rpdat.rp_bloom:
             f.write(f"public static var bloomRadius = {bpy.context.scene.eevee.bloom_radius if rpdat.arm_bloom_follow_blender else rpdat.arm_bloom_radius};")
