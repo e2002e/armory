@@ -88,7 +88,7 @@ def write(vert: shader.Shader, frag: shader.Shader):
             frag.write(', voxels')
             if '_VoxelTemporal' in wrd.world_defs:
                 frag.write(', voxelsLast')
-            frag.write(', voxpos, int(clipmapLevel.x)')
+            frag.write(', P, int(clipmapLevel.x), clipmap_center')
         
     if '_MicroShadowing' in wrd.world_defs and not is_mobile:
         frag.write('\t, occlusion')
