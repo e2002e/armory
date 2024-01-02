@@ -410,9 +410,9 @@ void main() {
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
+	svisibility *= (1.0 - traceShadow(p, n, voxels, sunDir, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(p, n, voxelsLast, sunDir, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
 	#else
-	svisibility *= 1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmapLevel, clipmap_center);
 	#endif
 	#endif
 	#endif
@@ -420,9 +420,9 @@ void main() {
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
+	svisibility *= (1.0 - traceShadow(p, n, voxels, sunDir, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(p, n, voxelslast, sunDir, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
 	#else
-	svisibility *= 1.0 - traceShadow(voxels, p, sunDir, clipmapLevel, clipmap_center);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmapLevel, clipmap_center);
 	#endif
 	#endif
 	#endif

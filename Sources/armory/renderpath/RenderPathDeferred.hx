@@ -541,9 +541,8 @@ class RenderPathDeferred {
 			}
 			#end
 
-			if(voxelize)
-			while(path.voxelize()) {
-				if(armory.renderpath.RenderPathCreator.clipmapLevel % Main.voxelgiClipmapCount == 0)
+			while(path.voxelize() && voxelize) {
+				if(armory.renderpath.RenderPathCreator.clipmapLevel == 0)
 					path.clearImage(voxels, 0x00000000);
 
 				path.setTarget("");

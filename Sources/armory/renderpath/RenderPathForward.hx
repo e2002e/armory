@@ -330,9 +330,8 @@ class RenderPathForward {
 			}
 			#end
 
-			if(voxelize)
-			if(path.voxelize()) {
-				if(armory.renderpath.RenderPathCreator.clipmapLevel % Main.voxelgiClipmapCount == 0)
+			if(path.voxelize() && voxelize) {
+				if(armory.renderpath.RenderPathCreator.clipmapLevel == 0)
 					path.clearImage(voxels, 0x00000000);
 				path.setTarget("");
 				var res = Inc.getVoxelRes();

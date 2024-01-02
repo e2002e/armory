@@ -159,9 +159,9 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	direct *= (1.0 - traceShadow(voxels, voxpos, l, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxelsLast, voxpos, l, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
+	direct *= (1.0 - traceShadow(voxpos, n, voxels, l, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxpos, n, voxelsLast, l, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
 	#else
-	direct *= 1.0 - traceShadow(voxels, voxpos, l, clipmapLevel, clipmap_center);
+	direct *= 1.0 - traceShadow(voxpos, n, voxels, l, clipmapLevel, clipmap_center);
 	#endif
 	#endif
 	#endif
@@ -169,9 +169,9 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
 	#ifdef _VoxelTemporal
-	direct *= (1.0 - traceShadow(voxels, voxpos, l, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxelsLast, voxpos, l, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
+	direct *= (1.0 - traceShadow(voxpos, n, voxels, l, clipmapLevel, clipmap_center)) * voxelBlend + (1.0 - traceShadow(voxpos, n, voxelsLast, l, clipmapLevel, clipmap_center) * 1.0 - voxelBlend);
 	#else
-	direct *= 1.0 - traceShadow(voxels, voxpos, l, clipmapLevel, clipmap_center);
+	direct *= 1.0 - traceShadow(voxpos, n, voxels, l, clipmapLevel, clipmap_center);
 	#endif
 	#endif
 	#endif

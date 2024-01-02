@@ -735,9 +735,9 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             frag.write('}') # receiveShadow
         if '_VoxelShadow' in wrd.world_defs and ('_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs):
             if '_VoxelTemporal' in wrd.world_defs:
-                frag.write('svisibility *= (1.0 - traceShadow(voxels, P, sunDir, int(clipmapLevel.x), clipmap_center) * voxelBlend) + (1.0 - traceShadow(voxels, P, sunDir, int(clipmapLevel.x), clipmap_center) * 1.0 - voxelBlend);')
+                frag.write('svisibility *= (1.0 - traceShadow(P, n, voxels, sunDir, int(clipmapLevel.x), clipmap_center) * voxelBlend) + (1.0 - traceShadow(P, n, voxelsLast, sunDir, int(clipmapLevel.x), clipmap_center) * 1.0 - voxelBlend);')
             else:
-                frag.write('svisibility *= 1.0 - traceShadow(voxels, P, sunDir, int(clipmapLevel.x), clipmap_center);')
+                frag.write('svisibility *= 1.0 - traceShadow(P, n, voxels, sunDir, int(clipmapLevel.x), clipmap_center);')
         frag.write('direct += (lambertDiffuseBRDF(albedo, sdotNL) + specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * specular) * sunCol * svisibility;')
         # sun
 
