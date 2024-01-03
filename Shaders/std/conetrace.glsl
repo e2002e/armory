@@ -12,10 +12,6 @@
 // https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf
 
 const float MAX_DISTANCE = 1.73205080757 * voxelgiRange;
-const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
-
-const float BORDER_OFFSET = 0.1 / 128;
-const float BORDER_WIDTH = 0.25 / 128;
 
 // uniform sampler3D voxels;
 // uniform sampler3D voxelsLast;
@@ -52,8 +48,8 @@ vec3 tangent(const vec3 n) {
 vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aperture, const float maxDist, const int clipmapLevel, const vec3 clipmap_center) {
     dir = normalize(dir);
     vec4 sampleCol = vec4(0.0);
-	float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);
-	float voxelSize0 = voxelgiVoxelSize * 2.0;
+	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
+	float voxelSize0 = 1.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
@@ -65,7 +61,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
         float lod = max(log2(diam / voxelSize0), 0.0);
 		vec4 mipSample = vec4(0.0);
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 16.0 / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
 
@@ -85,7 +81,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
         step_dist = diam * voxelgiStep;
 		dist += step_dist;
 	}
-    return sampleCol;
+    return sampleCol * step_dist / voxelSize;
 }
 
 
@@ -155,8 +151,8 @@ vec3 traceRefraction(const vec3 origin, const vec3 normal, sampler3D voxels, con
 float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aperture, const float maxDist, const int clipmapLevel, const vec3 clipmap_center) {
     dir = normalize(dir);
     float sampleCol = 0.0;
-	float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);
-	float voxelSize0 = voxelgiVoxelSize * 2.0;
+	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
+	float voxelSize0 = 4.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
@@ -169,7 +165,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 		float mipSample = 0.0;
 		float clipmap_index = floor(lod);
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 16.0 / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
 
@@ -189,16 +185,17 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
 	}
-    return sampleCol;
+    return sampleCol * step_dist / voxelSize;
 }
 
 
 float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, const float aperture, const float maxDist, const int clipmapLevel, const vec3 clipmap_center) {
     dir = normalize(dir);
     float sampleCol = 0.0;
-	float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);
-	float voxelSize0 = voxelgiVoxelSize * 2.0;
+	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
+	float voxelSize0 = 1.0 * voxelgiOffset;
 	float dist = voxelSize0;
+	float step_dist = dist;
 	vec3 samplePos;
 	vec3 start_pos = origin + n * voxelSize0;
 	float coneCoefficient = 2.0 * tan(aperture * 0.5);
@@ -208,7 +205,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
         float lod = max(log2(diam / voxelSize0), 0);
 		float mipSample = 0.0;
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 16.0 / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
 
@@ -233,9 +230,10 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		}
 		*/
 
-		dist += diam * voxelgiStep;
+		step_dist = diam * voxelgiStep;
+		dist += step_dist;
 	}
-	return sampleCol;
+	return sampleCol * step_dist / voxelSize;
 }
 
 
