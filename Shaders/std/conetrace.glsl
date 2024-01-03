@@ -49,7 +49,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
     dir = normalize(dir);
     vec4 sampleCol = vec4(0.0);
 	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
-	float voxelSize0 = 4.0;
+	float voxelSize0 = 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
@@ -152,7 +152,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
     dir = normalize(dir);
     float sampleCol = 0.0;
 	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
-	float voxelSize0 = 4.0;
+	float voxelSize0 = 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
@@ -192,7 +192,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
     dir = normalize(dir);
     float sampleCol = 0.0;
 	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
-	float voxelSize0 = 4.0;
+	float voxelSize0 = 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
