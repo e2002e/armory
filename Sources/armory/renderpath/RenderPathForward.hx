@@ -319,7 +319,6 @@ class RenderPathForward {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-
 			var voxelize = true;
 
 			#if arm_voxelgi_temporal

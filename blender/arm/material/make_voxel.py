@@ -123,7 +123,7 @@ def make_gi(context_id):
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
     vert.write('float voxelSize = 2.0 * pow(2.0, clipmapLevel);')
-    vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiResolution.x * voxelSize * 0.0625) / voxelSize) * voxelSize;')
+    vert.write('vec3 eyeSnap = floor((eye + eyeLook * voxelgiResolution.x * 0.0625) / voxelSize) * voxelSize;')
     vert.write('voxpositionGeom = (P - eyeSnap) / voxelSize * 16.0 / voxelgiResolution.x;')
 
     geom.add_out('vec3 voxposition')
