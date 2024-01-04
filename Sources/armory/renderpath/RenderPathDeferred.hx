@@ -64,6 +64,8 @@ class RenderPathDeferred {
 
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+			#else
+			Inc.initGI("voxelsOpac");
 			#end
 		}
 		#end
@@ -549,39 +551,12 @@ class RenderPathDeferred {
 				var res = Inc.getVoxelRes();
 				path.setViewport(res, res);
 
-				path.bindTarget(voxels, "voxels");
-
-				#if (rp_voxels == "Voxel GI")
-				#if rp_shadowmap
-				{
-					#if arm_shadowmap_atlas
-					Inc.bindShadowMapAtlas();
-					#else
-					Inc.bindShadowMap();
-					#end
-				}
-				#end
-				#end
-
+				path.bindTarget("voxelsOpac", "voxels");
 				path.drawMeshes("voxel");
-				path.generateMipmaps(voxels);
 
-				#if arm_voxelgi_bounces
-				path.clearImage(voxelsBounce, 0x00000000);
-				path.setTarget("");
-				var res = Inc.getVoxelRes();
-				path.setViewport(res, res);
-				path.bindTarget(voxels, "voxels");
-				path.bindTarget(voxelsBounce, "voxelsBounce");
-				#if rp_voxelgi_refract
-				path.bindTarget("gbuffer_refraction", "gbuffer_refraction");
-				#end
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.bindTarget("gbuffer1", "gbuffer1");
-				path.bindTarget("_main", "gbufferD");
-				path.drawMeshes("voxelbounce");
-				path.generateMipmaps(voxelsBounce);
-				#end
+				Inc.computeVoxelsBegin();
+				Inc.computeVoxels();
+				Inc.computeVoxelsEnd();
 
 				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 			}

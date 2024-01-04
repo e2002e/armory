@@ -104,14 +104,13 @@ def add_world_defs():
 
         if voxelgi:
             wrd.world_defs += '_VoxelGI'
-            #assets.add_khafile_def('arm_voxelgi_clipmap_count={0}'.format(rpdat.arm_voxelgi_clipmap_count)) //could be used to limit the total extents
+            assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_light/voxel_light.comp.glsl')
+            if rpdat.arm_voxelgi_bounces != "1":
+                assets.add_khafile_def('rp_gi_bounces={0}'.format(rpdat.arm_voxelgi_bounces))
+                assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_bounce/voxel_bounce.comp.glsl')
             if rpdat.arm_voxelgi_refraction:
                 wrd.world_defs += '_VoxelRefract'
                 assets.add_khafile_def('rp_voxelgi_refract')
-
-            if rpdat.arm_voxelgi_bounces != '1':
-                wrd.world_defs += '_VoxelBounce'
-                assets.add_khafile_def('arm_voxelgi_bounces={0}'.format(rpdat.arm_voxelgi_bounces))
 
         elif voxelao:
             wrd.world_defs += '_VoxelAOvar' # Write a shader variant
