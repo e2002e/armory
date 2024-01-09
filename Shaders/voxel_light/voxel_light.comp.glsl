@@ -21,11 +21,8 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-
-uniform layout(binding = 0, rgba8) readonly image3D voxelsOpac;
-// uniform layout(binding = 1, r32ui) readonly uimage3D voxelsNor;
-// uniform layout(binding = 2, rgba8) writeonly image3D voxels;
-uniform layout(binding = 1, rgba8) writeonly image3D voxels;
+uniform layout(rgba8) readonly image3D voxelsOpac;
+uniform writeonly image3D voxels;
 #ifdef _ShadowMap
 uniform layout(binding = 2) sampler2D shadowMap;
 uniform layout(binding = 3) samplerCube shadowMapCube;
