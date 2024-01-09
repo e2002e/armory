@@ -558,13 +558,11 @@ class RenderPathDeferred {
 					path.bindTarget("voxels", "voxels");
 					path.drawMeshes("voxel");
 
-					Inc.computeVoxelsBegin();
-					Inc.computeVoxels();
-					Inc.computeVoxelsEnd();
-
 					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				}
-				path.generateMipmaps("voxels");
+				Inc.computeVoxelsBegin();
+				Inc.computeVoxels();
+				Inc.computeVoxelsEnd();
 			}
 		}
 		#end

@@ -705,6 +705,7 @@ class Inc {
 	public static function computeVoxelsEnd() {
 		var rts = path.renderTargets;
 		var res = Inc.getVoxelRes();
+		path.generateMipmaps("voxels");
 
 		#if (rp_gi_bounces)
 		if (bounce_sh == null) {

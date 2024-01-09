@@ -48,8 +48,8 @@ vec3 tangent(const vec3 n) {
 vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aperture, const float maxDist, const int clipmapLevel, const vec3 clipmap_center) {
     dir = normalize(dir);
     vec4 sampleCol = vec4(0.0);
-	float voxelSize = 2.0 * pow(2.0, clipmapLevel);
-	float voxelSize0 = 2.0 * voxelgiOffset;
+	float voxelSize = 0.125 * pow(2.0, clipmapLevel);
+	float voxelSize0 = 0.25 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
 	vec3 samplePos;
@@ -61,7 +61,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
         float lod = max(log2(diam / voxelSize0), 0.0);
 		vec4 mipSample = vec4(0.0);
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 16.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 		samplePos.y = (samplePos.y + clipmapLevel) / voxelgiClipmapCount;
 

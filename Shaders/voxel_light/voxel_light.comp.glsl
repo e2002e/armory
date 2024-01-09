@@ -64,5 +64,5 @@ void main() {
     col.rgb += visibility * lightColor;
     col = clamp(col, vec4(0.0), vec4(1.0));
 
-    imageStore(voxels, ivec3(gl_GlobalInvocationID.xyz), vec4(1.0));
+    imageStore(voxels, ivec3(gl_GlobalInvocationID.xyz), col);
 }
