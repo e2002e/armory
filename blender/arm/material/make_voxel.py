@@ -54,7 +54,7 @@ def make_gi(context_id):
     frag.write_header('#extension GL_ARB_shader_image_load_store : enable')
 
     rpdat = arm.utils.get_rp()
-    frag.add_uniform('layout(rgba8) image3D voxels')
+    frag.add_uniform('layout(binding = 0, rgba8) image3D voxels')
 
     frag.write('vec3 basecol;')
     frag.write('float roughness;') #
@@ -174,6 +174,14 @@ def make_gi(context_id):
         frag.write('imageStore(voxels, ivec3(uvw), vec4(min(surfaceAlbedo(basecol, metallic), vec3(1.0)) + emissionCol, opacity));')
     else:
         frag.write('imageStore(voxels, ivec3(uvw), vec4(min(surfaceAlbedo(basecol, metallic), vec3(1.0)) + emissionCol, 1.0));')
+
+    """
+    frag.write('uint val = convVec4ToRGBA8(vec4(basecol, 1.0) * 255);')
+    frag.write('imageAtomicMax(voxels, ivec3(uvw), val);')
+
+    frag.write('val = encNor(wnormal);');
+    frag.write('imageAtomicMax(voxelsNor, ivec3(voxelgiResolution * voxel), val);')
+    """
 
     return con_voxel
 
