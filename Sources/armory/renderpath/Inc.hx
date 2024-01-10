@@ -480,7 +480,10 @@ class Inc {
 		}
 		#else
 		{
-			t.format = "RGBA64";
+			if(t.name == "voxels")
+				t.format = "RGBA64";
+			else
+				t.format = "R32";
 		}
 		#end
 
@@ -621,7 +624,7 @@ class Inc {
 			voxel_ch = kha.Shaders.voxel_light_comp.getConstantLocation("shadowsBias");
 			#end
 		}
-		path.clearImage("voxels", 0x00000000);
+		//path.clearImage("voxels", 0x00000000);
 	}
 	public static function computeVoxels() {
 		var rts = path.renderTargets;
