@@ -1,7 +1,5 @@
 #version 450
 
-layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
-
 #include "compiled.inc"
 #include "std/math.glsl"
 #include "std/gbuffer.glsl"
@@ -21,12 +19,14 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-layout(binding = 0, r32ui) readonly uniform uimage3D voxelsOpac;
-layout(binding = 1, r32ui) uniform uimage3D voxels;
+uniform layout(binding = 0, r32ui) readonly uimage3D voxelsOpac;
+uniform layout(binding = 1, r32ui) uimage3D voxels;
 #ifdef _ShadowMap
 uniform layout(binding = 2) sampler2D shadowMap;
 uniform layout(binding = 3) samplerCube shadowMapCube;
 #endif
+
+layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
 void main() {
     // Adjust resolution based on clipmapLevel

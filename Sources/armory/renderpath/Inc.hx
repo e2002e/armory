@@ -698,7 +698,7 @@ class Inc {
 			}
 			kha.compute.Compute.setInt(voxel_cj, armory.renderpath.RenderPathCreator.clipmapLevel);
 
-			//kha.compute.Compute.compute(Std.int(res / 4), Std.int(res / 4), Std.int(res / 4));
+			kha.compute.Compute.compute(Std.int(res / 4), Std.int(res / 4), Std.int(res / 4));
 		}
 		// path.currentLightIndex = 0;
 	}

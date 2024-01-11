@@ -547,22 +547,25 @@ class RenderPathDeferred {
 				voxelsBounceLast = voxelsBounce == "voxelsBounce" ? "voxelsBounceB" : "voxelsBounce";
 				#end
 
+				Inc.computeVoxelsBegin();
+
 				while(path.voxelize()) {
 					if(armory.renderpath.RenderPathCreator.clipmapLevel == 0)
-						path.clearImage("voxels", 0x00000000);
+						path.clearImage("voxelsOpac", 0x00000000);
 
 					path.setTarget("");
 					var res = Inc.getVoxelRes();
 					path.setViewport(res, res);
 
-					path.bindTarget("voxels", "voxels");
+					path.bindTarget("voxelsOpac", "voxels");
 					path.drawMeshes("voxel");
+
+					Inc.computeVoxels();
 
 					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				}
-				Inc.computeVoxelsBegin();
-				Inc.computeVoxels();
 				Inc.computeVoxelsEnd();
+
 			}
 		}
 		#end
