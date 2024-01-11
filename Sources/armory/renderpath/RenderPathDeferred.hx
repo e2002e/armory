@@ -549,13 +549,13 @@ class RenderPathDeferred {
 
 				while(path.voxelize()) {
 					if(armory.renderpath.RenderPathCreator.clipmapLevel == 0)
-						path.clearImage("voxelsOpac", 0x00000000);
+						path.clearImage("voxels", 0x00000000);
 
 					path.setTarget("");
 					var res = Inc.getVoxelRes();
 					path.setViewport(res, res);
 
-					path.bindTarget("voxelsOpac", "voxels");
+					path.bindTarget("voxels", "voxels");
 					path.drawMeshes("voxel");
 
 					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;

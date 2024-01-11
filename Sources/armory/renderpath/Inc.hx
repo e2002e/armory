@@ -480,10 +480,7 @@ class Inc {
 		}
 		#else
 		{
-			if(t.name == "voxels")
-				t.format = "RGBA64";
-			else
-				t.format = "R32";
+			t.format = "RGBA64";
 		}
 		#end
 
@@ -701,7 +698,7 @@ class Inc {
 			}
 			kha.compute.Compute.setInt(voxel_cj, armory.renderpath.RenderPathCreator.clipmapLevel);
 
-			kha.compute.Compute.compute(Std.int(res / 4), Std.int(res / 4), Std.int(res / 4));
+			//kha.compute.Compute.compute(Std.int(res / 4), Std.int(res / 4), Std.int(res / 4));
 		}
 		// path.currentLightIndex = 0;
 	}
