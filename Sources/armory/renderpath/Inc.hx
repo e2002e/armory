@@ -17,6 +17,15 @@ class Inc {
 	#if ((rp_voxels != 'Off') && arm_config)
 	static var voxelsCreated = false;
 	#end
+	#if (rp_voxels != "Off")
+	static var voxel_sh = kha.compute.Shader = null;
+	static var voxel_ta = kha.compute.TextureUnit;
+	static var voxel_tb = kha.compute.TextureUnit;
+	static var voxel_tb = kha.compute.TextureUnit;
+	static var voxel_ca = kha.compute.ConstantLocation;
+	static var voxel_cb = kha.compute.ConstantLocation;
+	static var voxel_cc = kha.compute.ConstantLocation;
+	#end
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -613,6 +622,43 @@ class Inc {
 	static function endShadowsLogicProfile() { shadowsLogicTime += kha.Scheduler.realTime() - startShadowsLogicTime - shadowsRenderTime; }
 	static function endShadowsRenderProfile() { shadowsRenderTime += kha.Scheduler.realTime() - startShadowsRenderTime; }
 	public static function endFrame() { shadowsLogicTime = 0;  shadowsRenderTime = 0; }
+	#end
+
+	#if (rp_voxels != "Off")
+	public static function computeVoxelsBegin() {
+		path.clearImage("voxelsOut", 0x00000000);
+		if (voxel_sh == null)
+		{
+			voxel_sh = path.getComputeShader("voxel_temporal");
+			voxel_ta = voxel_sh.getTextureUnit("voxelsOut");
+			voxel_tb = voxel_sh.getTextureUnit("voxels");
+			voxel_tc = voxel_sh.getTextureUnit("voxelsB");
+
+			trace(voxel_ta);
+
+			voxel_ca = voxel_sh.getConstantLocation("clipmapLevel");
+			voxel_cb = voxel_sh.getConstantLocation("clipmap_center_last");
+			voxel_cc = voxel_sh.getConstantLocation("voxelBlend");
+		}
+	}
+	public static function computeVoxels() {
+		var rts = path.renderTargets;
+		var res = Inc.getVoxelRes();
+		var camera = iron.Scene.active.camera;
+
+		kha.compute.Compute.setShader(voxel_sh);
+		kha.compute.Compute.setTexture(voxel_ta, rts.get("voxelsOut").image, kha.compute.Access.Write);
+		kha.compute.Compute.setTexture(voxel_tb, rts.get("voxels").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tc, rts.get("voxelsB").image, kha.compute.Access.Read);
+
+		kha.compute.Compute.setInt(voxel_ca, armory.renderpath.RenderPathCreator.clipmapLevel);
+		kha.compute.Compute.setFloat3(voxel_cb, armory.renderpath.RenderPathCreator.clipmap_center_last.x, armory.renderpath.RenderPathCreator.clipmap_center_last.y, armory.renderpath.RenderPathCreator.clipmap_center_last.z);
+		var freq = armory.renderpath.RenderPathCreator.voxelFreq;
+		var blend = (armory.renderpath.RenderPathCreator.voxelFrame % freq) / freq;
+		kha.compute.Compute.setFloat(voxel_cc, blend);
+
+		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
+	}
 	#end
 }
 

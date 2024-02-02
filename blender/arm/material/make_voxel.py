@@ -121,8 +121,9 @@ def make_gi(context_id):
     vert.add_uniform('int clipmapLevel', '_clipmapLevel')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('vec3 clipmap_center = floor(eye + eyeLook);')
     vert.write('float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);')
+    vert.write('float texelSize = 2.0 * voxelSize;')
+    vert.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
     vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
 
     geom.add_out('vec3 voxposition')
@@ -363,8 +364,9 @@ def make_ao(context_id):
     vert.add_uniform('int clipmapLevel', '_clipmapLevel')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('vec3 clipmap_center = floor(eye + eyeLook);')
     vert.write('float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);')
+    vert.write('float texelSize = 2.0 * voxelSize;')
+    vert.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
     vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
 
     geom.add_out('vec3 voxposition')
