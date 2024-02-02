@@ -314,13 +314,7 @@ void main() {
 #endif
 
 #ifdef _VoxelAOvar
-	#ifndef _VoxelAONoTrace
-	#ifdef _VoxelTemporal
-	envl.rgb *= 1.0 - (traceAO(p, n, voxels, clipmap_center) * voxelBlend + traceAO(p, n, voxelsLast, clipmap_center) * (1.0 - voxelBlend));
-	#else
 	envl.rgb *= 1.0 - traceAO(p, n, voxels, clipmap_center);
-	#endif
-	#endif
 #endif
 
 #ifdef _VoxelGI

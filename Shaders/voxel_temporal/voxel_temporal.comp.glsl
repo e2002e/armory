@@ -40,6 +40,6 @@ void main() {
 		else
 			opac = mix(convRGBA8ToVec4(imageLoad(voxelsB, coords).r), convRGBA8ToVec4(imageLoad(voxels, coords).r),  voxelBlend);
 
-		imageAtomicAdd(voxelsOut, dest, convVec4ToRGBA8(opac));
+		imageAtomicAdd(voxelsOut, dest, convVec4ToRGBA8(vec4(opac)));
 	}
 }

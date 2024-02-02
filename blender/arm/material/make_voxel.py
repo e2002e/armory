@@ -116,7 +116,6 @@ def make_gi(context_id):
         vert.add_out('vec2 texCoordGeom')
         vert.write('texCoordGeom = tex;')
 
-    vert.add_uniform('vec3 eyeLook', '_cameraLook')
     vert.add_uniform('vec3 eye', '_cameraPosition')
     vert.add_uniform('int clipmapLevel', '_clipmapLevel')
 
@@ -359,7 +358,6 @@ def make_ao(context_id):
     vert.add_uniform('mat4 W', '_worldMatrix')
     vert.add_out('vec3 voxpositionGeom')
 
-    vert.add_uniform('vec3 eyeLook', '_cameraLook')
     vert.add_uniform('vec3 eye', '_cameraPosition')
     vert.add_uniform('int clipmapLevel', '_clipmapLevel')
 

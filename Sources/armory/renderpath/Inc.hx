@@ -18,13 +18,13 @@ class Inc {
 	static var voxelsCreated = false;
 	#end
 	#if (rp_voxels != "Off")
-	static var voxel_sh = kha.compute.Shader = null;
-	static var voxel_ta = kha.compute.TextureUnit;
-	static var voxel_tb = kha.compute.TextureUnit;
-	static var voxel_tb = kha.compute.TextureUnit;
-	static var voxel_ca = kha.compute.ConstantLocation;
-	static var voxel_cb = kha.compute.ConstantLocation;
-	static var voxel_cc = kha.compute.ConstantLocation;
+	static var voxel_sh:kha.compute.Shader = null;
+	static var voxel_ta:kha.compute.TextureUnit;
+	static var voxel_tb:kha.compute.TextureUnit;
+	static var voxel_tc:kha.compute.TextureUnit;
+	static var voxel_ca:kha.compute.ConstantLocation;
+	static var voxel_cb:kha.compute.ConstantLocation;
+	static var voxel_cc:kha.compute.ConstantLocation;
 	#end
 
 	public static function init(_path: RenderPath) {
@@ -493,7 +493,7 @@ class Inc {
 		path.createRenderTarget(tBo);
 		#end
 
-		#if arm_voxelgi_temporal
+		//#if arm_voxelgi_temporal
 		{
 			var tB = new RenderTargetRaw();
 			tB.name = t.name + "B";
@@ -505,19 +505,18 @@ class Inc {
 			tB.mipmaps = t.mipmaps;
 			path.createRenderTarget(tB);
 
-			#if arm_voxelgi_bounces
-			var tBoB = new RenderTargetRaw();
-			tBoB.name = "voxelsBounceB";
-			tBoB.format = "RGBA64";
-			tBoB.width = t.width;
-			tBoB.height = t.height;
-			tBoB.depth = t.depth;
-			tBoB.is_image = t.is_image;
-			tBoB.mipmaps = t.mipmaps;
-			path.createRenderTarget(tBoB);
-			#end
+
+			var tB = new RenderTargetRaw();
+			tB.name = t.name + "Out";
+			tB.format = t.format;
+			tB.width = t.width;
+			tB.height = t.height;
+			tB.depth = t.depth;
+			tB.is_image = t.is_image;
+			tB.mipmaps = t.mipmaps;
+			path.createRenderTarget(tB);
 		}
-		#end
+		//#end
 	}
 	#end
 
@@ -633,8 +632,6 @@ class Inc {
 			voxel_ta = voxel_sh.getTextureUnit("voxelsOut");
 			voxel_tb = voxel_sh.getTextureUnit("voxels");
 			voxel_tc = voxel_sh.getTextureUnit("voxelsB");
-
-			trace(voxel_ta);
 
 			voxel_ca = voxel_sh.getConstantLocation("clipmapLevel");
 			voxel_cb = voxel_sh.getConstantLocation("clipmap_center_last");

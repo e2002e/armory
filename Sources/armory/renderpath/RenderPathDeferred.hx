@@ -574,8 +574,6 @@ class RenderPathDeferred {
 
 					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				}
-				path.generateMipmaps(voxelsBounce);
-				#end
 			}
 		}
 		#end
@@ -629,16 +627,7 @@ class RenderPathDeferred {
 			#if arm_voxelgi_bounces
 			path.bindTarget(voxelsBounce, "voxels");
 			#else
-			path.bindTarget(voxels, "voxels");
-			#end
-			#if arm_voxelgi_temporal
-			{
-				#if arm_voxelgi_bounces
-				path.bindTarget(voxelsBounceLast, "voxelsLast");
-				#else
-				path.bindTarget(voxelsLast, "voxelsLast");
-				#end
-			}
+			path.bindTarget("voxelsOut", "voxels");
 			#end
 		}
 		#end
