@@ -64,10 +64,6 @@ class RenderPathDeferred {
 
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
-			#else
-			#if arm_voxelgi_bounces
-			path.loadShader("shader_datas/voxels_bounce/voxels_bounce");
-			#end
 			#end
 		}
 		#end
@@ -536,14 +532,17 @@ class RenderPathDeferred {
 			var voxelize = true;
 
 			#if arm_voxelgi_temporal
-			voxelize = ++armory.renderpath.RenderPathCreator.voxelFrame % armory.renderpath.RenderPathCreator.voxelFreq == 0;
+			//voxelize = ++armory.renderpath.RenderPathCreator.voxelFrame % armory.renderpath.RenderPathCreator.voxelFreq == 0;
 			#end
 
 			if(voxelize) {
+				#if arm_voxelgi_temporal
 				voxels = voxels == "voxels" ? "voxelsB" : "voxels";
 				voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 				voxelsBounce = voxelsBounce == "voxelsBounce" ? "voxelsBounceB" : "voxelsBounce";
 				voxelsBounceLast = voxelsBounce == "voxelsBounce" ? "voxelsBounceB" : "voxelsBounce";
+				Inc.computeVoxelsBegin();
+				#end
 				path.clearImage(voxels, 0x00000000);
 
 				for (i in 0...Main.voxelgiClipmapCount)
@@ -575,28 +574,6 @@ class RenderPathDeferred {
 
 					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				}
-
-				path.generateMipmaps(voxels);
-
-				#if arm_voxelgi_bounces
-				path.clearImage(voxelsBounce, 0x00000000);
-
-				for (i in 0...Main.voxelgiClipmapCount) {
-					path.setTarget("tex");
-					path.bindTarget("_main", "gbufferD");
-					path.bindTarget("gbuffer0", "gbuffer0");
-					path.bindTarget("gbuffer1", "gbuffer1");
-					#if rp_voxelgi_refract
-					path.bindTarget("gbuffer_refraction", "gbuffer_refraction");
-					#end
-					path.bindTarget(voxels, "voxels");
-					path.bindTarget(voxelsBounce, "voxelsBounce");
-
-					path.drawShader("shader_datas/voxels_bounce/voxels_bounce");
-
-					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
-				}
-
 				path.generateMipmaps(voxelsBounce);
 				#end
 			}
