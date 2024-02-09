@@ -6,7 +6,7 @@
 #include "std/shadows.glsl"
 #include "std/imageatomic.glsl"
 
-layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -21,9 +21,9 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-uniform layout(r32ui) uimage3D voxelsOpac;
-uniform layout(r32ui) uimage3D voxelsNor;
-uniform layout(rgba16) image3D voxels;
+uniform layout(rgba8) image3D voxelsOpac;
+uniform layout(rgba8) image3D voxelsNor;
+uniform layout(rgba8) image3D voxels;
 
 #ifdef _ShadowMap
 uniform sampler2DShadow shadowMap;
@@ -32,15 +32,16 @@ uniform samplerCubeShadow shadowMapPoint;
 #endif
 
 void main() {
-	ivec3 adjustedID = ivec3(gl_GlobalInvocationID.xyz);
-	adjustedID.y = int((adjustedID.y + clipmapLevel * voxelgiResolution.x / 4) / voxelgiClipmapCount);
+	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 
-	uint ucol = imageLoad(voxelsOpac, adjustedID).r;
-	vec4 col = convRGBA8ToVec4(ucol);
+	ivec3 dst = src;
+	dst.y += clipmapLevel * voxelgiResolution.x;
+
+	vec4 col = imageLoad(voxelsOpac, dst);
 	if (col.a == 0.0) return;
 
-	const vec3 hres = voxelgiResolution / 2;
-	vec3 wposition = ((adjustedID - hres) / hres) * voxelgiResolution;
+	const float voxelSize = 2.0 * voxelgiVoxelSize;
+    vec3 wposition = vec3(dst) * voxelSize * pow(2.0, float(clipmapLevel));
 
 	//uint unor = imageLoad(voxelsNor, adjustedID).r;
 	//vec3 wnormal = normalize(decNor(unor));
@@ -84,6 +85,5 @@ void main() {
 
 	//TODO add emission color image.
 
-	//imageAtomicAdd(voxels, adjustedID, convVec4ToRGBA8(col * 255));
-	imageStore(voxels, adjustedID, vec4(col));
+	imageStore(voxels, dst, col);
 }

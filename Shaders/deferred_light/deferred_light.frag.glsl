@@ -220,15 +220,15 @@ void main() {
 
 #ifdef _VoxelGI
 	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 1.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * voxelgiVoxelSize * pow(2.0, clipmapLevel);
+	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
+	float texelSize = voxelgiVoxelSize * 2.0 * pow(2.0, clipmapLevel);
 	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
 #endif
 
 #ifdef _VoxelAOvar
 	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 1.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * voxelgiVoxelSize * pow(2.0, clipmapLevel);
+	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
+	float texelSize = voxelgiVoxelSize * 2.0 * pow(2.0, clipmapLevel);
 	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
 #endif
 

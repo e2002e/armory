@@ -166,6 +166,14 @@ class Uniforms {
 				}
 			}
 			#end
+			#if (rp_voxels != "Off")
+			case "_clipmap_center": {
+				v = iron.object.Uniforms.helpVec;
+				v.x = armory.renderpath.RenderPathCreator.clipmap_center.x;
+				v.y = armory.renderpath.RenderPathCreator.clipmap_center.y;
+				v.z = armory.renderpath.RenderPathCreator.clipmap_center.z;
+			}
+			#end
 		}
 		return v;
 	}
@@ -208,6 +216,9 @@ class Uniforms {
 			case "_voxelBlend": { // Blend current and last voxels
 				var freq = armory.renderpath.RenderPathCreator.voxelFreq;
 				return (armory.renderpath.RenderPathCreator.voxelFrame % freq) / freq;
+			}
+			case "_voxelSize": {
+				return Main.voxelgiVoxelSize * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
 			}
 			#end
 		}
