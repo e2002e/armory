@@ -90,7 +90,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 		float diam = max(voxelSize0, dist * coneCoefficient);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
 
-		float clipmap_index = floor(lod);
+        float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);
 
 		float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
@@ -98,10 +98,11 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
         samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 
-		if((all(greaterThan(samplePos, clamp(samplePos, 0.0, 1.0))))) {
+		if (any(notEqual(samplePos, clamp(samplePos, 0.0, 1.0)))) {
 			clipmap_index0++;
 			continue;
 		}
+
 		float half_texel = 0.5 / voxelgiResolution.x;
 		samplePos = clamp(samplePos, half_texel, 1.0 - half_texel);
 		samplePos.x /= 6;
@@ -117,6 +118,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 			mipSample = mix(mipSample, mixSampleNext, clipmap_blend);
 		}
 		*/
+
 		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
 		step_dist = diam * voxelgiStep;
@@ -215,7 +217,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
         samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize / voxelgiResolution.x;
 		samplePos = samplePos * 0.5 + 0.5;
 
-		if (!(all(equal(clamp(samplePos, 0.0, 1.0), samplePos)))) {
+		if ((any(notEqual(clamp(samplePos, 0.0, 1.0), samplePos)))) {
 			clipmap_index0++;
 			continue;
 		}
@@ -311,20 +313,16 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		float mipSample = 0.0;
 		float diam = max(voxelSize0, dist * coneCoefficient);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
-
 		float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);
-
 		float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / (voxelSize * voxelgiResolution.x);
 		samplePos = samplePos * 0.5 + 0.5;
-
-		if (!(all(equal(samplePos, clamp(samplePos, 0.0, 1.0))))) {
+		if ((any(equal(samplePos, clamp(samplePos, 0.0, 1.0))))) {
 			clipmap_index0++;
 			continue;
 		}
-
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
 		#ifdef _VoxelAOvar

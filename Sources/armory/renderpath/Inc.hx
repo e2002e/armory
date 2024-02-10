@@ -702,9 +702,8 @@ class Inc {
 
 	 		#if (rp_shadowmap)
 	 		#if arm_shadowmap_atlas_single_map
-	 		trace("single map not supported with GI.");
-	 		return;
-			#end
+			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMapAtlas").image);
+			#else
 	 		if (l.data.raw.type == "sun") {
 	 			#if arm_shadowmap_atlas
 	 			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMapAtlasSun").image);
@@ -731,6 +730,7 @@ class Inc {
 	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 3);
 	 		}
+	 		#end
 
 	 		// lightProj
 	 		var near = l.data.raw.near_plane;
