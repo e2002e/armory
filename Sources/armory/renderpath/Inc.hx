@@ -17,6 +17,15 @@ class Inc {
 	#if ((rp_voxels != 'Off') && arm_config)
 	static var voxelsCreated = false;
 	#end
+
+	static var voxel_sh0:kha.compute.Shader = null;
+	static var voxel_sh1:kha.compute.Shader = null;
+	static var voxel_ta0:kha.compute.TextureUnit;
+	static var voxel_tb0:kha.compute.TextureUnit;
+	static var voxel_tc0:kha.compute.TextureUnit;
+	static var voxel_ca0:kha.compute.ConstantLocation;
+	static var voxel_cb0:kha.compute.ConstantLocation;
+
 	#if (rp_voxels == "Voxel GI")
 	static var voxel_sh:kha.compute.Shader = null;
 	static var voxel_ta:kha.compute.TextureUnit;
@@ -603,8 +612,54 @@ class Inc {
 	public static function endFrame() { shadowsLogicTime = 0;  shadowsRenderTime = 0; }
 	#end
 
+	#if (rp_voxels != "Off")
+	public static function voxelsStabilizeBegin() {
+		if (voxel_sh0 == null) {
+			voxel_sh0 = path.getComputeShader("voxel_offsetprev");
+			voxel_sh1 = path.getComputeShader("voxel_temporal");
+			voxel_ta0 = voxel_sh0.getTextureUnit("voxels");
+			voxel_tb0 = voxel_sh0.getTextureUnit("voxelsOut");
+			voxel_tc0 = voxel_sh0.getTextureUnit("gbuffer1");
+
+	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_center_last");
+	 		voxel_cb0 = voxel_sh0.getConstantLocation("clipmapLevel");
+		}
+	}
+
+	public static function voxelsStabilize(voxels = "voxels") {
+		var rts = path.renderTargets;
+	 	var res = Inc.getVoxelRes();
+		kha.compute.Compute.setShader(voxel_sh0);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Write);
+
+		kha.compute.Compute.setFloat3(voxel_ca0,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.z
+		);
+		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
+
+		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
+
+		kha.compute.Compute.setShader(voxel_sh1);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Write);
+		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Read);
+		kha.compute.Compute.setSampledTexture(voxel_tc0, rts.get("gbuffer1").image);
+
+		kha.compute.Compute.setFloat3(voxel_ca0,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.z
+		);
+		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
+
+		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
+	}
+	#end
+
 	#if (rp_voxels == "Voxel GI")
-	public static function computeVoxelsBegin() {
+	public static function voxelsLightBegin() {
 	 	if (voxel_sh == null) {
 	 		voxel_sh = path.getComputeShader("voxel_light");
 	 		voxel_ta = voxel_sh.getTextureUnit("voxelsOpac");
@@ -629,7 +684,7 @@ class Inc {
 	 	}
 	 	path.clearImage("voxels", 0x00000000);
 	}
-	public static function computeVoxelsLight() {
+	public static function voxelsLight() {
 	 	var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var lights = iron.Scene.active.lights;
@@ -641,7 +696,7 @@ class Inc {
 	 		//path.light = l;
 
 	 		kha.compute.Compute.setShader(voxel_sh);
-	 		kha.compute.Compute.setTexture(voxel_ta, rts.get("voxelsOpac").image, kha.compute.Access.Read);
+	 		kha.compute.Compute.setTexture(voxel_ta, rts.get("voxelsOut").image, kha.compute.Access.Read);
 	 		// kha.compute.Compute.setTexture(voxel_tb, rts.get("voxelsNor").image, kha.compute.Access.Read);
 	 		kha.compute.Compute.setTexture(voxel_tc, rts.get("voxels").image, kha.compute.Access.Write);
 

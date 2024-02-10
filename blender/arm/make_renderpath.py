@@ -94,6 +94,7 @@ def add_world_defs():
             voxelao = True
 
     if voxelgi or voxelao:
+        assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_offsetprev/voxel_offsetprev.comp.glsl')
         assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_temporal/voxel_temporal.comp.glsl')
         wrd.world_defs += "_VoxelCones" + rpdat.arm_voxelgi_cones
         if rpdat.arm_voxelgi_shadows:

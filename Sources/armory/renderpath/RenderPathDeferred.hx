@@ -54,6 +54,7 @@ class RenderPathDeferred {
 		#if (rp_voxels != 'Off')
 		{
 			Inc.initGI();
+			Inc.initGI("voxelsOut");
 
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
@@ -538,11 +539,13 @@ class RenderPathDeferred {
 
 				var camera = iron.Scene.active.camera;
 
-				Inc.computeVoxelsBegin();
+				Inc.voxelsStabilizeBegin();
+				#if (rp_voxels == "Voxel GI")
+				Inc.voxelsLightBegin();
+				#end
 
 				for (i in 0...Main.voxelgiClipmapCount)
 				{
-					armory.renderpath.RenderPathCreator.clipmapLevel = i;
 					var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
 
 					var center = new iron.math.Vec3(
@@ -563,12 +566,15 @@ class RenderPathDeferred {
 					path.bindTarget(voxtex, "voxels");
 					path.drawMeshes("voxel");
 
-					Inc.computeVoxelsTemporal();
+					Inc.voxelsStabilize(voxtex);
+					#if (rp_voxels == "Voxel GI")
+					Inc.voxelsLight();
+					#end
 
-					Inc.computeVoxelsLight();
+					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				}
 				//Inc.computeVoxelsEnd();
-				path.generateMipmaps("voxels");
+				//path.generateMipmaps("voxels");
 			}
 		}
 		#end
