@@ -26,12 +26,11 @@ THE SOFTWARE.
 #include "std/gbuffer.glsl"
 #include "std/imageatomic.glsl"
 
-uniform writeonly image3D voxels;
+uniform writeonly image3D voxelsOut;
 #ifdef _VoxelGI
-uniform layout(rgba8) image3D voxelsOut;
-uniform sampler2D gbuffer1;
+uniform layout(rgba8) image3D voxels;
 #else
-uniform layout(r8) image3D voxelsOut;
+uniform layout(r8) image3D voxels;
 #endif
 
 uniform vec3 clipmap_center_last;
@@ -41,19 +40,17 @@ uniform float voxelBlend;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
-
 	int res = voxelgiResolution.x;
 	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	ivec3 dst = src;
-	dst.y += clipmapLevel * res;
+
 	#ifdef _VoxelGI
 	vec4 col;
-	const float voxelSize = 2.0 * voxelgiVoxelSize;
-	vec3 wposition = vec3(dst);
-	vec3 basecol = textureLod(gbuffer1, wposition.xy, 0.0).rgb;
 	#else
 	float opac;
 	#endif
+
+	dst.y += clipmapLevel * res;
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -77,22 +74,28 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = mix(imageLoad(voxelsOut, dst), vec4(basecol, 1.0), voxelBlend);
+				col = imageLoad(voxels, coords);
 				#else
-				opac = mix(imageLoad(voxelsOut, dst).r, 1.0, voxelBlend);
+				opac = imageLoad(voxels, coords).r;
+				#endif
+			else
+				#ifdef _VoxelGI
+				col = vec4(0.0);
+				#else
+				opac = 0.0;
 				#endif
 		}
 		else
 			#ifdef _VoxelGI
-			col = mix(imageLoad(voxelsOut, dst), vec4(basecol, 1.0), voxelBlend);
+			col = imageLoad(voxels, dst);
 			#else
-			opac = mix(imageLoad(voxelsOut, dst).r, 1.0, voxelBlend);
+			opac = imageLoad(voxels, dst).r;
 			#endif
 
 		#ifdef _VoxelGI
-		imageStore(voxels, dst, col);
+		imageStore(voxelsOut, dst, col);
 		#else
-		imageStore(voxels, dst, vec4(opac));
+		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
 	}
 }

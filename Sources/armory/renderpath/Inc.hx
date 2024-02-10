@@ -18,6 +18,7 @@ class Inc {
 	static var voxelsCreated = false;
 	#end
 
+	#if (rp_voxels != "Off")
 	static var voxel_sh0:kha.compute.Shader = null;
 	static var voxel_sh1:kha.compute.Shader = null;
 	static var voxel_ta0:kha.compute.TextureUnit;
@@ -25,6 +26,7 @@ class Inc {
 	static var voxel_tc0:kha.compute.TextureUnit;
 	static var voxel_ca0:kha.compute.ConstantLocation;
 	static var voxel_cb0:kha.compute.ConstantLocation;
+	#end
 
 	#if (rp_voxels == "Voxel GI")
 	static var voxel_sh:kha.compute.Shader = null;
