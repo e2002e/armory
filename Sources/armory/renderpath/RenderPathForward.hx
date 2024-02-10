@@ -9,13 +9,6 @@ class RenderPathForward {
 
 	static var path: RenderPath;
 
-	#if (rp_voxels != "Off")
-	static var voxels = "voxels";
-	static var voxelsLast = "voxels";
-	static var voxelsBounce = "voxelsBounce";
-	static var voxelsBounceLast = "voxelsBounce";
-	#end
-
 	#if rp_bloom
 	static var bloomDownsampler: Downsampler;
 	static var bloomUpsampler: Upsampler;
@@ -160,9 +153,9 @@ class RenderPathForward {
 		#if (rp_voxels != 'Off')
 		{
 			Inc.initGI();
-
-			#if arm_voxelgi_bounces
-			path.loadShader("shader_datas/voxels_bounce/voxels_bounce");
+			Inc.initGI("voxelsOut");
+			#if (rp_voxels == "Voxel GI")
+			Inc.initGI("voxelsOpac");
 			#end
 		}
 		#end
@@ -313,66 +306,52 @@ class RenderPathForward {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-			var voxelize = true;
 
-			#if arm_voxelgi_temporal
-			voxelize = ++armory.renderpath.RenderPathCreator.voxelFrame % armory.renderpath.RenderPathCreator.voxelFreq == 0;
-			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsBounce = voxelsBounce == "voxelsBounce" ? "voxelsBounceB" : "voxelsBounce";
-			voxelsBounceLast = voxelsBounce == "voxelsBounce" ? "voxelsBounceB" : "voxelsBounce";
+			#if (rp_voxels == "Voxel GI")
+			var voxtex = "voxelsOpac";
+			#else
+			var voxtex = "voxels";
 			#end
 
-			if(voxelize) {
-				path.clearImage(voxels, 0x00000000);
+			path.clearImage(voxtex, 0x00000000);
 
-				for (i in 0...Main.voxelgiClipmapCount) {
-					path.setTarget("");
-					var res = Inc.getVoxelRes();
-					path.setViewport(res, res);
+			var camera = iron.Scene.active.camera;
 
-					path.bindTarget(voxels, "voxels");
+			Inc.voxelsStabilizeBegin();
+			#if (rp_voxels == "Voxel GI")
+			Inc.voxelsLightBegin();
+			#end
 
-					#if (rp_voxels == "Voxel GI")
-					#if rp_shadowmap
-					{
-						#if arm_shadowmap_atlas
-						Inc.bindShadowMapAtlas();
-						#else
-						Inc.bindShadowMap();
-						#end
-					}
-					#end
-					#end
+			for (i in 0...Main.voxelgiClipmapCount)
+			{
+				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
 
-					path.drawMeshes("voxel");
+				var center = new iron.math.Vec3(
+					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
+					Math.floor(camera.transform.worldy() / texelSize) * texelSize,
+					Math.floor(camera.transform.worldz() / texelSize) * texelSize
+				);
 
-					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
-				}
+				armory.renderpath.RenderPathCreator.clipmap_center_last.x = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.x - center.x) / texelSize);
+				armory.renderpath.RenderPathCreator.clipmap_center_last.y = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.y - center.y) / texelSize);
+				armory.renderpath.RenderPathCreator.clipmap_center_last.z = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.z - center.z) / texelSize);
 
-				path.generateMipmaps(voxels);
+				armory.renderpath.RenderPathCreator.clipmap_center = center;
 
-				#if arm_voxelgi_bounces
-				path.clearImage(voxelsBounce, 0x00000000);
+				path.setTarget("");
+				var res = Inc.getVoxelRes();
+				path.setViewport(res, res);
+				path.bindTarget(voxtex, "voxels");
+				path.drawMeshes("voxel");
 
-				for (i in 0...Main.voxelgiClipmapCount) {
-					path.setTarget("buf");
-					path.bindTarget("_main", "gbufferD");
-					path.bindTarget("gbuffer0", "gbuffer0");
-					path.bindTarget("gbuffer1", "gbuffer1");
-					#if rp_voxelgi_refract
-					path.bindTarget("gbuffer_refraction", "gbuffer_refraction");
-					#end
-					path.bindTarget(voxels, "voxels");
-					path.bindTarget(voxelsBounce, "voxelsBounce");
-
-					path.drawShader("shader_datas/voxels_bounce/voxels_bounce");
-
-					armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
-				}
-
-				path.generateMipmaps(voxelsBounce);
+				Inc.voxelsStabilize(voxtex);
+				#if (rp_voxels == "Voxel GI")
+				Inc.voxelsLight();
 				#end
+
+				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
+				//Inc.computeVoxelsEnd();
+				//path.generateMipmaps("voxels");
 			}
 		}
 		#end
@@ -411,19 +390,9 @@ class RenderPathForward {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			#if arm_voxelgi_bounces
-			path.bindTarget(voxelsBounce, "voxels");
+			path.bindTarget("voxelsBounce", "voxels");
 			#else
-			path.bindTarget(voxels, "voxels");
-			#end
-
-			#if arm_voxelgi_temporal
-			{
-				#if arm_voxelgi_bounces
-				path.bindTarget(voxelsBounceLast, "voxelsLast");
-				#else
-				path.bindTarget(voxelsLast, "voxelsLast");
-				#end
-			}
+			path.bindTarget("voxels", "voxels");
 			#end
 		}
 		#end

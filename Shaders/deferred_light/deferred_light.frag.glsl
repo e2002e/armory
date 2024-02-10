@@ -300,17 +300,9 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	#ifdef _VoxelTemporal
-	fragColor.rgb = (traceDiffuse(p, n, voxels, clipmap_center).rgb * voxelBlend + traceDiffuse(p, n, voxelsLast, clipmap_center).rgb * (1.0 - voxelBlend)) * voxelgiDiff * albedo;
-	#else
 	fragColor.rgb = traceDiffuse(p, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;
-	#endif
 	if(roughness < 1.0 && occspec.y > 0.0)
-		#ifdef _VoxelTemporal
-		fragColor.rgb += (traceSpecular(p, n, voxels, -v, roughness, clipmap_center).rgb * voxelBlend + traceSpecular(p, n, voxelsLast, -v, roughness, clipmap_center).rgb * (1.0 - voxelBlend)) * voxelgiRefl * occspec.y;
-		#else
 		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, clipmap_center).rgb * voxelgiRefl * occspec.y;
-		#endif
 #endif
 
 #ifdef _VoxelAOvar
@@ -585,11 +577,7 @@ void main() {
 
 #ifdef _VoxelRefract
 if(opac < 1.0) {
-	#ifdef _VoxelTemporal
-	vec3 refraction = (traceRefraction(p, n, voxels, v, ior, roughness, clipmap_center) * voxelBlend + traceRefraction(p, n, voxelsLast, v, ior, roughness, clipmap_center) * (1.0 - voxelBlend)) * voxelgiRefr;
-	#else
 	vec3 refraction = traceRefraction(p, n, voxels, v, ior, roughness, clipmap_center) * voxelgiRefr;
-	#endif
 	fragColor.rgb = mix(refraction, fragColor.rgb, opac);
 }
 #endif

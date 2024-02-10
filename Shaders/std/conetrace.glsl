@@ -95,7 +95,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 
 		float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / (voxelSize * voxelgiResolution.x);
 		samplePos = samplePos * 0.5 + 0.5;
 
 		if (any(notEqual(samplePos, clamp(samplePos, 0.0, 1.0)))) {
@@ -214,7 +214,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 
 		float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
 
-        samplePos = ((start_pos + dir * dist) - clipmap_center) / voxelSize / voxelgiResolution.x;
+        samplePos = ((start_pos + dir * dist) - clipmap_center) / (voxelSize * voxelgiResolution.x);
 		samplePos = samplePos * 0.5 + 0.5;
 
 		if ((any(notEqual(clamp(samplePos, 0.0, 1.0), samplePos)))) {

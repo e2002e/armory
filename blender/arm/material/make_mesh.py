@@ -669,22 +669,12 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             make_tess.interpolate(tese, 'clipmap_center', 3, declare_out=True)
 
     if '_VoxelAOvar' in wrd.world_defs:
-        if '_VoxelTemporal' in wrd.world_defs:
-            frag.write('indirect *= ((1.0 - traceAO(wposition, n, voxels, clipmap_center)) * voxelBlend + (1.0 - traceAO(wposition, n, voxelsLast, clipmap_center)) * (1.0 - voxelBlend));')
-        else:
-            frag.write('indirect *= 1.0 - traceAO(wposition, n, voxels, clipmap_center);')
+        frag.write('indirect *= 1.0 - traceAO(wposition, n, voxels, clipmap_center);')
 
     if '_VoxelGI' in wrd.world_defs:
-        if '_VoxelTemporal' in wrd.world_defs:
-            frag.write('indirect += (traceDiffuse(wposition, n, voxels, clipmap_center).rgb * voxelBlend + traceDiffuse(wposition, n, voxelsLast, clipmap_center).rgb * (1.0 - voxelBlend)) * voxelgiDiff * albedo;')
-        else:
-            frag.write('indirect += traceDiffuse(wposition, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;')
-
+        frag.write('indirect += traceDiffuse(wposition, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;')
         frag.write('if (roughness < 1.0 && specular > 0.0)')
-        if '_VoxelTemporal' in wrd.world_defs:
-            frag.write('indirect += (traceSpecular(wposition, n, voxels, -eyeDir, roughness, clipmap_center).rgb * voxelBlend + traceSpecular(wposition, n, voxelsLast, -eyeDir, roughness, clipmap_center).rgb * (1.0 - voxelBlend)) * voxelgiRefl * specular;')
-        else:
-            frag.write('indirect += traceSpecular(wposition, n, voxels, -eyeDir, roughness, clipmap_center).rgb * voxelgiRefl * specular;')
+        frag.write('    indirect += traceSpecular(wposition, n, voxels, -eyeDir, roughness, clipmap_center).rgb * voxelgiRefl * specular;')
 
     frag.write('vec3 direct = vec3(0.0);')
 
@@ -773,10 +763,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.write('indirect += emissionCol;')
 
     if '_VoxelRefract' in wrd.world_defs and parse_opacity:
-        if '_VoxelTemporal' in wrd.world_defs:
-            frag.write('vec3 refraction = (traceRefraction(wposition, n, voxels, eyeDir, ior, roughness, clipmap_center) * voxelBlend + traceRefraction(wposition, n, voxelsLast, eyeDir, ior, roughness, clipmap_center) * (1.0 - voxelBlend)) * voxelgiRefr;')
-        else:
-            frag.write('vec3 refraction = traceRefraction(wposition, n, voxels, eyeDir, ior, roughness, clipmap_center) * voxelgiRefr;')
+        frag.write('vec3 refraction = traceRefraction(wposition, n, voxels, eyeDir, ior, roughness, clipmap_center) * voxelgiRefr;')
         frag.write('indirect = mix(refraction, indirect, opacity);')
         frag.write('direct = mix(refraction, direct, opacity);')
 
