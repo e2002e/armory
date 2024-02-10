@@ -29,25 +29,34 @@ vec3 tangent(const vec3 n) {
 	else return normalize(t2);
 }
 
-// uvec3 faceIndices(const vec3 dir) {
-// 	uvec3 ret;
-// 	ret.x = (dir.x < 0.0) ? 0 : 1;
-// 	ret.y = (dir.y < 0.0) ? 2 : 3;
-// 	ret.z = (dir.z < 0.0) ? 4 : 5;
-// 	return ret;
-// }
+uvec3 faceIndices(const vec3 dir) {
+ 	uvec3 ret;
+ 	ret.x = (dir.x < 0.0) ? 0 : 1;
+ 	ret.y = (dir.y < 0.0) ? 2 : 3;
+ 	ret.z = (dir.z < 0.0) ? 4 : 5;
+ 	return ret / 6;
+}
 
-// vec4 sampleVoxel(const vec3 pos, vec3 dir, const uvec3 indices, const float lod) {
-// 	dir = abs(dir);
-// 	return dir.x * textureLod(voxels[indices.x], pos, lod) +
-// 		   dir.y * textureLod(voxels[indices.y], pos, lod) +
-// 		   dir.z * textureLod(voxels[indices.z], pos, lod);
-// }
+vec4 sampleVoxel(sampler3D voxels, const vec3 pos, vec3 dir, const uvec3 indices, const float lod) {
+ 	dir = abs(dir);
+ 	vec4 col = vec4(0.0);
+ 	vec3 tc = pos;
+ 	tc.x += indices.x;
+ 	col += dir.x * textureLod(voxels, tc, lod);
+ 	tc = pos;
+ 	tc.x += indices.y;
+	col += dir.y * textureLod(voxels, tc, lod);
+	tc = pos;
+	tc.x += indices.z;
+	col += dir.z * textureLod(voxels, tc, lod);
+	return col;
+}
 
 
 #ifdef _VoxelGI
 vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aperture, const float maxDist, const vec3 clipmap_center) {
     dir = normalize(dir);
+    uvec3 indices = faceIndices(dir);
     vec4 sampleCol = vec4(0.0);
 	float voxelSize0 = voxelgiVoxelSize * 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
@@ -74,10 +83,12 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 			clipmap_index0++;
 			continue;
 		}
-
+		float half_texel = 0.5 / voxelgiResolution.x;
+		samplePos = clamp(samplePos, half_texel, 1.0 - half_texel);
+		samplePos.x /= 6;
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
-		mipSample = textureLod(voxels, samplePos, 0.0);
+		mipSample = sampleVoxel(voxels, samplePos, dir, indices, 0.0);
 
 		/*
 		if(clipmap_blend > 0.0) {
@@ -187,7 +198,8 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 			clipmap_index0++;
 			continue;
 		}
-
+		float half_texel = 0.5 / voxelgiResolution.x;
+		samplePos = clamp(samplePos, half_texel, 1.0 - half_texel);
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
 		mipSample = textureLod(voxels, samplePos, 0.0).r;

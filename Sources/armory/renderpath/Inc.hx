@@ -491,7 +491,7 @@ class Inc {
 
 		var res = getVoxelRes();
 		var resZ =  getVoxelResZ();
-		t.width = res;
+		t.width = res * 6;
 		t.height = res * Main.voxelgiClipmapCount;
 		t.depth = Std.int(res * resZ);
 		t.is_image = true;
@@ -629,7 +629,7 @@ class Inc {
 	 	}
 	 	path.clearImage("voxels", 0x00000000);
 	}
-	public static function computeVoxels() {
+	public static function computeVoxelsLight() {
 	 	var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var lights = iron.Scene.active.lights;
@@ -714,7 +714,7 @@ class Inc {
 
 	 		kha.compute.Compute.setInt(voxel_cj, armory.renderpath.RenderPathCreator.clipmapLevel);
 
-	 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
+	 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 	 	}
 		pointIndex = spotIndex = 0;
 	 }

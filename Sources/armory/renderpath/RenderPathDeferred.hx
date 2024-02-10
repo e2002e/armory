@@ -563,7 +563,9 @@ class RenderPathDeferred {
 					path.bindTarget(voxtex, "voxels");
 					path.drawMeshes("voxel");
 
-					Inc.computeVoxels();
+					Inc.computeVoxelsTemporal();
+
+					Inc.computeVoxelsLight();
 				}
 				//Inc.computeVoxelsEnd();
 				path.generateMipmaps("voxels");

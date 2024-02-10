@@ -109,6 +109,7 @@ def make_gi(context_id):
     vert.add_uniform('mat4 W', '_worldMatrix')
     vert.add_uniform('mat3 N', '_normalMatrix')
     vert.add_out('vec3 voxpositionGeom')
+    vert.add_out('vec3 voxnormalGeom')
 
     if con_voxel.is_elem('col'):
         vert.add_out('vec3 vcolorGeom')
@@ -123,6 +124,7 @@ def make_gi(context_id):
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
     vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
+    vert.write('voxnormalGeom = N * vec3(nor.xy, pos.w);')
 
     geom.add_out('vec3 voxposition')
     geom.add_out('vec3 voxnormal')
@@ -142,6 +144,7 @@ def make_gi(context_id):
     geom.write('vec3 p = abs(cross(p1, p2));')
     geom.write('for (uint i = 0; i < 3; ++i) {')
     geom.write('    voxposition = voxpositionGeom[i];')
+    geom.write('    voxnormal = voxnormalGeom[i];')
     if con_voxel.is_elem('col'):
         geom.write('    vcolor = vcolorGeom[i];')
     if con_voxel.is_elem('tex'):
@@ -168,10 +171,30 @@ def make_gi(context_id):
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5) * voxelgiResolution.x;')
     frag.write('uvw.y += clipmapLevel * voxelgiResolution.x;')
-    if parse_opacity:
-        frag.write('imageStore(voxels, ivec3(uvw), vec4(min(basecol, vec3(1.0)), opacity));')
-    else:
-        frag.write('imageStore(voxels, ivec3(uvw), vec4(min(basecol, vec3(1.0)), 1.0));')
+    frag.write('vec3 face_offsets = vec3(')
+    frag.write('	voxnormal.x > 0 ? 0 : 1,')
+    frag.write('	voxnormal.y > 0 ? 2 : 3,')
+    frag.write('	voxnormal.z > 0 ? 4 : 5')
+    frag.write('	) * voxelgiResolution.x;')
+    frag.write('vec3 direction_weights = abs(voxnormal);')
+
+    frag.write('if (direction_weights.x > 0.0) {')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
+    frag.write('    uvw.x += face_offsets.x;')
+    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('}')
+
+    frag.write('if (direction_weights.y > 0.0) {')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
+    frag.write('    uvw.x += face_offsets.y;')
+    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('}')
+
+    frag.write('if (direction_weights.z > 0.0) {')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
+    frag.write('    uvw.x += face_offsets.z;')
+    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('}')
 
     return con_voxel
 
