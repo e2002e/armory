@@ -36,6 +36,9 @@ class Inc {
 	static var voxel_td:kha.compute.TextureUnit;
 	static var voxel_te:kha.compute.TextureUnit;
 	static var voxel_tf:kha.compute.TextureUnit;
+	#if (rp_gbuffer_emission && arm_deferred)
+	static var voxel_tg:kha.compute.TextureUnit;
+	#end
 	static var voxel_ca:kha.compute.ConstantLocation;
 	static var voxel_cb:kha.compute.ConstantLocation;
 	static var voxel_cc:kha.compute.ConstantLocation;
@@ -674,6 +677,9 @@ class Inc {
 	 		voxel_td = voxel_sh.getTextureUnit("shadowMap");
 	 		voxel_te = voxel_sh.getTextureUnit("shadowMapSpot");
 	 		voxel_tf = voxel_sh.getTextureUnit("shadowMapPoint");
+			#if (rp_gbuffer_emission && arm_deferred)
+	 		voxel_tg = voxel_sh.getTextureUnit("gbuffer_emission");
+	 		#end
 
 	 		voxel_ca = voxel_sh.getConstantLocation("lightPos");
 	 		voxel_cb = voxel_sh.getConstantLocation("lightColor");
@@ -705,6 +711,9 @@ class Inc {
 	 		kha.compute.Compute.setTexture(voxel_ta, rts.get("voxelsOut").image, kha.compute.Access.Read);
 	 		// kha.compute.Compute.setTexture(voxel_tb, rts.get("voxelsNor").image, kha.compute.Access.Read);
 	 		kha.compute.Compute.setTexture(voxel_tc, rts.get("voxels").image, kha.compute.Access.Write);
+			#if (rp_gbuffer_emission && arm_deferred)
+			kha.compute.Compute.setSampledTexture(voxel_tc, rts.get("gbuffer_emission").image);
+			#end
 
 	 		#if (rp_shadowmap)
 	 		#if arm_shadowmap_atlas_single_map
@@ -775,7 +784,7 @@ class Inc {
 
 	 		kha.compute.Compute.setInt(voxel_cj, armory.renderpath.RenderPathCreator.clipmapLevel);
 
-	 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
+	 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 	 	}
 		pointIndex = spotIndex = 0;
 	 }

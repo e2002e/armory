@@ -543,7 +543,8 @@ class RenderPathDeferred {
 
 			for (i in 0...Main.voxelgiClipmapCount)
 			{
-				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
+				armory.renderpath.RenderPathCreator.clipmapLevel = i;
+				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, i);
 
 				var center = new iron.math.Vec3(
 					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
@@ -568,7 +569,6 @@ class RenderPathDeferred {
 				Inc.voxelsLight();
 				#end
 
-				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 				//Inc.computeVoxelsEnd();
 				//path.generateMipmaps("voxels");
 			}
