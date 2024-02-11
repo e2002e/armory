@@ -40,28 +40,27 @@ uniform float voxelBlend;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
-	int res = voxelgiResolution.x;
-	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
-	ivec3 dst = src;
-
 	#ifdef _VoxelGI
 	vec4 col;
 	#else
 	float opac;
 	#endif
 
-	dst.y += clipmapLevel * res;
-
 	for (int i = 0; i < 6; i++)
 	{
+		int res = voxelgiResolution.x;
+		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
+		ivec3 dst = src;
+
 		dst.x += i * res;
+		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		col = vec4(0.0);
 		#else
 		opac = 0.0;
 		#endif
 
-		if (clipmap_center_last.x != 0 || clipmap_center_last.y != 0 || clipmap_center_last.z != 0)
+		if (any(notEqual(clipmap_center_last, vec3(0.0))))
 		{
 			ivec3 coords = ivec3(dst - clipmap_center_last);
 			int aniso_face_start_x = i * res;

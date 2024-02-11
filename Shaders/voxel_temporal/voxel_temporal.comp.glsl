@@ -57,14 +57,16 @@ void main() {
 
 	for (int i = 0; i < 6; i++)
 	{
+		dst = src;
 		dst.x += i * res;
+		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		col = vec4(0.0);
 		#else
 		opac = 0.0;
 		#endif
 
-		if (clipmap_center_last.x != 0 || clipmap_center_last.y != 0 || clipmap_center_last.z != 0)
+		if (any(notEqual(clipmap_center_last, vec3(0.0))))
 		{
 			ivec3 coords = ivec3(dst - clipmap_center_last);
 			int aniso_face_start_x = i * res;
