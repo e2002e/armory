@@ -29,7 +29,7 @@ THE SOFTWARE.
 uniform writeonly image3D voxels;
 #ifdef _VoxelGI
 uniform layout(rgba8) image3D voxelsOut;
-uniform sampler2D gbuffer1;
+uniform sampler2D buffer1;
 #else
 uniform layout(r8) image3D voxelsOut;
 #endif
@@ -45,12 +45,9 @@ void main() {
 	int res = voxelgiResolution.x;
 	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	ivec3 dst = src;
-	dst.y += clipmapLevel * res;
 	#ifdef _VoxelGI
 	vec4 col;
 	const float voxelSize = 2.0 * voxelgiVoxelSize;
-	vec3 wposition = vec3(dst);
-	vec3 basecol = textureLod(gbuffer1, wposition.xy, 0.0).rgb;
 	#else
 	float opac;
 	#endif
@@ -62,6 +59,8 @@ void main() {
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		col = vec4(0.0);
+		vec3 wposition = vec3(dst);
+		vec3 basecol = textureLod(buffer1, wposition.xy, 0.0).rgb;
 		#else
 		opac = 0.0;
 		#endif
