@@ -587,7 +587,7 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 			var voxelize = path.voxelize();
 
-			//if(voxelize)
+			if(voxelize)
 			{
 
 				#if (rp_voxels == "Voxel GI")
@@ -596,8 +596,7 @@ class RenderPathDeferred {
 				var voxtex = "voxels";
 				#end
 
-				if (armory.renderpath.RenderPathCreator.clipmapLevel == 0)
-					path.clearImage(voxtex, 0x00000000);
+				path.clearImage(voxtex, 0x00000000);
 
 				var camera = iron.Scene.active.camera;
 
