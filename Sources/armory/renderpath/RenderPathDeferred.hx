@@ -587,7 +587,7 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 			var voxelize = path.voxelize();
 
-			if(voxelize)
+			//if(voxelize)
 			{
 
 				#if (rp_voxels == "Voxel GI")
