@@ -35,7 +35,7 @@ out float fragColor;
 #endif
 
 vec3 hitCoord;
-vec2 coord;
+vec4 coord;
 float depth;
 #ifdef _RTGI
 vec3 col = vec3(1.0);
@@ -62,7 +62,7 @@ float getDeltaDepth(vec3 hitCoord) {
 }
 
 #ifdef _RTGI
-vec2 binarySearch(vec3 dir) {
+vec4 binarySearch(vec3 dir) {
 	float ddepth;
 	for (int i = 0; i < numBinarySearchSteps; i++) {
 		dir *= 0.5;
@@ -70,13 +70,13 @@ vec2 binarySearch(vec3 dir) {
 		ddepth = getDeltaDepth(hitCoord);
 		if (ddepth < 0.0) hitCoord += dir;
 	}
-	if (abs(ddepth) > 1.0) return vec2(0.0);
-	return getProjectedCoord(hitCoord);
+	if (abs(ddepth) > 1.0) return vec4(0.0);
+	return vec4(getProjectedCoord(hitCoord), 0.0, 1.0);
 }
 #endif
 
 void rayCast(vec3 dir) {
-	coord = vec2(0.0);
+	coord = vec4(0.0);
 	hitCoord = vpos;
 	dir *= ssgiRayStep;
 	float dist = 1.0;
@@ -89,17 +89,26 @@ void rayCast(vec3 dir) {
 			dist = distance(vpos, hitCoord);
 			float lod = log2(dist / ssgiSearchDist);
 			#ifdef _RTGI
-			coord = binarySearch(floor(dir / (lod * ssgiRayStep)) * (lod * ssgiRayStep));
+			coord = binarySearch(dir);
 			#endif
 			break;
 		}
 	}
 	#ifdef _RTGI
-	if (any(greaterThan(coord, vec2(0.0)))) //ray has hit
+	if (any(greaterThan(coord, vec4(0.0)))) //ray has hit
 	{
-		col += textureLod(gbuffer1, coord, 0.0).rgb * (ssgiSearchDist - dist);
-		col += textureLod(gbuffer_emission, coord, 0.0).rgb * (ssgiSearchDist - dist);
+		vec2 deltaCoords = abs(vec2(0.5, 0.5) - coord.xy);
+		float screenEdgeFactor = clamp(1.0 - (deltaCoords.x + deltaCoords.y), 0.0, 1.0);
+
+		float reflectivity = 1.0;// - roughness;
+
+		float intensity = pow(reflectivity, 5.0) * screenEdgeFactor * clamp(-vpos.z, 0.0, 1.0) * clamp((ssrSearchDist - length(vpos - hitCoord)) * (1.0 / ssgiSearchDist), 0.0, 1.0) * coord.w;
+
+		intensity = clamp(intensity, 0.0, 1.0);
+		col += textureLod(gbuffer1, coord.xy, 0.0).rgb * (ssgiSearchDist - dist) * intensity;
+		col += textureLod(gbuffer_emission, coord.xy, 0.0).rgb * (ssgiSearchDist - dist) * intensity;
 	}
+	else col += 1.0;
 	#else
 	col += dist;
 	#endif
