@@ -325,7 +325,7 @@ class RenderPathForward {
 			for (i in 0...Main.voxelgiClipmapCount)
 			{
 				armory.renderpath.RenderPathCreator.clipmapLevel = i;
-				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
+				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, i);
 
 				var center = new iron.math.Vec3(
 					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
@@ -351,8 +351,8 @@ class RenderPathForward {
 				#end
 
 				//Inc.computeVoxelsEnd();
-				//path.generateMipmaps("voxels");
 			}
+			path.generateMipmaps("voxels");
 		}
 		#end
 

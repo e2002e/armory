@@ -108,7 +108,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 		samplePos.x /= 6;
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
-		mipSample = sampleVoxel(voxels, samplePos, dir, indices, 0.0);
+		mipSample = sampleVoxel(voxels, samplePos, dir, indices, lod);
 
 		/*
 		if(clipmap_blend > 0.0) {
@@ -226,7 +226,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 		samplePos.x /= 6;
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
-		mipSample = sampleVoxel(voxels, samplePos, dir, indices, 0.0);
+		mipSample = sampleVoxel(voxels, samplePos, dir, indices, lod);
 
 		/*
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
@@ -326,9 +326,9 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
 		#ifdef _VoxelAOvar
-		mipSample = textureLod(voxels, samplePos, 0.0).r;
+		mipSample = textureLod(voxels, samplePos, lod).r;
 		#else
-		mipSample = textureLod(voxels, samplePos, 0.0).a;
+		mipSample = textureLod(voxels, samplePos, lod).a;
 		#endif
 		sampleCol += (1.0 - sampleCol) * mipSample;
 
