@@ -12,6 +12,7 @@ uniform sampler2D gbuffer1; // Basecol
 uniform mat4 P;
 uniform mat3 V3;
 
+uniform vec3 eye;
 uniform vec2 cameraProj;
 
 const int numBinarySearchSteps = 7;
@@ -81,14 +82,13 @@ void rayCast(vec3 dir) {
 	for (int i = 0; i < ssgiMaxSteps; i++) {
 		hitCoord += dir;
 		float delta = getDeltaDepth(hitCoord);
-		if (delta > 0.0 && delta < 0.2) {
+		if (delta > 0.0 && delta < ssgiSearchDist && delta < depth) {
 			dist = distance(vpos, hitCoord);
 			#ifdef _RTGI
 			coord = binarySearch(dir);
 			#endif
 			break;
 		}
-		else coord = vec2(0.0);
 	}
 	#ifdef _RTGI
 	if (any(greaterThan(coord, vec2(0.0)))) //ray has hit

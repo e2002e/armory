@@ -21,7 +21,12 @@
 				{
 					"name": "cameraProj",
 					"link": "_cameraPlaneProj"
+				},
+				{
+					"name": "eye",
+					"link": "_cameraPosition"
 				}
+
 			],
 			"texture_params": [],
 			"vertex_shader": "../include/pass_viewray2.vert.glsl",
