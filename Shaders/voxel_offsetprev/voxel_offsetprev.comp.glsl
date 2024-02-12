@@ -35,7 +35,6 @@ uniform layout(r8) image3D voxels;
 
 uniform vec3 clipmap_center_last;
 uniform int clipmapLevel;
-uniform float voxelBlend;
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
