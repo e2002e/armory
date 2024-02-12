@@ -510,6 +510,9 @@ class RenderPathDeferred {
 				#end
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.bindTarget("gbuffer1", "gbuffer1");
+				#if rp_gbuffer_emission
+				path.bindTarget("gbuffer_emission", "gbuffer_emission");
+				#end
 				path.drawShader("shader_datas/ssgi_pass/ssgi_pass");
 
 				path.setTarget("rtgib");

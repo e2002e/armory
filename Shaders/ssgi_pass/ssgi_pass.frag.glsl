@@ -8,6 +8,7 @@ uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0; // Normal
 #ifdef _RTGI
 uniform sampler2D gbuffer1; // Basecol
+uniform sampler2D gbuffer_emission;
 #endif
 uniform mat4 P;
 uniform mat3 V3;
@@ -37,7 +38,7 @@ vec3 hitCoord;
 vec2 coord;
 float depth;
 #ifdef _RTGI
-vec3 col = vec3(0.0);
+vec3 col = vec3(1.0);
 #else
 float col = 0.0;
 #endif
@@ -79,13 +80,16 @@ void rayCast(vec3 dir) {
 	hitCoord = vpos;
 	dir *= ssgiRayStep;
 	float dist = 1.0;
+	float lod = 0;
+	float delta = 0.0;
 	for (int i = 0; i < ssgiMaxSteps; i++) {
 		hitCoord += dir;
-		float delta = getDeltaDepth(hitCoord);
-		if (delta > 0.0 && delta < ssgiSearchDist && delta < depth) {
+		delta = getDeltaDepth(hitCoord);
+		if (delta > 0.0 && delta < depth && delta < ssgiSearchDist) {
 			dist = distance(vpos, hitCoord);
+			float lod = log2(dist / ssgiSearchDist);
 			#ifdef _RTGI
-			coord = binarySearch(dir);
+			coord = binarySearch(floor(dir / (lod * ssgiRayStep)) * (lod * ssgiRayStep));
 			#endif
 			break;
 		}
@@ -93,7 +97,8 @@ void rayCast(vec3 dir) {
 	#ifdef _RTGI
 	if (any(greaterThan(coord, vec2(0.0)))) //ray has hit
 	{
-		col += textureLod(gbuffer1, coord, 0.0).rgb * ((ssgiSearchDist) - dist);
+		col += textureLod(gbuffer1, coord, 0.0).rgb * (ssgiSearchDist - dist);
+		col += textureLod(gbuffer_emission, coord, 0.0).rgb * (ssgiSearchDist - dist);
 	}
 	#else
 	col += dist;
