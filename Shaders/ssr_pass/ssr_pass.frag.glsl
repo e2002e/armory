@@ -45,7 +45,6 @@ float getDeltaDepth(const vec3 hit) {
 
 vec4 binarySearch(vec3 dir) {
 	float ddepth;
-	vec3 start = hitCoord;
 	for (int i = 0; i < numBinarySearchSteps; i++) {
 		dir *= 0.5;
 		hitCoord -= dir;

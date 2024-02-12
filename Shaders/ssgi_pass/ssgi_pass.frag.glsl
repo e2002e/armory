@@ -54,7 +54,7 @@ vec2 getProjectedCoord(vec3 hitCoord) {
 
 float getDeltaDepth(vec3 hitCoord) {
 	vec2 coord = getProjectedCoord(hitCoord);
-	depth = textureLod(gbufferD, coord, 0.0).r * 2.0 - 1.0;
+	float depth = textureLod(gbufferD, coord, 0.0).r * 2.0 - 1.0;
 	vec3 p = getPosView(viewRay, depth, cameraProj);
 	return p.z - hitCoord.z;
 }
@@ -68,20 +68,20 @@ vec2 binarySearch(vec3 dir) {
 		ddepth = getDeltaDepth(hitCoord);
 		if (ddepth < 0.0) hitCoord += dir;
 	}
-	if (abs(ddepth) > 1.0) return vec2(-1.0);
+	if (abs(ddepth) > 1.0) return vec2(0.0);
 	return getProjectedCoord(hitCoord);
 }
 #endif
 
 void rayCast(vec3 dir) {
-	coord = vec2(-1.0);
+	coord = vec2(0.0);
 	hitCoord = vpos;
 	dir *= ssgiRayStep;
 	float dist = 1.0;
 	for (int i = 0; i < ssgiMaxSteps; i++) {
 		hitCoord += dir;
 		float delta = getDeltaDepth(hitCoord);
-		if (delta > 0.0 && delta < 1.0) {
+		if (delta > 0.0 && delta < depth && delta < ssgiSearchDist) {
 			dist = distance(vpos, hitCoord);
 			#ifdef _RTGI
 			coord = binarySearch(dir);
@@ -90,11 +90,10 @@ void rayCast(vec3 dir) {
 		}
 	}
 	#ifdef _RTGI
-	if (all (greaterThanEqual(coord, vec2(0.0)))) // ray has hit
+	if (any(greaterThan(coord, vec2(0.0)))) //ray has hit
 	{
-		col += textureLod(gbuffer1, coord, 0.0).rgb * (ssgiSearchDist - dist);
+		col += textureLod(gbuffer1, coord, 0.0).rgb * ((ssgiSearchDist) - dist);
 	}
-	else col += 1.0;
 	#else
 	col += dist;
 	#endif
@@ -114,7 +113,7 @@ void main() {
 	fragColor = 0.0;
 	#endif
 	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
-	float d = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
+	depth = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
 
 	vec2 enc = g0.rg;
 	vec3 n;
@@ -122,14 +121,13 @@ void main() {
 	n.xy = n.z >= 0.0 ? enc.xy : octahedronWrap(enc.xy);
 	n = normalize(V3 * n);
 
-	vpos = getPosView(viewRay, d, cameraProj);
+	vpos = getPosView(viewRay, depth, cameraProj);
 
 	rayCast(n);
 	vec3 o1 = normalize(tangent(n));
 	vec3 o2 = (cross(o1, n));
 	vec3 c1 = 0.5f * (o1 + o2);
 	vec3 c2 = 0.5f * (o1 - o2);
-	rayCast(n);
 	rayCast(mix(n, o1, angleMix));
 	rayCast(mix(n, o2, angleMix));
 	rayCast(mix(n, -c1, angleMix));
