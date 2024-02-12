@@ -119,11 +119,14 @@ def make_gi(context_id):
         vert.add_out('vec2 texCoordGeom')
         vert.write('texCoordGeom = tex;')
 
-    vert.add_uniform('vec3 clipmap_center', '_clipmap_center')
-    vert.add_uniform('float voxelSize', '_voxelSize')
+    vert.add_uniform('vec3 eye', '_cameraPosition')
+    vert.add_uniform('int clipmapLevel', '_clipmapLevel')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
+    vert.write('float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);')
+    vert.write('float texelSize = 2.0 * voxelSize;')
+    vert.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
+    vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
     geom.add_out('vec3 voxposition')

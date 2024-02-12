@@ -242,7 +242,8 @@ class Uniforms {
 		switch (link) {
 			#if (rp_voxels != "Off")
 			case "_clipmapLevel": {
-				return armory.renderpath.RenderPathCreator.clipmapLevel;
+				var lod = armory.renderpath.RenderPathCreator.clipmapLevel;
+				return lod;
 			}
 			#end
 		}

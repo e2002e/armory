@@ -220,7 +220,6 @@ void main() {
 	vec3 v = normalize(eye - p);
 	float dotNV = max(dot(n, v), 0.0);
 
-/*
 #ifdef _VoxelGI
 	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
 	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
@@ -234,7 +233,6 @@ void main() {
 	float texelSize = voxelgiVoxelSize * 2.0 * pow(2.0, clipmapLevel);
 	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
 #endif
-*/
 
 #ifdef _VoxelRefract
 	vec4 gr = textureLod(gbuffer_refraction, texCoord, 0.0);
