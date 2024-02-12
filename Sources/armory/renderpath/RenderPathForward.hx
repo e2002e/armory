@@ -324,20 +324,6 @@ class RenderPathForward {
 
 			for (i in 0...Main.voxelgiClipmapCount)
 			{
-				armory.renderpath.RenderPathCreator.clipmapLevel = i;
-				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, i);
-
-				var center = new iron.math.Vec3(
-					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldy() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldz() / texelSize) * texelSize
-				);
-
-				armory.renderpath.RenderPathCreator.clipmap_center_last.x = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.x - center.x) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.y = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.y - center.y) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.z = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.z - center.z) / texelSize);
-
-				armory.renderpath.RenderPathCreator.clipmap_center = center;
 
 				path.setTarget("");
 				var res = Inc.getVoxelRes();
@@ -351,6 +337,7 @@ class RenderPathForward {
 				#end
 
 				//Inc.computeVoxelsEnd();
+				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 			}
 			path.generateMipmaps("voxels");
 		}

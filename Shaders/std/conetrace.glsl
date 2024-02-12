@@ -304,6 +304,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
     float sampleCol = 0.0;
 	float voxelSize0 = voxelgiVoxelSize * 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
+	float step_dist = dist;
 	vec3 samplePos;
 	vec3 start_pos = origin + n * voxelSize0;
 	float coneCoefficient = 2.0 * tan(aperture * 0.5);
@@ -345,8 +346,10 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		}
 		*/
 
+		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol) * mipSample;
-		dist += diam * voxelgiStep;
+		step_dist = diam * voxelgiStep;
+		dist += step_dist;
 	}
 	return sampleCol;
 }

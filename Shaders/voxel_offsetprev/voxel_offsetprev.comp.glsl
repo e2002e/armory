@@ -40,6 +40,8 @@ uniform float voxelBlend;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
+	const int res = voxelgiResolution.x;
+	const ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	#ifdef _VoxelGI
 	vec4 col;
 	#else
@@ -48,10 +50,7 @@ void main() {
 
 	for (int i = 0; i < 6; i++)
 	{
-		int res = voxelgiResolution.x;
-		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 		ivec3 dst = src;
-
 		dst.x += i * res;
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI

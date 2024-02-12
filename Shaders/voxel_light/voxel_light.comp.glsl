@@ -35,17 +35,18 @@ uniform samplerCubeShadow shadowMapPoint;
 #endif
 
 void main() {
-	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
+	const ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 
 	for (int i = 0; i < 6; i++) {
 		ivec3 dst = src;
+
+		const float voxelSize = 2.0 * voxelgiVoxelSize;
+		vec3 wposition = vec3(dst);
+
 		dst.y += clipmapLevel * voxelgiResolution.x;
 		dst.x += i * voxelgiResolution.x;
 		vec4 col = imageLoad(voxelsOpac, dst);
 		if (col.a == 0.0) return;
-
-		const float voxelSize = 2.0 * voxelgiVoxelSize;
-		vec3 wposition = vec3(dst);
 
 		//uint unor = imageLoad(voxelsNor, adjustedID).r;
 		//vec3 wnormal = normalize(decNor(unor));
