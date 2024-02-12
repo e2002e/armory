@@ -385,8 +385,8 @@ class ArmRPListItem(bpy.types.PropertyGroup):
     rp_ssgi: EnumProperty(
         items=[('Off', 'No AO', 'Off'),
                ('SSAO', 'SSAO', 'Screen space ambient occlusion'),
-               ('RTAO', 'RTAO', 'Ray-traced ambient occlusion')
-               # ('RTGI', 'RTGI', 'Ray-traced global illumination')
+               ('RTAO', 'RTAO', 'Ray-traced ambient occlusion'),
+               ('RTGI', 'RTGI', 'Ray-traced global illumination')
                ],
         name="SSGI", description="Screen space global illumination", default='SSAO', update=update_renderpath)
     rp_bloom: BoolProperty(name="Bloom", description="Bloom processing", default=False, update=update_renderpath)
@@ -538,8 +538,9 @@ class ArmRPListItem(bpy.types.PropertyGroup):
     arm_water_reflect: FloatProperty(name="Reflect", default=1.0, update=assets.invalidate_shader_cache)
     arm_ssgi_strength: FloatProperty(name="Strength", default=1.0, update=assets.invalidate_shader_cache)
     arm_ssgi_radius: FloatProperty(name="Radius", default=1.0, update=assets.invalidate_shader_cache)
-    arm_ssgi_step: FloatProperty(name="Step", default=2.0, update=assets.invalidate_shader_cache)
-    arm_ssgi_max_steps: IntProperty(name="Max Steps", default=8, update=assets.invalidate_shader_cache)
+    arm_ssgi_step: FloatProperty(name="Step", default=0.03, update=assets.invalidate_shader_cache)
+    #arm_ssgi_max_steps: IntProperty(name="Max Steps", default=8, update=assets.invalidate_shader_cache)
+    arm_ssgi_search_dist: FloatProperty(name="Search distance", default=0.5, update=assets.invalidate_shader_cache)
     arm_ssgi_rays: EnumProperty(
         items=[('9', '9', '9'),
                ('5', '5', '5'),

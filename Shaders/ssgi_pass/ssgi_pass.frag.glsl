@@ -6,13 +6,18 @@
 
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0; // Normal
-// #ifdef _RTGI
-// uniform sampler2D gbuffer1; // Basecol
-// #endif
+#ifdef _RTGI
+uniform sampler2D gbuffer1; // Basecol
+uniform sampler2D gbuffer_emission;
+#endif
 uniform mat4 P;
 uniform mat3 V3;
 
+uniform vec3 eye;
 uniform vec2 cameraProj;
+
+const int numBinarySearchSteps = 7;
+const int ssgiMaxSteps = int(ceil(1.0 / ssgiRayStep) * ssgiSearchDist);
 
 const float angleMix = 0.5f;
 #ifdef _SSGICone9
@@ -23,49 +28,90 @@ const float strength = 2.0 * (1.0 / ssgiStrength) * 1.8;
 
 in vec3 viewRay;
 in vec2 texCoord;
+#ifdef _RTGI
+out vec4 fragColor;
+#else
 out float fragColor;
+#endif
 
 vec3 hitCoord;
-vec2 coord;
+vec4 coord;
 float depth;
-// #ifdef _RTGI
-// vec3 col = vec3(0.0);
-// #endif
+#ifdef _RTGI
+vec3 col = vec3(1.0);
+#else
+float col = 0.0;
+#endif
 vec3 vpos;
 
 vec2 getProjectedCoord(vec3 hitCoord) {
 	vec4 projectedCoord = P * vec4(hitCoord, 1.0);
 	projectedCoord.xy /= projectedCoord.w;
 	projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-	#ifdef _InvY
+	#ifdef HLSL
 	projectedCoord.y = 1.0 - projectedCoord.y;
 	#endif
 	return projectedCoord.xy;
 }
 
 float getDeltaDepth(vec3 hitCoord) {
-	coord = getProjectedCoord(hitCoord);
-	depth = textureLod(gbufferD, coord, 0.0).r * 2.0 - 1.0;
+	vec2 coord = getProjectedCoord(hitCoord);
+	float depth = textureLod(gbufferD, coord, 0.0).r * 2.0 - 1.0;
 	vec3 p = getPosView(viewRay, depth, cameraProj);
 	return p.z - hitCoord.z;
 }
 
+#ifdef _RTGI
+vec4 binarySearch(vec3 dir) {
+	float ddepth;
+	for (int i = 0; i < numBinarySearchSteps; i++) {
+		dir *= 0.5;
+		hitCoord -= dir;
+		ddepth = getDeltaDepth(hitCoord);
+		if (ddepth < 0.0) hitCoord += dir;
+	}
+	if (abs(ddepth) > 1.0) return vec4(0.0);
+	return vec4(getProjectedCoord(hitCoord), 0.0, 1.0);
+}
+#endif
+
 void rayCast(vec3 dir) {
+	coord = vec4(0.0);
 	hitCoord = vpos;
-	dir *= ssgiRayStep * 2;
-	float dist = 0.15;
+	dir *= ssgiRayStep;
+	float dist = 1.0;
+	float lod = 0;
+	float delta = 0.0;
 	for (int i = 0; i < ssgiMaxSteps; i++) {
 		hitCoord += dir;
-		float delta = getDeltaDepth(hitCoord);
-		if (delta > 0.0 && delta < 0.2) {
+		delta = getDeltaDepth(hitCoord);
+		if (delta > 0.0 && delta < depth && delta < ssgiSearchDist) {
 			dist = distance(vpos, hitCoord);
+			float lod = log2(dist / ssgiSearchDist);
+			#ifdef _RTGI
+			coord = binarySearch(dir);
+			#endif
 			break;
 		}
 	}
-	fragColor += dist;
-	// #ifdef _RTGI
-	// col += textureLod(gbuffer1, coord, 0.0).rgb * ((ssgiRayStep * ssgiMaxSteps) - dist);
-	// #endif
+	#ifdef _RTGI
+	if (any(greaterThan(coord, vec4(0.0)))) //ray has hit
+	{
+		vec2 deltaCoords = abs(vec2(0.5, 0.5) - coord.xy);
+		float screenEdgeFactor = clamp(1.0 - (deltaCoords.x + deltaCoords.y), 0.0, 1.0);
+
+		float reflectivity = 1.0;// - roughness;
+
+		float intensity = pow(reflectivity, 5.0) * screenEdgeFactor * clamp(-vpos.z, 0.0, 1.0) * clamp((ssrSearchDist - length(vpos - hitCoord)) * (1.0 / ssgiSearchDist), 0.0, 1.0) * coord.w;
+
+		intensity = clamp(intensity, 0.0, 1.0);
+		col += textureLod(gbuffer1, coord.xy, 0.0).rgb * (ssgiSearchDist - dist) * intensity;
+		col += textureLod(gbuffer_emission, coord.xy, 0.0).rgb * (ssgiSearchDist - dist) * intensity;
+	}
+	else col += 1.0;
+	#else
+	col += dist;
+	#endif
 }
 
 vec3 tangent(const vec3 n) {
@@ -76,9 +122,13 @@ vec3 tangent(const vec3 n) {
 }
 
 void main() {
-	fragColor = 0;
+	#ifdef _RTGI
+	fragColor = vec4(0.0);
+	#else
+	fragColor = 0.0;
+	#endif
 	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
-	float d = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
+	depth = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
 
 	vec2 enc = g0.rg;
 	vec3 n;
@@ -86,7 +136,7 @@ void main() {
 	n.xy = n.z >= 0.0 ? enc.xy : octahedronWrap(enc.xy);
 	n = normalize(V3 * n);
 
-	vpos = getPosView(viewRay, d, cameraProj);
+	vpos = getPosView(viewRay, depth, cameraProj);
 
 	rayCast(n);
 	vec3 o1 = normalize(tangent(n));
@@ -103,5 +153,19 @@ void main() {
 	rayCast(mix(n, -o2, angleMix));
 	rayCast(mix(n, c1, angleMix));
 	rayCast(mix(n, c2, angleMix));
+	#endif
+
+	#ifdef _RTGI
+	#ifdef _SSGICone9
+	fragColor.rgb = col / 9 * ssgiStrength;
+	#else
+	fragColor.rgb = col / 5 * ssgiStrength;
+	#endif
+	#else
+	#ifdef _SSGICone9
+	fragColor.r = col / 9 / ssgiStrength;
+	#else
+	fragColor.r = col / 5 / ssgiStrength;
+	#endif
 	#endif
 }
