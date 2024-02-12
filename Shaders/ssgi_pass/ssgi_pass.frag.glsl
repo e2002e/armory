@@ -81,13 +81,14 @@ void rayCast(vec3 dir) {
 	for (int i = 0; i < ssgiMaxSteps; i++) {
 		hitCoord += dir;
 		float delta = getDeltaDepth(hitCoord);
-		if (delta > 0.0 && delta < depth && delta < ssgiSearchDist) {
+		if (delta > 0.0 && delta < 0.2) {
 			dist = distance(vpos, hitCoord);
 			#ifdef _RTGI
 			coord = binarySearch(dir);
 			#endif
 			break;
 		}
+		else coord = vec2(0.0);
 	}
 	#ifdef _RTGI
 	if (any(greaterThan(coord, vec2(0.0)))) //ray has hit
