@@ -647,7 +647,7 @@ class Inc {
 
 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 
-		path.clearImage(voxels, 0x00000000);
+		//path.clearImage(voxels, 0x00000000);
 		kha.compute.Compute.setShader(voxel_sh1);
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Write);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Read);
