@@ -21,10 +21,6 @@
 					"link": "_cameraLook"
 				},
 				{
-					"name": "clipmap_center",
-					"link": "_clipmap_center"
-				},
-				{
 					"name": "invVP",
 					"link": "_inverseViewProjectionMatrix"
 				},

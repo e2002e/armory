@@ -37,11 +37,9 @@ uniform sampler2D gbuffer_refraction;
 
 #ifdef _VoxelGI
 uniform sampler3D voxels;
-uniform vec3 clipmap_center;
 #endif
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
-uniform vec3 clipmap_center;
 #endif
 #ifdef _VoxelTemporal
 uniform sampler3D voxelsLast;
