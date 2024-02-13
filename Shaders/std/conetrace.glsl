@@ -62,14 +62,12 @@ vec4 sampleVoxel(sampler3D voxels, const vec3 pos, vec3 dir, const uvec3 indices
  	dir = abs(dir);
  	vec4 col = vec4(0.0);
  	vec3 tc = pos;
- 	tc.x += indices.x;
- 	col += dir.x * textureLod(voxels, tc, lod);
- 	tc = pos;
- 	tc.x += indices.y;
-	col += dir.y * textureLod(voxels, tc, lod);
-	tc = pos;
-	tc.x += indices.z;
-	col += dir.z * textureLod(voxels, tc, lod);
+	if (dir.x > 0.0)
+		col += dir.x * textureLod(voxels, vec3(tc.x + indices.x, tc.y, tc.z), lod);
+ 	if (dir.y > 0.0)
+		col += dir.y * textureLod(voxels, vec3(tc.x + indices.y, tc.y, tc.z), lod);
+ 	if (dir.z > 0.0)
+		col += dir.z * textureLod(voxels, vec3(tc.x + indices.z, tc.y, tc.z), lod);
 	return col;
 }
 #else
