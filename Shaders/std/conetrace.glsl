@@ -110,16 +110,14 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 
 		mipSample = sampleVoxel(voxels, samplePos, dir, indices, lod);
 
-		/*
-		if(clipmap_blend > 0.0) {
+		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
 			vec3 samplePosNext = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 0.5 / voxelgiResolution.x;
 			samplePosNext.y = (samplePosNext.y + clipmap_index + 1.0) / voxelgiClipmapCount;
-			vec4 mixSampleNext = textureLod(voxels, samplePosNext, 0.0);
+			vec4 mixSampleNext = textureLod(voxels, samplePosNext, lod);
 			mipSample = mix(mipSample, mixSampleNext, clipmap_blend);
 		}
-		*/
 
-		//mipSample *= step_dist / voxelSize;
+		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
@@ -226,17 +224,16 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 		samplePos.x /= 6;
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
-		mipSample = sampleVoxel(voxels, samplePos, dir, indices, lod);
+		mipSample = sampleVoxel(voxels, samplePos, dir, indices, 0.0);
 
-		/*
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
 			vec3 samplePosNext = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 0.5 / voxelgiResolution.x;
 			samplePosNext.y = (samplePosNext.y + clipmap_index + 1.0) / voxelgiClipmapCount;
-			float mixSampleNext = textureLod(voxels, samplePosNext, 0.0).r;
+			float mixSampleNext = textureLod(voxels, samplePosNext, lod).r;
 			mipSample = mix(mipSample, mixSampleNext, clipmap_blend);
 		}
-		*/
-		//mipSample *= step_dist / voxelSize;
+
+		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol) * mipSample;
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
@@ -333,18 +330,16 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		#endif
 		sampleCol += (1.0 - sampleCol) * mipSample;
 
-		/*
-		if(clipmap_blend > 0.0) {
+		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
 			vec3 samplePosNext = ((start_pos + dir * dist) - clipmap_center) / voxelSize * 0.5 / voxelgiResolution.x;
-			samplePosNext.y = (samplePos.y + clipmap_index + 1.0) / voxelgiClipmapCount;
+			samplePosNext.y = (samplePosNext.y + clipmap_index + 1.0) / voxelgiClipmapCount;
 			#ifdef _VoxelAOvar
-			float mixSampleNext = textureLod(voxels, samplePosNext, 0.0).r;
+			float mixSampleNext = textureLod(voxels, samplePosNext, lod).r;
 			#else
-			float mixSampleNext = textureLod(voxels, samplePosNext, 0.0).a;
+			float mixSampleNext = textureLod(voxels, samplePosNext, lod).a;
 			#endif
 			mipSample = mix(mipSample, mixSampleNext, clipmap_blend);
 		}
-		*/
 
 		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol) * mipSample;

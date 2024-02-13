@@ -306,7 +306,6 @@ class RenderPathForward {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-
 			#if (rp_voxels == "Voxel GI")
 			var voxtex = "voxelsOpac";
 			#else
@@ -315,8 +314,6 @@ class RenderPathForward {
 
 			path.clearImage(voxtex, 0x00000000);
 
-			var camera = iron.Scene.active.camera;
-
 			Inc.voxelsStabilizeBegin();
 			#if (rp_voxels == "Voxel GI")
 			Inc.voxelsLightBegin();
@@ -324,7 +321,7 @@ class RenderPathForward {
 
 			for (i in 0...Main.voxelgiClipmapCount)
 			{
-
+				armory.renderpath.RenderPathCreator.clipmapLevel = i;
 				path.setTarget("");
 				var res = Inc.getVoxelRes();
 				path.setViewport(res, res);
@@ -337,7 +334,6 @@ class RenderPathForward {
 				#end
 
 				//Inc.computeVoxelsEnd();
-				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 			}
 			path.generateMipmaps("voxels");
 		}

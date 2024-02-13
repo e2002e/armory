@@ -39,12 +39,10 @@ void main() {
 
 	for (int i = 0; i < 6; i++) {
 		ivec3 dst = src;
-
-		const float voxelSize = 2.0 * voxelgiVoxelSize;
 		vec3 wposition = vec3(dst);
-
 		dst.y += clipmapLevel * voxelgiResolution.x;
 		dst.x += i * voxelgiResolution.x;
+
 		vec4 col = imageLoad(voxelsOpac, dst);
 		if (col.a == 0.0) return;
 
@@ -54,10 +52,10 @@ void main() {
 		//wposition -= wnormal * 0.01; // Offset
 
 		float visibility;
-		vec3 lp = lightPos - wposition;
+		vec3 ld = lightPos - wposition;
 		vec3 l;
 		if (lightType == 0) { l = lightDir; visibility = 1.0; }
-		else { l = normalize(lp); visibility = attenuate(distance(wposition, lightPos)); }
+		else { l = normalize(ld); visibility = attenuate(distance(wposition, lightPos)); }
 
 		//float dotNL = max(dot(wnormal, l), 0.0);
 		//if (dotNL == 0.0) return;
@@ -74,7 +72,7 @@ void main() {
 			visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
 		}
 		else if (lightShadow == 3) {
-			visibility *= texture(shadowMapPoint, vec4(-l, lpToDepth(lp, lightProj) - shadowsBias)).r;
+			visibility *= texture(shadowMapPoint, vec4(-l, lpToDepth(ld, lightProj) - shadowsBias)).r;
 		}
 #endif
 

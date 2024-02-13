@@ -64,7 +64,8 @@ def update_preset(self, context):
         rpdat.rp_hdr = True
         rpdat.rp_background = 'World'
         rpdat.rp_stereo = False
-        rpdat.rp_voxels = 'Off'
+        rpdat.rp_voxelgi_resolution = '32'
+        rpdat.rp_voxels = 'Voxel AO'
         rpdat.rp_render_to_texture = True
         rpdat.rp_supersampling = '1'
         rpdat.rp_antialiasing = 'SMAA'
@@ -139,7 +140,7 @@ def update_preset(self, context):
         rpdat.rp_background = 'World'
         rpdat.rp_stereo = False
         rpdat.rp_voxels = 'Voxel GI'
-        rpdat.rp_voxelgi_resolution = '128'
+        rpdat.rp_voxelgi_resolution = '64'
         rpdat.arm_voxelgi_revoxelize = False
         rpdat.arm_voxelgi_camera = False
         rpdat.rp_voxelgi_emission = False
@@ -487,7 +488,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
                ('64', '64', '64'),
                ('128', '128', '128'),
                ('256', '256', '256'),
-               ('512', '512', '512')],
+               ],
         name="Resolution", description="3D texture resolution", default='128', update=update_renderpath)
     rp_voxelgi_resolution_z: EnumProperty(
         items=[('1.0', '1.0', '1.0'),
@@ -500,7 +501,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
         	   ('1', '1', '1'),
                ('2', '2', '2')],
         name="Bounces", description="Trace multiple light bounces", default='1', update=update_renderpath)
-    arm_voxelgi_clipmap_count: IntProperty(name="Clipmap count", description="Number of clipmaps", default=4, update=assets.invalidate_compiled_data)
+    arm_voxelgi_clipmap_count: IntProperty(name="Clipmap count", description="Number of clipmaps", default=3, update=assets.invalidate_compiled_data)
     arm_voxelgi_temporal: BoolProperty(name="Temporal Filter", description="Use temporal filtering to stabilize voxels", default=False, update=assets.invalidate_shader_cache)
     arm_voxelgi_shadows: BoolProperty(name="Shadows", description="Use voxels to render shadows", default=False, update=update_renderpath)
     arm_samples_per_pixel: EnumProperty(
@@ -522,7 +523,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
     arm_voxelgi_spec: FloatProperty(name="Reflection", description="", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_refr: FloatProperty(name="Refraction", description="", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_occ: FloatProperty(name="Intensity", description="", default=1.0, update=assets.invalidate_shader_cache)
-    arm_voxelgi_size: FloatProperty(name="Size", description="Voxel size", default=1.0, update=assets.invalidate_shader_cache)
+    arm_voxelgi_size: FloatProperty(name="Size", description="Voxel size", default=0.25, update=assets.invalidate_shader_cache)
     arm_voxelgi_step: FloatProperty(name="Step", description="Step size", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_range: FloatProperty(name="Range", description="Maximum range", default=2.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_offset: FloatProperty(name="Offset", description="Offset for dealing with self occlusion", default=1.0, update=assets.invalidate_shader_cache)

@@ -44,7 +44,6 @@ void main() {
 
 	int res = voxelgiResolution.x;
 	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
-	ivec3 dst = src;
 	#ifdef _VoxelGI
 	vec4 col;
 	const float voxelSize = 2.0 * voxelgiVoxelSize;
@@ -54,7 +53,7 @@ void main() {
 
 	for (int i = 0; i < 6; i++)
 	{
-		dst = src;
+		ivec3 dst = src;
 		dst.x += i * res;
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI

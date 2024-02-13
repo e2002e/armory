@@ -728,7 +728,7 @@ class Inc {
 	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 1); // lightShadow
 	 		}
-	 		else if (l.data.raw.type == "spot") {
+	 		else if (l.data.raw.type == "spot" || l.data.raw.type == "area") {
 	 			#if arm_shadowmap_atlas
 	 			kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapAtlasSpot").image);
 	 			#else

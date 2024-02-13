@@ -525,38 +525,40 @@ class RenderPathDeferred {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
+			var voxelize = path.voxelize();
 
-			#if (rp_voxels == "Voxel GI")
-			var voxtex = "voxelsOpac";
-			#else
-			var voxtex = "voxels";
-			#end
-
-			path.clearImage(voxtex, 0x00000000);
-
-			Inc.voxelsStabilizeBegin();
-			#if (rp_voxels == "Voxel GI")
-			Inc.voxelsLightBegin();
-			#end
-
-			for (i in 0...Main.voxelgiClipmapCount)
-			{
-
-				path.setTarget("");
-				var res = Inc.getVoxelRes();
-				path.setViewport(res, res);
-				path.bindTarget(voxtex, "voxels");
-				path.drawMeshes("voxel");
-
-				Inc.voxelsStabilize(voxtex);
+			if (voxelize) {
 				#if (rp_voxels == "Voxel GI")
-				Inc.voxelsLight();
+				var voxtex = "voxelsOpac";
+				#else
+				var voxtex = "voxels";
 				#end
 
-				//Inc.computeVoxelsEnd();
-				armory.renderpath.RenderPathCreator.clipmapLevel = (armory.renderpath.RenderPathCreator.clipmapLevel + 1) % Main.voxelgiClipmapCount;
+				path.clearImage(voxtex, 0x00000000);
+
+				Inc.voxelsStabilizeBegin();
+				#if (rp_voxels == "Voxel GI")
+				Inc.voxelsLightBegin();
+				#end
+
+				for (i in 0...Main.voxelgiClipmapCount)
+				{
+					armory.renderpath.RenderPathCreator.clipmapLevel = i;
+					path.setTarget("");
+					var res = Inc.getVoxelRes();
+					path.setViewport(res, res);
+					path.bindTarget(voxtex, "voxels");
+					path.drawMeshes("voxel");
+
+					Inc.voxelsStabilize(voxtex);
+					#if (rp_voxels == "Voxel GI")
+					Inc.voxelsLight();
+					#end
+
+					//Inc.computeVoxelsEnd();
+				}
+				path.generateMipmaps("voxels");
 			}
-			path.generateMipmaps("voxels");
 		}
 		#end
 
