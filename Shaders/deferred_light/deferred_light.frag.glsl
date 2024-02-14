@@ -41,9 +41,6 @@ uniform sampler3D voxels;
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
 #endif
-#ifdef _VoxelTemporal
-uniform sampler3D voxelsLast;
-#endif
 
 uniform float envmapStrength;
 #ifdef _Irr
@@ -395,21 +392,13 @@ void main() {
 
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
-	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center)) * voxelBlend + (1.0 - traceShadow(p, n, voxelsLast, sunDir, clipmap_center) * 1.0 - voxelBlend);
-	#else
 	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center);
-	#endif
 	#endif
 	#endif
 
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
-	#ifdef _VoxelTemporal
-	svisibility *= (1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center)) * voxelBlend + (1.0 - traceShadow(p, n, voxelsLast, sunDir, clipmap_center) * 1.0 - voxelBlend);
-	#else
 	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center);
-	#endif
 	#endif
 	#endif
 	
@@ -477,18 +466,12 @@ void main() {
 		#ifdef _VoxelAOvar
 		#ifdef _VoxelShadow
 		, voxels 
-		#ifdef _VoxelTemporal
-		, voxelsLast
-		#endif
 		, clipmap_center
 		#endif
 		#endif
 		#ifdef _VoxelGI
 		#ifdef _VoxelShadow
 		, voxels
-		#ifdef _VoxelTemporal
-		, voxelsLast
-		#endif
 		, clipmap_center
 		#endif
 		#endif
@@ -550,9 +533,6 @@ void main() {
 			#ifdef _VoxelAOvar
 			#ifdef _VoxelShadow
 			, voxels
-			#ifdef _VoxelTemporal
-			, voxelsLast
-			#endif
 			, clipmap_center
 			#endif
 			#endif

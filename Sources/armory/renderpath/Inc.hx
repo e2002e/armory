@@ -720,36 +720,20 @@ class Inc {
 			#end
 
 	 		#if (rp_shadowmap)
-	 		#if arm_shadowmap_atlas_single_map
-			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMapAtlas").image);
-			#else
 	 		if (l.data.raw.type == "sun") {
-	 			#if arm_shadowmap_atlas
-	 			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMapAtlasSun").image);
-	 			#else
 	 			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMap").image);
-	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 1); // lightShadow
 	 		}
 	 		else if (l.data.raw.type == "spot" || l.data.raw.type == "area") {
-	 			#if arm_shadowmap_atlas
-	 			kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapAtlasSpot").image);
-	 			#else
 	 			kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapSpot[" + spotIndex + "]").image);
 	 			spotIndex++;
-	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 2);
 	 		}
 	 		else {
-				#if arm_shadowmap_atlas
-	 			kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasPoint").cubeMap);
-	 			#else
-	 			kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapPoint[" + pointIndex + "]").cubeMap);
+				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapPoint[" + pointIndex + "]").cubeMap);
 				pointIndex++;
-	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 3);
 	 		}
-	 		#end
 
 	 		// lightProj
 	 		var near = l.data.raw.near_plane;
