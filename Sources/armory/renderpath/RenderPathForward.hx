@@ -9,6 +9,10 @@ class RenderPathForward {
 
 	static var path: RenderPath;
 
+	#if (rp_voxels != "Off")
+	static var voxelsOut = "voxelsOut";
+	#end
+
 	#if rp_bloom
 	static var bloomDownsampler: Downsampler;
 	static var bloomUpsampler: Upsampler;
@@ -154,6 +158,7 @@ class RenderPathForward {
 		{
 			Inc.initGI();
 			Inc.initGI("voxelsOut");
+			Inc.initGI("voxelsOutB");
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsOpac");
 			#end

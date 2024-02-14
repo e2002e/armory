@@ -26,11 +26,12 @@ THE SOFTWARE.
 #include "std/gbuffer.glsl"
 #include "std/imageatomic.glsl"
 
-uniform writeonly image3D voxels;
 #ifdef _VoxelGI
-uniform layout(rgba8) image3D voxelsOut;
-uniform layout(rgba8) image3D voxelsOutB;
+uniform layout(r32ui) uimage3D voxels;
+uniform layout(r32ui) uimage3D voxelsOut;
+uniform layout(r32ui) uimage3D voxelsOutB;
 #else
+uniform layout(r8) image3D voxels;
 uniform layout(r8) image3D voxelsOut;
 uniform layout(r8) image3D voxelsOutB;
 #endif
@@ -76,20 +77,20 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = mix(imageLoad(voxelsOutB, dst), imageLoad(voxelsOut, dst), voxelBlend);
+				col = mix(convRGBA8ToVec4(imageLoad(voxelsOutB, dst).r), convRGBA8ToVec4(imageLoad(voxelsOut, dst).r), voxelBlend);
 				#else
 				opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
 				#endif
 		}
 		else
 			#ifdef _VoxelGI
-			col = mix(imageLoad(voxelsOutB, dst), imageLoad(voxelsOut, dst), voxelBlend);
+			col = mix(convRGBA8ToVec4(imageLoad(voxelsOutB, dst).r), convRGBA8ToVec4(imageLoad(voxelsOut, dst).r), voxelBlend);
 			#else
 			opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
 			#endif
 
 		#ifdef _VoxelGI
-		imageStore(voxels, dst, col);
+		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
 		#else
 		imageStore(voxels, dst, vec4(opac));
 		#endif

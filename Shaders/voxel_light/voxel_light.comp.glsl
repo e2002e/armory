@@ -21,9 +21,9 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-uniform layout(rgba8) image3D voxelsOpac;
+uniform layout(r32ui) uimage3D voxelsOpac;
 uniform layout(rgba8) image3D voxelsNor;
-uniform layout(rgba8) image3D voxels;
+uniform layout(r32ui) uimage3D voxels;
 #ifdef _EmissionShaded
 uniform sampler2D gbuffer_emission;
 #endif
@@ -43,7 +43,8 @@ void main() {
 		dst.y += clipmapLevel * voxelgiResolution.x;
 		dst.x += i * voxelgiResolution.x;
 
-		vec4 col = imageLoad(voxelsOpac, dst);
+		uint ucol = imageLoad(voxelsOpac, dst).r;
+		vec4 col = convRGBA8ToVec4(ucol);
 		if (col.a == 0.0) return;
 
 		//uint unor = imageLoad(voxelsNor, adjustedID).r;
@@ -90,6 +91,6 @@ void main() {
 		col += texture(gbuffer_emission, wposition.xy);
 		#endif
 
-		imageStore(voxels, dst, col);
+		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
 	}
 }

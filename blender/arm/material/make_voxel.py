@@ -53,8 +53,8 @@ def make_gi(context_id):
     frag.add_include('std/brdf.glsl')
 
     rpdat = arm.utils.get_rp()
-    frag.add_uniform('writeonly layout(rgba8) image3D voxels')
-    frag.add_uniform('writeonly layout(rgba8) image3D voxelsNor')
+    frag.add_uniform('layout(r32ui) uimage3D voxels')
+    frag.add_uniform('layout(r32ui) uimage3D voxelsNor')
 
     frag.write('vec3 wposition;')#dummy
     frag.write('vec3 basecol;')
@@ -184,19 +184,19 @@ def make_gi(context_id):
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
     frag.write('    uvw.x += face_offsets.x;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
     frag.write('    uvw.x += face_offsets.y;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
     frag.write('    uvw.x += face_offsets.z;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     return con_voxel

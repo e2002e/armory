@@ -26,11 +26,12 @@ THE SOFTWARE.
 #include "std/gbuffer.glsl"
 #include "std/imageatomic.glsl"
 
-uniform writeonly image3D voxelsOut;
 #ifdef _VoxelGI
-uniform layout(rgba8) image3D voxels;
+uniform layout(r32ui) uimage3D voxels;
+uniform layout(r32ui) uimage3D voxelsOut;
 #else
 uniform layout(r8) image3D voxels;
+uniform layout(r8) image3D voxelsOut;
 #endif
 
 uniform vec3 clipmap_center_last;
@@ -72,7 +73,7 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = imageLoad(voxels, coords);
+				col = convRGBA8ToVec4(imageLoad(voxels, dst).r);
 				#else
 				opac = imageLoad(voxels, coords).r;
 				#endif
@@ -85,13 +86,13 @@ void main() {
 		}
 		else
 			#ifdef _VoxelGI
-			col = imageLoad(voxels, dst);
+			col = convRGBA8ToVec4(imageLoad(voxels, dst).r);
 			#else
 			opac = imageLoad(voxels, dst).r;
 			#endif
 
 		#ifdef _VoxelGI
-		imageStore(voxelsOut, dst, col);
+		imageAtomicAdd(voxelsOut, dst, convVec4ToRGBA8(col));
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
