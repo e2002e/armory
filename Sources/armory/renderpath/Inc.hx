@@ -721,16 +721,28 @@ class Inc {
 
 	 		#if (rp_shadowmap)
 	 		if (l.data.raw.type == "sun") {
+				#if arm_shadowmap_atlas
+				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasSun").cubeMap);
+				#else
 	 			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMap").image);
+	 			#end
 	 			kha.compute.Compute.setInt(voxel_ce, 1); // lightShadow
 	 		}
 	 		else if (l.data.raw.type == "spot" || l.data.raw.type == "area") {
+				#if arm_shadowmap_atlas
+				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasSpot").cubeMap);
+				#else
 	 			kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapSpot[" + spotIndex + "]").image);
+	 			#end
 	 			spotIndex++;
 	 			kha.compute.Compute.setInt(voxel_ce, 2);
 	 		}
 	 		else {
+				#if arm_shadowmap_atlas
+				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasPoint").cubeMap);
+				#else
 				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapPoint[" + pointIndex + "]").cubeMap);
+				#end
 				pointIndex++;
 	 			kha.compute.Compute.setInt(voxel_ce, 3);
 	 		}
