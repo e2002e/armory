@@ -29,9 +29,10 @@ THE SOFTWARE.
 uniform writeonly image3D voxels;
 #ifdef _VoxelGI
 uniform layout(rgba8) image3D voxelsOut;
-uniform sampler2D buffer1;
+uniform layout(rgba8) image3D voxelsOutB;
 #else
 uniform layout(r8) image3D voxelsOut;
+uniform layout(r8) image3D voxelsOutB;
 #endif
 
 uniform vec3 clipmap_center_last;
@@ -58,8 +59,6 @@ void main() {
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		col = vec4(0.0);
-		vec3 wposition = vec3(dst);
-		vec3 basecol = textureLod(buffer1, wposition.xy, 0.0).rgb;
 		#else
 		opac = 0.0;
 		#endif
@@ -77,16 +76,16 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = mix(imageLoad(voxelsOut, dst), vec4(basecol, 1.0), voxelBlend);
+				col = mix(imageLoad(voxelsOutB, dst), imageLoad(voxelsOut, dst), voxelBlend);
 				#else
-				opac = mix(imageLoad(voxelsOut, dst).r, 1.0, voxelBlend);
+				opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
 				#endif
 		}
 		else
 			#ifdef _VoxelGI
-			col = mix(imageLoad(voxelsOut, dst), vec4(basecol, 1.0), voxelBlend);
+			col = mix(imageLoad(voxelsOutB, dst), imageLoad(voxelsOut, dst), voxelBlend);
 			#else
-			opac = mix(imageLoad(voxelsOut, dst).r, 1.0, voxelBlend);
+			opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
 			#endif
 
 		#ifdef _VoxelGI

@@ -624,19 +624,19 @@ class Inc {
 			voxel_sh1 = path.getComputeShader("voxel_temporal");
 			voxel_ta0 = voxel_sh0.getTextureUnit("voxels");
 			voxel_tb0 = voxel_sh0.getTextureUnit("voxelsOut");
-			voxel_tc0 = voxel_sh0.getTextureUnit("buffer1");
+			voxel_tc0 = voxel_sh0.getTextureUnit("voxelsOutB");
 
 	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_center_last");
 	 		voxel_cb0 = voxel_sh0.getConstantLocation("clipmapLevel");
 		}
 	}
 
-	public static function voxelsStabilize(voxels = "voxels") {
+	public static function voxelsStabilize(voxels = "voxels", voxelsOut = "voxelsOut") {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 		kha.compute.Compute.setShader(voxel_sh0);
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Write);
+		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
 			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
@@ -651,11 +651,14 @@ class Inc {
 		kha.compute.Compute.setShader(voxel_sh1);
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Write);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tc0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
+		/*
 		#if (arm_deferred)
 		kha.compute.Compute.setSampledTexture(voxel_tc0, rts.get("gbuffer1").image);
 		#else
 		kha.compute.Compute.setSampledTexture(voxel_tc0, rts.get("lbuffer1").image);
 		#end
+		*/
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
 			armory.renderpath.RenderPathCreator.clipmap_center_last.x,

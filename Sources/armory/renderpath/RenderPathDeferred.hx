@@ -9,6 +9,10 @@ class RenderPathDeferred {
 
 	static var path: RenderPath;
 
+	#if (rp_voxels != "Off")
+	static var voxelsOut = "voxelsOut";
+	#end
+
 	#if rp_bloom
 	static var bloomDownsampler: Downsampler;
 	static var bloomUpsampler: Upsampler;
@@ -55,6 +59,7 @@ class RenderPathDeferred {
 		{
 			Inc.initGI();
 			Inc.initGI("voxelsOut");
+			Inc.initGI("voxelsOutB");
 
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
@@ -528,6 +533,7 @@ class RenderPathDeferred {
 			var voxelize = path.voxelize();
 
 			if (voxelize) {
+				voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 				#if (rp_voxels == "Voxel GI")
 				var voxtex = "voxelsOpac";
 				#else
@@ -550,7 +556,7 @@ class RenderPathDeferred {
 					path.bindTarget(voxtex, "voxels");
 					path.drawMeshes("voxel");
 
-					Inc.voxelsStabilize(voxtex);
+					Inc.voxelsStabilize(voxtex, voxelsOut);
 					#if (rp_voxels == "Voxel GI")
 					Inc.voxelsLight();
 					#end
