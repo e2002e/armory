@@ -169,20 +169,6 @@ class Uniforms {
 			#if (rp_voxels != "Off")
 			case "_clipmap_center": {
 				v = iron.object.Uniforms.helpVec;
-				var camera = iron.Scene.active.camera;
-				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
-
-				var center = new iron.math.Vec3(
-					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldy() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldz() / texelSize) * texelSize
-				);
-
-				armory.renderpath.RenderPathCreator.clipmap_center_last.x = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.x - center.x) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.y = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.y - center.y) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.z = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.z - center.z) / texelSize);
-
-				armory.renderpath.RenderPathCreator.clipmap_center = center;
 				v.x = armory.renderpath.RenderPathCreator.clipmap_center.x;
 				v.y = armory.renderpath.RenderPathCreator.clipmap_center.y;
 				v.z = armory.renderpath.RenderPathCreator.clipmap_center.z;

@@ -119,13 +119,10 @@ def make_gi(context_id):
         vert.add_out('vec2 texCoordGeom')
         vert.write('texCoordGeom = tex;')
 
-    vert.add_uniform('vec3 eye', '_cameraPosition')
-    vert.add_uniform('int clipmapLevel', '_clipmapLevel')
+    vert.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);')
-    vert.write('float texelSize = 2.0 * voxelSize;')
-    vert.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
     vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
@@ -172,8 +169,9 @@ def make_gi(context_id):
     frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
-    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5) * voxelgiResolution.x;')
-    frag.write('uvw.y += clipmapLevel * voxelgiResolution.x;')
+    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('uvw.y += clipmapLevel;')
+    frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x > 0 ? 0 : 1,')
     frag.write('	voxnormal.y > 0 ? 2 : 3,')
@@ -229,13 +227,10 @@ def make_ao(context_id):
     vert.add_out('vec3 voxpositionGeom')
     vert.add_out('vec3 voxnormalGeom')
 
-    vert.add_uniform('vec3 eye', '_cameraPosition')
-    vert.add_uniform('int clipmapLevel', '_clipmapLevel')
+    vert.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('float voxelSize = voxelgiVoxelSize * pow(2.0, clipmapLevel);')
-    vert.write('float texelSize = 2.0 * voxelSize;')
-    vert.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
     vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
@@ -264,8 +259,9 @@ def make_ao(context_id):
     frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
-    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5) * voxelgiResolution.x;')
-    frag.write('uvw.y += clipmapLevel * voxelgiResolution.x;')
+    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('uvw.y += clipmapLevel;')
+    frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x > 0 ? 0 : 1,')
     frag.write('	voxnormal.y > 0 ? 2 : 3,')

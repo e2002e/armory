@@ -499,7 +499,10 @@ class Inc {
 		}
 		#else
 		{
-			t.format = "RGBA64";
+			if (t.name == "voxels")
+				t.format = "RGBA64";
+			else
+				t.format = "R32";
 		}
 		#end
 
