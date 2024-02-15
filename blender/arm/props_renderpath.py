@@ -489,7 +489,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
                ('128', '128', '128'),
                ('256', '256', '256'),
                ],
-        name="Resolution", description="3D texture resolution", default='128', update=update_renderpath)
+        name="Resolution", description="3D texture resolution", default='64', update=update_renderpath)
     rp_voxelgi_resolution_z: EnumProperty(
         items=[('1.0', '1.0', '1.0'),
                ('0.5', '0.5', '0.5'),
@@ -518,16 +518,16 @@ class ArmRPListItem(bpy.types.PropertyGroup):
                ('3', '3', '3'),
                ('1', '1', '1'),
                ],
-        name="Cones", description="Number of cones to trace", default='9', update=assets.invalidate_shader_cache)
+        name="Cones", description="Number of cones to trace", default='5', update=assets.invalidate_shader_cache)
     arm_voxelgi_diff: FloatProperty(name="Diffuse", description="", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_spec: FloatProperty(name="Reflection", description="", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_refr: FloatProperty(name="Refraction", description="", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_occ: FloatProperty(name="Intensity", description="", default=1.0, update=assets.invalidate_shader_cache)
-    arm_voxelgi_size: FloatProperty(name="Size", description="Voxel size", default=0.25, update=assets.invalidate_shader_cache)
+    arm_voxelgi_size: FloatProperty(name="Size", description="Voxel size", default=0.125, update=assets.invalidate_shader_cache)
     arm_voxelgi_step: FloatProperty(name="Step", description="Step size", default=1.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_range: FloatProperty(name="Range", description="Maximum range", default=2.0, update=assets.invalidate_shader_cache)
     arm_voxelgi_offset: FloatProperty(name="Offset", description="Offset for dealing with self occlusion", default=1.0, update=assets.invalidate_shader_cache)
-    arm_voxelgi_aperture: FloatProperty(name="Aperture", description="Cone aperture for shadow trace", default=1.0, update=assets.invalidate_shader_cache)
+    arm_voxelgi_aperture: FloatProperty(name="Aperture", description="Cone aperture for shadow trace", default=0.5, update=assets.invalidate_shader_cache)
     arm_sss_width: FloatProperty(name="Width", description="SSS blur strength", default=1.0, update=assets.invalidate_shader_cache)
     arm_water_color: FloatVectorProperty(name="Color", size=3, default=[1, 1, 1], subtype='COLOR', min=0, max=1, update=assets.invalidate_shader_cache)
     arm_water_level: FloatProperty(name="Level", default=0.0, update=assets.invalidate_shader_cache)
