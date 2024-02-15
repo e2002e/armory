@@ -181,20 +181,17 @@ def make_gi(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
-    frag.write('    uvw.x += face_offsets.x;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
-    frag.write('    uvw.x += face_offsets.y;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
-    frag.write('    uvw.x += face_offsets.z;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     return con_voxel
@@ -271,20 +268,17 @@ def make_ao(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.x;')
-    frag.write('    uvw.x += face_offsets.x;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(opac_direction));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(opac_direction));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.y;')
-    frag.write('    uvw.x += face_offsets.y;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(opac_direction));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(opac_direction));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.z;')
-    frag.write('    uvw.x += face_offsets.z;')
-    frag.write('    imageStore(voxels, ivec3(uvw), vec4(opac_direction));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(opac_direction));')
     frag.write('}')
 
     return con_voxel

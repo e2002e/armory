@@ -145,7 +145,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float aper
 
 vec4 traceDiffuse(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3 clipmap_center) {
 	const float angleMix = 0.5f;
-	const float aperture = 0.55785173935;
+	const float aperture = voxelgiAperture;
 	vec3 o1 = normalize(tangent(normal));
 	vec3 o2 = normalize(cross(o1, normal));
 	vec3 c1 = 0.5f * (o1 + o2);
@@ -255,7 +255,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 
 float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3 clipmap_center) {
 	const float angleMix = 0.5f;
-	const float aperture = 0.55785173935;
+	const float aperture = voxelgiAperture;
 	vec3 o1 = normalize(tangent(normal));
 	vec3 o2 = normalize(cross(o1, normal));
 	vec3 c1 = 0.5f * (o1 + o2);
