@@ -546,23 +546,29 @@ class RenderPathDeferred {
 			Inc.voxelsLightBegin();
 			#end
 
+			var camera = iron.Scene.active.camera;
+			armory.renderpath.Clipmap.eyePosition = new iron.math.Vec3(
+				camera.transform.worldx(),
+				camera.transform.worldy(),
+				camera.transform.worldz()
+			);
+
 			for (i in 0...Main.voxelgiClipmapCount)
 			{
-				armory.renderpath.RenderPathCreator.clipmapLevel = i;
-				var camera = iron.Scene.active.camera;
+				armory.renderpath.Clipmap.clipmapLevel = i;
 				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, i);
 
 				var center = new iron.math.Vec3(
-					Math.floor(camera.transform.worldx() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldy() / texelSize) * texelSize,
-					Math.floor(camera.transform.worldz() / texelSize) * texelSize
+					Math.floor(armory.renderpath.Clipmap.eyePosition.x / texelSize) * texelSize,
+					Math.floor(armory.renderpath.Clipmap.eyePosition.y / texelSize) * texelSize,
+					Math.floor(armory.renderpath.Clipmap.eyePosition.z / texelSize) * texelSize
 				);
 
-				armory.renderpath.RenderPathCreator.clipmap_center_last.x = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.x - center.x) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.y = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.y - center.y) / texelSize);
-				armory.renderpath.RenderPathCreator.clipmap_center_last.z = Std.int((armory.renderpath.RenderPathCreator.clipmap_center.z - center.z) / texelSize);
+				armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
+				armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
+				armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
 
-				armory.renderpath.RenderPathCreator.clipmap_center = center;
+				armory.renderpath.Clipmap.clipmap_center = center;
 
 				path.setTarget("");
 				var res = Inc.getVoxelRes();

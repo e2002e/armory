@@ -57,14 +57,6 @@ class RenderPathCreator {
 		return path;
 	}
 
-	#if (rp_voxels != "Off")
-	public static var voxelFrame = 0;
-	public static var voxelFreq = 6; // Revoxelizing frequency
-	public static var clipmapLevel = 0;
-	public static var clipmap_center: iron.math.Vec3 = new iron.math.Vec3();
-	public static var clipmap_center_last: iron.math.Vec3 = new iron.math.Vec3();
-	#end
-
 	// Last target before drawing to framebuffer
 	public static var finalTarget: RenderTarget = null;
 }

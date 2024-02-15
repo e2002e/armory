@@ -639,33 +639,25 @@ class Inc {
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.z
+			armory.renderpath.Clipmap.clipmap_center_last.x,
+			armory.renderpath.Clipmap.clipmap_center_last.y,
+			armory.renderpath.Clipmap.clipmap_center_last.z
 		);
-		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
+		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.Clipmap.clipmapLevel);
 
 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 
-		//path.clearImage(voxels, 0x00000000);
 		kha.compute.Compute.setShader(voxel_sh1);
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Write);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tc0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
-		/*
-		#if (arm_deferred)
-		kha.compute.Compute.setSampledTexture(voxel_tc0, rts.get("gbuffer1").image);
-		#else
-		kha.compute.Compute.setSampledTexture(voxel_tc0, rts.get("lbuffer1").image);
-		#end
-		*/
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
-			armory.renderpath.RenderPathCreator.clipmap_center_last.z
+			armory.renderpath.Clipmap.clipmap_center_last.x,
+			armory.renderpath.Clipmap.clipmap_center_last.y,
+			armory.renderpath.Clipmap.clipmap_center_last.z
 		);
-		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
+		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.Clipmap.clipmapLevel);
 
 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 	}
@@ -782,7 +774,7 @@ class Inc {
 	 			kha.compute.Compute.setFloat2(voxel_ci, vx, vy);
 	 		}
 
-	 		kha.compute.Compute.setInt(voxel_cj, armory.renderpath.RenderPathCreator.clipmapLevel);
+	 		kha.compute.Compute.setInt(voxel_cj, armory.renderpath.Clipmap.clipmapLevel);
 
 	 		kha.compute.Compute.compute(Std.int(res / 8 * 6), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 	 	}

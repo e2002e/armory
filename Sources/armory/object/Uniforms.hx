@@ -169,9 +169,15 @@ class Uniforms {
 			#if (rp_voxels != "Off")
 			case "_clipmap_center": {
 				v = iron.object.Uniforms.helpVec;
-				v.x = armory.renderpath.RenderPathCreator.clipmap_center.x;
-				v.y = armory.renderpath.RenderPathCreator.clipmap_center.y;
-				v.z = armory.renderpath.RenderPathCreator.clipmap_center.z;
+				v.x = armory.renderpath.Clipmap.clipmap_center.x;
+				v.y = armory.renderpath.Clipmap.clipmap_center.y;
+				v.z = armory.renderpath.Clipmap.clipmap_center.z;
+			}
+			case "_eyePosition": {
+				v = iron.object.Uniforms.helpVec;
+				v.x = armory.renderpath.Clipmap.eyePosition.x;
+				v.y = armory.renderpath.Clipmap.eyePosition.y;
+				v.z = armory.renderpath.Clipmap.eyePosition.z;
 			}
 			#end
 		}
@@ -214,11 +220,11 @@ class Uniforms {
 			#end
 			#if (rp_voxels != 'Off')
 			case "_voxelBlend": { // Blend current and last voxels
-				var freq = armory.renderpath.RenderPathCreator.voxelFreq;
-				return (armory.renderpath.RenderPathCreator.voxelFrame % freq) / freq;
+				var freq = armory.renderpath.Clipmap.voxelFreq;
+				return (armory.renderpath.Clipmap.voxelFrame % freq) / freq;
 			}
 			case "_voxelSize": {
-				return Main.voxelgiVoxelSize * Math.pow(2.0, armory.renderpath.RenderPathCreator.clipmapLevel);
+				return Main.voxelgiVoxelSize * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
 			}
 			#end
 		}
@@ -228,7 +234,7 @@ class Uniforms {
 		switch (link) {
 			#if (rp_voxels != "Off")
 			case "_clipmapLevel": {
-				var lod = armory.renderpath.RenderPathCreator.clipmapLevel;
+				var lod = armory.renderpath.Clipmap.clipmapLevel;
 				return lod;
 			}
 			#end

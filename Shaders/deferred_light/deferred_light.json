@@ -17,6 +17,10 @@
 					"ifdef": ["_VoxelTemporal"]
 				},
 				{
+					"name": "eyePosition",
+					"link": "_eyePosition"
+				},
+				{
 					"name": "eyeLook",
 					"link": "_cameraLook"
 				},
