@@ -668,7 +668,7 @@ class Inc {
 	 	if (voxel_sh == null) {
 	 		voxel_sh = path.getComputeShader("voxel_light");
 	 		voxel_ta = voxel_sh.getTextureUnit("voxelsOpac");
-	 		// voxel_tb = voxel_sh.getTextureUnit("voxelsNor");
+	 		//voxel_tb = voxel_sh.getTextureUnit("voxelsNor");
 	 		voxel_tc = voxel_sh.getTextureUnit("voxels");
 	 		voxel_td = voxel_sh.getTextureUnit("shadowMap");
 	 		voxel_te = voxel_sh.getTextureUnit("shadowMapSpot");
