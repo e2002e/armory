@@ -541,9 +541,6 @@ void main() {
 			#ifdef _VoxelGI
 			#ifdef _VoxelShadow
 			, voxels
-			#ifdef _VoxelTemporal
-			, voxelsLast
-			#endif
 			, clipmap_center
 			#endif
 			#endif

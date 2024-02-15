@@ -244,7 +244,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const float a
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
-		mipSample /= step_dist / voxelSize;
+		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol) * mipSample;
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
@@ -330,7 +330,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 
         samplePos = ((start_pos + dir * dist) - clipmap_center) / (voxelSize * voxelgiResolution.x);
 		samplePos = samplePos * 0.5 + 0.5;
-		if ((any(equal(samplePos, clamp(samplePos, 0.0, 1.0))))) {
+		if ((any(notEqual(samplePos, clamp(samplePos, 0.0, 1.0))))) {
 			clipmap_index0++;
 			continue;
 		}
@@ -351,7 +351,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
-		mipSample /= step_dist / voxelSize;
+		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol) * mipSample;
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
