@@ -22,27 +22,7 @@ THE SOFTWARE.
 #ifndef _CONETRACE_GLSL_
 #define _CONETRACE_GLSL_
 
-const int DIFFUSE_CONE_COUNT = 16;
-const float DIFFUSE_CONE_APERTURE = 0.872665f;
-
-const vec3 DIFFUSE_CONE_DIRECTIONS[16] = {
-	vec3(0.57735f, 0.57735f, 0.57735f),
-	vec3(0.57735f, -0.57735f, -0.57735f),
-	vec3(-0.57735f, 0.57735f, -0.57735f),
-	vec3(-0.57735f, -0.57735f, 0.57735f),
-	vec3(-0.903007f, -0.182696f, -0.388844f),
-	vec3(-0.903007f, 0.182696f, 0.388844f),
-	vec3(0.903007f, -0.182696f, 0.388844f),
-	vec3(0.903007f, 0.182696f, -0.388844f),
-	vec3(-0.388844f, -0.903007f, -0.182696f),
-	vec3(0.388844f, -0.903007f, 0.182696f),
-	vec3(0.388844f, 0.903007f, -0.182696f),
-	vec3(-0.388844f, 0.903007f, 0.182696f),
-	vec3(-0.182696f, -0.388844f, -0.903007f),
-	vec3(0.182696f, 0.388844f, -0.903007f),
-	vec3(-0.182696f, 0.388844f, 0.903007f),
-	vec3(0.182696f, -0.388844f, 0.903007f)
-};
+#include "std/voxels_constants.h"
 
 // References
 // https://github.com/Friduric/voxel-cone-tracing
@@ -76,7 +56,7 @@ vec3 faceIndices(const vec3 dir) {
  	ret.x = (dir.x < 0.0) ? 0 : 1;
  	ret.y = (dir.y < 0.0) ? 2 : 3;
  	ret.z = (dir.z < 0.0) ? 4 : 5;
- 	return ret / (6);
+ 	return ret / (6 + DIFFUSE_CONE_COUNT);
 }
 
 #ifdef _VoxelGI
@@ -105,7 +85,7 @@ float sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, vec3 indices, const int pr
 	tc = tc * 0.5 + 0.5;
 	float half_texel = 0.5 / voxelgiResolution.x;
 	tc = clamp(tc, half_texel, 1.0 - half_texel);
-	tc.x = (tc.x) / (6);
+	tc.x = (tc.x + precomputed_direction) / (6 + DIFFUSE_CONE_COUNT);
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {

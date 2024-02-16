@@ -49,7 +49,7 @@ void main() {
 	float opac;
 	#endif
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6 + 12; i++)
 	{
 		ivec3 dst = src;
 		dst.x += i * res;

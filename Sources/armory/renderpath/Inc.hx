@@ -505,7 +505,7 @@ class Inc {
 
 		var res = getVoxelRes();
 		var resZ =  getVoxelResZ();
-		t.width = res * 6;
+		t.width = res * (6 + 12);
 		t.height = res * Main.voxelgiClipmapCount;
 		t.depth = Std.int(res * resZ);
 		t.is_image = true;
