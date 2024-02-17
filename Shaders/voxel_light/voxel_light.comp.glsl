@@ -87,10 +87,6 @@ void main() {
 		col.rgb *= visibility * lightColor;// * dotNL;
 		col = clamp(col, vec4(0.0), vec4(1.0));
 
-		#ifdef _EmissionShaded
-		col += texture(gbuffer_emission, wposition.xy);
-		#endif
-
 		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
 	}
 }

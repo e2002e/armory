@@ -58,15 +58,15 @@ class RenderPathDeferred {
 
 		#if (rp_voxels != 'Off')
 		{
-			Inc.initGI();
 			Inc.initGI("voxelsOut");
-
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+			Inc.initGI("voxels");
 			Inc.initGI("voxelsB");
 			#else
 			Inc.initGI("voxelsOpac");
 			Inc.initGI("voxelsOpacB");
+			Inc.initGI("voxelsOpacOut");
 			#end
 		}
 		#end
