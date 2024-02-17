@@ -65,8 +65,8 @@ vec4 sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const i
  	vec4 col = vec4(0.0);
 	float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
  	vec3 tc = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);
-	tc = tc * 0.5 + 0.5;
 	float half_texel = 0.5 / voxelgiResolution.x;
+	tc = tc * 0.5 + 0.5;
 	tc = clamp(tc, half_texel, 1.0 - half_texel);
 	tc.x = (tc.x + precomputed_direction) / (6 + DIFFUSE_CONE_COUNT);
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
@@ -87,8 +87,8 @@ float sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const 
  	float opac = 0.0;
 	float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
  	vec3 tc = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);
-	tc = tc * 0.5 + 0.5;
 	float half_texel = 0.5 / voxelgiResolution.x;
+	tc = tc * 0.5 + 0.5;
 	tc = clamp(tc, half_texel, 1.0 - half_texel);
 	tc.x = (tc.x + precomputed_direction) / (6 + DIFFUSE_CONE_COUNT);
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;

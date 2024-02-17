@@ -537,7 +537,7 @@ class RenderPathDeferred {
 			#if (rp_voxels == "Voxel GI")
 			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			#else
-			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
+			var voxtex = "voxels";//voxels == "voxels" ? "voxelsB" : "voxels";
 			#end
 
 			path.clearImage(voxtex, 0x00000000);

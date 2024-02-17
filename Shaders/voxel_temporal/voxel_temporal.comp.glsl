@@ -49,13 +49,12 @@ void main() {
 	#ifdef _VoxelGI
 	vec4 col;
 	vec4 aniso_colors[6];
-	const float voxelSize = 2.0 * voxelgiVoxelSize;
 	#else
 	float opac;
 	float aniso_colors[6];
 	#endif
 
-	for (int i = 0; i < 6 + 12; i++)
+	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
 		ivec3 dst = src;
 		dst.x += i * res;
@@ -80,17 +79,18 @@ void main() {
 					coords.z >= 0 && coords.z < res
 				)
 					#ifdef _VoxelGI
-					col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), voxelBlend);
+					col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), 0.5);
 					#else
-					opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, voxelBlend);
+					opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
 					#endif
 			}
 			else
 				#ifdef _VoxelGI
-				col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), voxelBlend);
+				col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), 0.5);
 				#else
-				opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, voxelBlend);
+				opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
 				#endif
+
 			#ifdef _VoxelGI
 			aniso_colors[i] = col;
 			#else

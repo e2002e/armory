@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "std/math.glsl"
 #include "std/gbuffer.glsl"
 #include "std/imageatomic.glsl"
+#include "std/voxels_constants.h"
 
 #ifdef _VoxelGI
 uniform layout(r32ui) uimage3D voxels;
@@ -49,7 +50,7 @@ void main() {
 	float opac;
 	#endif
 
-	for (int i = 0; i < 6 + 12; i++)
+	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
 		ivec3 dst = src;
 		dst.x += i * res;
