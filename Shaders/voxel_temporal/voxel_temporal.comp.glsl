@@ -44,14 +44,15 @@ uniform float voxelBlend;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
-	float aniso_colors[6];
 	int res = voxelgiResolution.x;
 	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	#ifdef _VoxelGI
 	vec4 col;
+	vec4 aniso_colors[6];
 	const float voxelSize = 2.0 * voxelgiVoxelSize;
 	#else
 	float opac;
+	float aniso_colors[6];
 	#endif
 
 	for (int i = 0; i < 6 + 12; i++)
@@ -90,7 +91,11 @@ void main() {
 				#else
 				opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
 				#endif
+			#ifdef _VoxelGI
+			aniso_colors[i] = col;
+			#else
 			aniso_colors[i] = opac;
+			#endif
 		}
 		else {
 			// precompute cone sampling:
@@ -102,12 +107,21 @@ void main() {
 				aniso_direction.z > 0 ? 4 : 5
 			);
 			vec3 direction_weights = abs(coneDirection);
+			#ifdef _VoxelGI
+			vec4 sam =
+				aniso_colors[face_offsets.x] * direction_weights.x +
+				aniso_colors[face_offsets.y] * direction_weights.y +
+				aniso_colors[face_offsets.z] * direction_weights.z
+				;
+			col = sam;
+			#else
 			float sam =
 				aniso_colors[face_offsets.x] * direction_weights.x +
 				aniso_colors[face_offsets.y] * direction_weights.y +
 				aniso_colors[face_offsets.z] * direction_weights.z
 				;
 			opac = sam;
+			#endif
 		}
 		#ifdef _VoxelGI
 		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));

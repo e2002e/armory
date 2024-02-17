@@ -499,7 +499,7 @@ class Inc {
 		}
 		#else
 		{
-			t.format = "RGBA64";
+			t.format = "RGBA32";
 		}
 		#end
 
