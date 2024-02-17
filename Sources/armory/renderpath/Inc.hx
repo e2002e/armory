@@ -499,10 +499,7 @@ class Inc {
 		}
 		#else
 		{
-			if (t.name == "voxelsOut")
-				t.format = "RGBA32";
-			else
-				t.format = "R32";
+			t.format = "RGBA32";
 		}
 		#end
 

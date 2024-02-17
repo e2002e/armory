@@ -23,7 +23,7 @@ uniform mat4 LVP;
 
 uniform layout(r32ui) uimage3D voxelsOpac;
 uniform layout(rgba8) image3D voxelsNor;
-uniform layout(rgba8) image3D voxels;
+uniform layout(r32ui) uimage3D voxels;
 #ifdef _EmissionShaded
 uniform sampler2D gbuffer_emission;
 #endif
@@ -87,7 +87,7 @@ void main() {
 		col.rgb *= visibility * lightColor;// * dotNL;
 		col = clamp(col, vec4(0.0), vec4(1.0));
 
-		//imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
-		imageStore(voxels, dst, col);
+		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
+		//imageStore(voxels, dst, col);
 	}
 }
