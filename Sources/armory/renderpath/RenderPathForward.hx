@@ -157,12 +157,13 @@ class RenderPathForward {
 
 		Inc.initGI();
 			Inc.initGI("voxelsOut");
-
 			#if (rp_voxels == "Voxel AO")
+			Inc.initGI("voxels");
 			Inc.initGI("voxelsB");
 			#else
 			Inc.initGI("voxelsOpac");
 			Inc.initGI("voxelsOpacB");
+			Inc.initGI("voxelsOpacOut");
 			#end
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA") || (rp_ssr && !rp_ssr_half) || (rp_water) || (rp_depth_texture))
@@ -312,7 +313,6 @@ class RenderPathForward {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var path = RenderPath.active;
-			var voxelize = path.voxelize();
 
 			#if (rp_voxels == "Voxel GI")
 			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
