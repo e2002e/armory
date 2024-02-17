@@ -88,5 +88,6 @@ void main() {
 		col = clamp(col, vec4(0.0), vec4(1.0));
 
 		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
+		//imageStore(voxels, dst, col);
 	}
 }
