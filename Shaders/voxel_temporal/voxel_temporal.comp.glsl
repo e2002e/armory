@@ -29,12 +29,12 @@ THE SOFTWARE.
 
 #ifdef _VoxelGI
 uniform layout(r32ui) uimage3D voxels;
+uniform layout(r32ui) uimage3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsOut;
-uniform layout(r32ui) uimage3D voxelsOutB;
 #else
 uniform layout(r8) image3D voxels;
+uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
-uniform layout(r8) image3D voxelsOutB;
 #endif
 
 uniform vec3 clipmap_center_last;
@@ -80,16 +80,16 @@ void main() {
 					coords.z >= 0 && coords.z < res
 				)
 					#ifdef _VoxelGI
-					col = mix(convRGBA8ToVec4(imageLoad(voxelsOutB, dst).r), convRGBA8ToVec4(imageLoad(voxelsOut, dst).r), voxelBlend);
+					col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), voxelBlend);
 					#else
-					opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
+					opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, voxelBlend);
 					#endif
 			}
 			else
 				#ifdef _VoxelGI
-				col = mix(convRGBA8ToVec4(imageLoad(voxelsOutB, dst).r), convRGBA8ToVec4(imageLoad(voxelsOut, dst).r), voxelBlend);
+				col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), voxelBlend);
 				#else
-				opac = mix(imageLoad(voxelsOutB, dst).r, imageLoad(voxelsOut, dst).r, voxelBlend);
+				opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, voxelBlend);
 				#endif
 			#ifdef _VoxelGI
 			aniso_colors[i] = col;
@@ -124,9 +124,9 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));
+		imageAtomicAdd(voxelsOut, dst, convVec4ToRGBA8(col));
 		#else
-		imageStore(voxels, dst, vec4(opac));
+		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
 	}
 }

@@ -402,7 +402,7 @@ class RenderPathForward {
 			#if arm_voxelgi_bounces
 			path.bindTarget("voxelsBounce", "voxels");
 			#else
-			path.bindTarget("voxels", "voxels");
+			path.bindTarget("voxelsOut", "voxels");
 			#end
 		}
 		#end
