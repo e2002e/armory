@@ -10,7 +10,8 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxelsOut = "voxelsOut";
+	static var voxels = "voxels";
+	static var voxelsOpac = "voxelsOpac";
 	#end
 
 	#if rp_bloom
@@ -59,12 +60,13 @@ class RenderPathDeferred {
 		{
 			Inc.initGI();
 			Inc.initGI("voxelsOut");
-			Inc.initGI("voxelsOutB");
 
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+			Inc.initGI("voxelsB");
 			#else
 			Inc.initGI("voxelsOpac");
+			Inc.initGI("voxelsOpacB");
 			#end
 		}
 		#end
@@ -532,11 +534,10 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 			var voxelize = path.voxelize();
 
-			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 			#if (rp_voxels == "Voxel GI")
-			var voxtex = "voxelsOpac";
+			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			#else
-			var voxtex = "voxels";
+			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
 			#end
 
 			path.clearImage(voxtex, 0x00000000);
@@ -576,7 +577,7 @@ class RenderPathDeferred {
 				path.bindTarget(voxtex, "voxels");
 				path.drawMeshes("voxel");
 
-				Inc.voxelsStabilize(voxtex, voxelsOut);
+				Inc.voxelsStabilize(voxtex);
 				#if (rp_voxels == "Voxel GI")
 				Inc.voxelsLight();
 				#end
@@ -634,7 +635,7 @@ class RenderPathDeferred {
 			#if arm_voxelgi_bounces
 			path.bindTarget("voxelsBounce", "voxels");
 			#else
-			path.bindTarget("voxels", "voxels");
+			path.bindTarget("voxelsOut", "voxels");
 			#end
 		}
 		#end

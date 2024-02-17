@@ -10,7 +10,8 @@ class RenderPathForward {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxelsOut = "voxelsOut";
+	static var voxels = "voxels";
+	static var voxelsOpac = "voxelsOpac";
 	#end
 
 	#if rp_bloom
@@ -154,16 +155,15 @@ class RenderPathForward {
 		}
 		#end
 
-		#if (rp_voxels != 'Off')
-		{
-			Inc.initGI();
+		Inc.initGI();
 			Inc.initGI("voxelsOut");
-			Inc.initGI("voxelsOutB");
-			#if (rp_voxels == "Voxel GI")
+
+			#if (rp_voxels == "Voxel AO")
+			Inc.initGI("voxelsB");
+			#else
 			Inc.initGI("voxelsOpac");
+			Inc.initGI("voxelsOpacB");
 			#end
-		}
-		#end
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA") || (rp_ssr && !rp_ssr_half) || (rp_water) || (rp_depth_texture))
 		{
@@ -314,11 +314,10 @@ class RenderPathForward {
 			var path = RenderPath.active;
 			var voxelize = path.voxelize();
 
-			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 			#if (rp_voxels == "Voxel GI")
-			var voxtex = "voxelsOpac";
+			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			#else
-			var voxtex = "voxels";
+			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
 			#end
 
 			path.clearImage(voxtex, 0x00000000);
@@ -358,7 +357,7 @@ class RenderPathForward {
 				path.bindTarget(voxtex, "voxels");
 				path.drawMeshes("voxel");
 
-				Inc.voxelsStabilize(voxtex, voxelsOut);
+				Inc.voxelsStabilize(voxtex);
 				#if (rp_voxels == "Voxel GI")
 				Inc.voxelsLight();
 				#end
