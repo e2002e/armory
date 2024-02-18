@@ -329,18 +329,11 @@ class RenderPathForward {
 			#end
 
 			var camera = iron.Scene.active.camera;
-			armory.renderpath.Clipmap.eyePosition = new iron.math.Vec3(
-				camera.transform.worldx(),
-				camera.transform.worldy(),
-				camera.transform.worldz()
-			);
-
 			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
-
 			var center = new iron.math.Vec3(
-				Math.floor(armory.renderpath.Clipmap.eyePosition.x / texelSize) * texelSize,
-				Math.floor(armory.renderpath.Clipmap.eyePosition.y / texelSize) * texelSize,
-				Math.floor(armory.renderpath.Clipmap.eyePosition.z / texelSize) * texelSize
+				Math.floor(camera.transform.worldx() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldy() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldz() / texelSize) * texelSize
 			);
 
 			armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);

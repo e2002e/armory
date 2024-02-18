@@ -17,12 +17,12 @@
 					"ifdef": ["_VoxelTemporal"]
 				},
 				{
-					"name": "eyePosition",
-					"link": "_eyePosition"
-				},
-				{
 					"name": "eyeLook",
 					"link": "_cameraLook"
+				},
+				{
+					"name": "clipmap_center",
+					"link": "_clipmap_center"
 				},
 				{
 					"name": "invVP",

@@ -37,11 +37,11 @@ uniform sampler2D gbuffer_refraction;
 
 #ifdef _VoxelGI
 uniform sampler3D voxels;
-uniform vec3 eyePosition;
+uniform vec3 clipmap_center;
 #endif
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
-uniform vec3 eyePosition;
+uniform vec3 clipmap_center;
 #endif
 
 uniform float envmapStrength;
@@ -216,20 +216,6 @@ void main() {
 	vec3 p = getPos(eye, eyeLook, viewRay, depth, cameraProj);
 	vec3 v = normalize(eye - p);
 	float dotNV = max(dot(n, v), 0.0);
-
-#ifdef _VoxelGI
-	float dist = max(abs(eyePosition.x - p.x), max(abs(eyePosition.y - p.y), abs(eyePosition.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = voxelgiVoxelSize * 2.0 * pow(2.0, clipmapLevel);
-	vec3 clipmap_center = floor(eyePosition / texelSize) * texelSize;
-#endif
-
-#ifdef _VoxelAOvar
-	float dist = max(abs(eyePosition.x - p.x), max(abs(eyePosition.y - p.y), abs(eyePosition.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = voxelgiVoxelSize * 2.0 * pow(2.0, clipmapLevel);
-	vec3 clipmap_center = floor(eyePosition / texelSize) * texelSize;
-#endif
 
 #ifdef _VoxelRefract
 	vec4 gr = textureLod(gbuffer_refraction, texCoord, 0.0);
