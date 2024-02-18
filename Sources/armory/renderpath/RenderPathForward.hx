@@ -363,6 +363,7 @@ class RenderPathForward {
 				#end
 				//Inc.computeVoxelsEnd();
 			}
+			path.generateMipmaps("voxelsOut");
 		}
 		#end
 

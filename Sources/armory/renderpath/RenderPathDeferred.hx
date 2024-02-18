@@ -583,6 +583,7 @@ class RenderPathDeferred {
 				#end
 				//Inc.computeVoxelsEnd();
 			}
+			path.generateMipmaps("voxelsOut");
 		}
 		#end
 

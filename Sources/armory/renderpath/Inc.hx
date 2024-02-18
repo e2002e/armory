@@ -643,12 +643,13 @@ class Inc {
 		var A = "voxels";
 		var B = "voxelsB";
 		var Out = "voxelsOut";
-		if (voxels != "voxels" && voxels != "voxelsB")
+		#if (rp_voxels == "Voxel GI")
 		{
 			A = "voxelsOpac";
 			B = "voxelsOpacB";
 			Out = "voxelsOpacOut";
 		}
+		#end
 
 		kha.compute.Compute.setShader(voxel_sh0);
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Read);
