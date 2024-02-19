@@ -220,9 +220,6 @@ def make_gi(context_id):
             frag.write('}') # receiveShadow
 
     if '_SinglePoint' in wrd.world_defs:
-        frag.add_uniform("vec3 eye", "_cameraPosition")
-        frag.write('vec3 eyeDir = eye - wposition;')
-        frag.write('vec3 vVec = normalize(eyeDir);')
         frag.add_uniform('vec3 pointPos', '_pointPosition')
         frag.add_uniform('vec3 pointCol', '_pointColor')
         if '_Spot' in wrd.world_defs:
@@ -267,7 +264,7 @@ def make_gi(context_id):
 
         frag.write('col += basecol * visibility * pointCol;')
 
-    if "_Clusters" in wrd.world_defs:
+    if '_Clusters' in wrd.world_defs:
         frag.add_include_front('std/clusters.glsl')
         frag.add_uniform('vec2 cameraProj', link='_cameraPlaneProj')
         frag.add_uniform('vec2 cameraPlane', link='_cameraPlane')
@@ -275,15 +272,15 @@ def make_gi(context_id):
         frag.add_uniform('sampler2D clustersData', link='_clustersData')
         if is_shadows:
             frag.add_uniform('bool receiveShadow')
-            frag.add_uniform('vec2 lightProj', link='_lightPlaneProj', included=True)
+            frag.add_uniform('vec2 lightProj', link='_lightPlaneProj')
             if is_shadows_atlas:
                 if not is_single_atlas:
-                    frag.add_uniform('sampler2DShadow shadowMapAtlasPoint', included=True)
+                    frag.add_uniform('sampler2DShadow shadowMapAtlasPoint')
                 else:
                     frag.add_uniform('sampler2DShadow shadowMapAtlas', top=True)
-                frag.add_uniform('vec4 pointLightDataArray[maxLightsCluster]', link='_pointLightsAtlasArray', included=True)
+                frag.add_uniform('vec4 pointLightDataArray[maxLightsCluster]', link='_pointLightsAtlasArray')
             else:
-                frag.add_uniform('samplerCubeShadow shadowMapPoint[4]', included=True)
+                frag.add_uniform('samplerCubeShadow shadowMapPoint[4]')
 
         vert.add_out('vec4 wvppositionGeom')
         vert.write('wvppositionGeom = gl_Position;')
@@ -303,12 +300,12 @@ def make_gi(context_id):
             if is_shadows:
                 if is_shadows_atlas:
                     if not is_single_atlas:
-                        frag.add_uniform('sampler2DShadow shadowMapAtlasSpot', included=True)
+                        frag.add_uniform('sampler2DShadow shadowMapAtlasSpot')
                     else:
                         frag.add_uniform('sampler2DShadow shadowMapAtlas', top=True)
                 else:
-                    frag.add_uniform('sampler2DShadow shadowMapSpot[4]', included=True)
-                frag.add_uniform('mat4 LWVPSpotArray[maxLightsCluster]', link='_biasLightWorldViewProjectionMatrixSpotArray', included=True)
+                    frag.add_uniform('sampler2DShadow shadowMapSpot[4]')
+                frag.add_uniform('mat4 LWVPSpotArray[maxLightsCluster]', link='_biasLightWorldViewProjectionMatrixSpotArray')
 
         frag.write('for (int i = 0; i < min(numLights, maxLightsCluster); i++) {')
         frag.write('    int li = int(texelFetch(clustersData, ivec2(clusterI, i + 1), 0).r * 255);')
@@ -318,7 +315,7 @@ def make_gi(context_id):
         frag.write('    if (lightsArray[li * 3 + 2].z != 0.0) {//is shadow')
         if '_Spot' in wrd.world_defs:
             frag.write('    if (lightsArray[li * 3 + 2].y != 0.0) {//is spot')
-            frag.write('        visibility = spotlightMask(l, lightsArraySpot[li * 2].xyz, lightsArraySpot[li * 2 + 1].xyz, vec2(lightsArray[li * 3].w, lightsArray[li * 3 + 1].w), lightsArray[li * 3 + 2].y, lightsArraySpot[li * 2].w);')
+            frag.write('        visibility *= spotlightMask(l, lightsArraySpot[li * 2].xyz, lightsArraySpot[li * 2 + 1].xyz, vec2(lightsArray[li * 3].w, lightsArray[li * 3 + 1].w), lightsArray[li * 3 + 2].y, lightsArraySpot[li * 2].w);')
             frag.write('        vec4 lPos = LWVPSpotArray[li] * vec4(wposition + n * lightsArray[li * 3 + 2].x * 10, 1.0);')
             frag.write('#ifdef _ShadowMapAtlas')
             frag.write('        visibility *= shadowTest(')
@@ -345,7 +342,7 @@ def make_gi(context_id):
         frag.write('#else')
         frag.write('                shadowMapAtlas')
         frag.write('#endif')
-        frag.write('            , ld, -l, lightsArray[li * 3 + 2].x, lightProj, n, index')
+        frag.write('            , ld, -l, lightsArray[li * 3 + 2].x, lightProj, n, li')
         frag.write('            );')
         frag.write('#else')
         frag.write('            if (li == 0) visibility *= PCFCube(shadowMapPoint[0], ld, -l, lightsArray[li * 3 + 2].x, lightProj, n);')

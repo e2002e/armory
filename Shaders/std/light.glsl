@@ -56,7 +56,7 @@
 			uniform sampler2DShadow shadowMapAtlasSpot;
 			#endif
 			#else
-			uniform sampler2DShadow shadowMapSpot[maxLightsCluster];
+			uniform sampler2DShadow shadowMapSpot[4];
 			#endif
 			uniform mat4 LWVPSpotArray[maxLightsCluster];
 		#endif
