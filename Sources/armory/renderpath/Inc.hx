@@ -499,9 +499,7 @@ class Inc {
 		}
 		#else
 		{
-			if (t.name == "voxelsOut")
-				t.format = "RGBA32";
-			else t.format = "R32";
+			t.format = "RGBA32";
 		}
 		#end
 
@@ -631,11 +629,7 @@ class Inc {
 	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_center_last");
 	 		voxel_cb0 = voxel_sh0.getConstantLocation("clipmapLevel");
 		}
-		#if (rp_voxels == "Voxel GI")
-		path.clearImage("voxelsOpacOut", 0x00000000);
-		#else
 		path.clearImage("voxelsOut", 0x00000000);
-		#end
 	}
 
 	public static function voxelsStabilize(voxels = "voxels") {
@@ -645,16 +639,9 @@ class Inc {
 		var A = "voxels";
 		var B = "voxelsB";
 		var Out = "voxelsOut";
-		#if (rp_voxels == "Voxel GI")
-		{
-			A = "voxelsOpac";
-			B = "voxelsOpacB";
-			Out = "voxelsOpacOut";
-		}
-		#end
 
 		kha.compute.Compute.setShader(voxel_sh0);
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxels).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxels).image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tc0, rts.get(Out).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
@@ -692,9 +679,6 @@ class Inc {
 	 		voxel_td = voxel_sh.getTextureUnit("shadowMap");
 	 		voxel_te = voxel_sh.getTextureUnit("shadowMapSpot");
 	 		voxel_tf = voxel_sh.getTextureUnit("shadowMapPoint");
-			#if (rp_gbuffer_emission && arm_deferred)
-	 		voxel_tg = voxel_sh.getTextureUnit("gbuffer_emission");
-	 		#end
 
 	 		voxel_ca = voxel_sh.getConstantLocation("lightPos");
 	 		voxel_cb = voxel_sh.getConstantLocation("lightColor");
@@ -730,7 +714,7 @@ class Inc {
 	 		#if (rp_shadowmap)
 	 		if (l.data.raw.type == "sun") {
 				#if arm_shadowmap_atlas
-				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasSun").cubeMap);
+				kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMapAtlasSun").image);
 				#else
 	 			kha.compute.Compute.setSampledTexture(voxel_td, rts.get("shadowMap").image);
 	 			#end
@@ -738,7 +722,7 @@ class Inc {
 	 		}
 	 		else if (l.data.raw.type == "spot" || l.data.raw.type == "area") {
 				#if arm_shadowmap_atlas
-				kha.compute.Compute.setSampledCubeMap(voxel_tf, rts.get("shadowMapAtlasSpot").cubeMap);
+				kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapAtlasSpot").image);
 				#else
 	 			kha.compute.Compute.setSampledTexture(voxel_te, rts.get("shadowMapSpot[" + spotIndex + "]").image);
 	 			#end

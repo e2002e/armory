@@ -36,10 +36,9 @@ uniform samplerCubeShadow shadowMapPoint;
 
 void main() {
 	const ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
-
+	vec3 wposition = vec3(src) / (voxelgiResolution.x * voxelgiVoxelSize * pow(2.0, clipmapLevel));
 	for (int i = 0; i < 6 + 16; i++) {
 		ivec3 dst = src;
-		vec3 wposition = vec3(dst);
 		dst.y += clipmapLevel * voxelgiResolution.x;
 		dst.x += i * voxelgiResolution.x;
 

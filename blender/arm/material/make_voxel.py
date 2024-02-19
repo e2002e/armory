@@ -56,7 +56,12 @@ def make_gi(context_id):
     frag.add_uniform('layout(r32ui) uimage3D voxels')
     frag.add_uniform('layout(r32ui) uimage3D voxelsNor')
 
-    frag.write('vec3 wposition;')#dummy
+
+    frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    frag.add_uniform('float voxelSize', '_voxelSize')
+    frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
+    frag.write('vec3 wposition = (voxposition * voxelgiResolution.x * voxelSize) + clipmap_center;')
+
     frag.write('vec3 basecol;')
     frag.write('float roughness;') #
     frag.write('float metallic;') #
@@ -128,6 +133,9 @@ def make_gi(context_id):
 
     geom.add_out('vec3 voxposition')
     geom.add_out('vec3 voxnormal')
+    geom.add_out('vec4 lightPosition')
+    geom.add_out('vec4 spotPosition')
+    geom.add_out('vec4 wvpposition')
 
     if con_voxel.is_elem('col'):
         geom.add_out('vec3 vcolor')
@@ -145,6 +153,12 @@ def make_gi(context_id):
     geom.write('for (uint i = 0; i < 3; ++i) {')
     geom.write('    voxposition = voxpositionGeom[i];')
     geom.write('    voxnormal = voxnormalGeom[i];')
+    if "_Sun" in wrd.world_defs:
+        geom.write('    lightPosition = lightPositionGeom[i];')
+    if "_Spot" in wrd.world_defs and "_SinglePoint" in wrd.world_defs:
+        geom.write('    spotPosition = spotPositionGeom[i];')
+    if "_Clusters" in wrd.world_defs:
+        geom.write('    wvpposition = wvppositionGeom[i];')
     if con_voxel.is_elem('col'):
         geom.write('    vcolor = vcolorGeom[i];')
     if con_voxel.is_elem('tex'):
@@ -166,7 +180,183 @@ def make_gi(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
+    frag.write('vec3 col = vec3(0.0);')
+
+    is_shadows = '_ShadowMap' in wrd.world_defs
+    is_shadows_atlas = '_ShadowMapAtlas' in wrd.world_defs
+    shadowmap_sun = 'shadowMap'
+    if is_shadows_atlas:
+        is_single_atlas = '_SingleAtlas' in wrd.world_defs
+        shadowmap_sun = 'shadowMapAtlasSun' if not is_single_atlas else 'shadowMapAtlas'
+        frag.add_uniform('vec2 smSizeUniform', '_shadowMapSize', included=True)
+
+    if '_Sun' in wrd.world_defs:
+        frag.add_uniform('vec3 sunCol', '_sunColor')
+        frag.add_uniform('vec3 sunDir', '_sunDirection')
+        frag.write('float svisibility = 1.0;')
+        frag.write('float sdotNL = max(dot(n, sunDir), 0.0);')
+        if is_shadows:
+            vert.add_out('vec4 lightPositionGeom')
+            vert.add_uniform('mat4 LWVP', '_biasLightWorldViewProjectionMatrixSun')
+            vert.write('lightPositionGeom = LWVP * pos;')
+            frag.add_uniform('bool receiveShadow')
+            frag.add_uniform(f'sampler2DShadow {shadowmap_sun}')
+            frag.add_uniform('float shadowsBias', '_sunShadowsBias')
+
+            frag.write('if (receiveShadow) {')
+            if '_CSM' in wrd.world_defs:
+                frag.add_include('std/shadows.glsl')
+                frag.add_uniform('vec4 casData[shadowmapCascades * 4 + 4]', '_cascadeData', included=True)
+                frag.add_uniform('vec3 eye', '_cameraPosition')
+                frag.write(f'svisibility = shadowTestCascade({shadowmap_sun}, eye, wposition + n * shadowsBias * 10, shadowsBias);')
+            else:
+                frag.write('if (lightPosition.w > 0.0) {')
+                frag.write('    vec3 lPos = lightPosition.xyz / lightPosition.w;')
+                if '_Legacy' in wrd.world_defs:
+                    frag.write(f'    svisibility = float(texture({shadowmap_sun}, vec2(lPos.xy)).r > lPos.z - shadowsBias);')
+                else:
+                    frag.write(f'    svisibility = texture({shadowmap_sun}, vec3(lPos.xy, lPos.z - shadowsBias)).r;')
+                frag.write('}')
+            frag.write('}') # receiveShadow
+
+    if '_SinglePoint' in wrd.world_defs:
+        frag.add_uniform("vec3 eye", "_cameraPosition")
+        frag.write('vec3 eyeDir = eye - wposition;')
+        frag.write('vec3 vVec = normalize(eyeDir);')
+        frag.add_uniform('vec3 pointPos', '_pointPosition')
+        frag.add_uniform('vec3 pointCol', '_pointColor')
+        if '_Spot' in wrd.world_defs:
+            frag.add_uniform('vec3 spotDir', link='_spotDirection')
+            frag.add_uniform('vec3 spotRight', link='_spotRight')
+            frag.add_uniform('vec4 spotData', link='_spotData')
+        frag.write('float visibility = 1.0;')
+        frag.write('vec3 ld = pointPos - wposition;')
+        frag.write('vec3 l = normalize(ld);')
+        frag.write('float dotNL = max(dot(n, l), 0.0);')
+        if is_shadows:
+            frag.add_uniform('bool receiveShadow')
+            frag.add_uniform('float pointBias', link='_pointShadowsBias')
+            frag.add_include('std/shadows.glsl')
+
+            frag.write('if (receiveShadow) {')
+            if '_Spot' in wrd.world_defs:
+                vert.add_out('vec4 spotPositionGeom')
+                vert.add_uniform('mat4 LWVPSpotArray[1]', link='_biasLightWorldViewProjectionMatrixSpotArray')
+                vert.write('spotPositionGeom = LWVPSpotArray[0] * pos;')
+                frag.add_uniform('sampler2DShadow shadowMapSpot[1]')
+                frag.write('if (spotPosition.w > 0.0) {')
+                frag.write('    vec3 lPos = spotPosition.xyz / spotPosition.w;')
+                if '_Legacy' in wrd.world_defs:
+                    frag.write('    visibility = float(texture(shadowMapSpot[0], vec2(lPos.xy)).r > lPos.z - pointBias);')
+                else:
+                    frag.write('    visibility = texture(shadowMapSpot[0], vec3(lPos.xy, lPos.z - pointBias)).r;')
+                frag.write('}')
+            else:
+                frag.add_uniform('vec2 lightProj', link='_lightPlaneProj')
+                frag.add_uniform('samplerCubeShadow shadowMapPoint[1]')
+                frag.write('const float s = shadowmapCubePcfSize;') # TODO: incorrect...
+                frag.write('float compare = lpToDepth(ld, lightProj) - pointBias * 1.5;')
+                frag.write('#ifdef _InvY')
+                frag.write('l.y = -l.y;')
+                frag.write('#endif')
+                if '_Legacy' in wrd.world_defs:
+                    frag.write('visibility = float(texture(shadowMapPoint[0], vec3(-l + n * pointBias * 20)).r > compare);')
+                else:
+                    frag.write('visibility = texture(shadowMapPoint[0], vec4(-l + n * pointBias * 20, compare)).r;')
+            frag.write('}') # receiveShadow
+
+        frag.write('col += basecol * visibility * pointCol;')
+
+    if "_Clusters" in wrd.world_defs:
+        frag.add_include_front('std/clusters.glsl')
+        frag.add_uniform('vec2 cameraProj', link='_cameraPlaneProj')
+        frag.add_uniform('vec2 cameraPlane', link='_cameraPlane')
+        frag.add_uniform('vec4 lightsArray[maxLights * 3]', link='_lightsArray')
+        frag.add_uniform('sampler2D clustersData', link='_clustersData')
+        if is_shadows:
+            frag.add_uniform('bool receiveShadow')
+            frag.add_uniform('vec2 lightProj', link='_lightPlaneProj', included=True)
+            if is_shadows_atlas:
+                if not is_single_atlas:
+                    frag.add_uniform('sampler2DShadow shadowMapAtlasPoint', included=True)
+                else:
+                    frag.add_uniform('sampler2DShadow shadowMapAtlas', top=True)
+                frag.add_uniform('vec4 pointLightDataArray[maxLightsCluster]', link='_pointLightsAtlasArray', included=True)
+            else:
+                frag.add_uniform('samplerCubeShadow shadowMapPoint[4]', included=True)
+
+        vert.add_out('vec4 wvppositionGeom')
+        vert.write('wvppositionGeom = gl_Position;')
+        # wvpposition.z / wvpposition.w
+        frag.write('float viewz = linearize(gl_FragCoord.z, cameraProj);')
+        frag.write('int clusterI = getClusterI((wvpposition.xy / wvpposition.w) * 0.5 + 0.5, viewz, cameraPlane);')
+        frag.write('int numLights = int(texelFetch(clustersData, ivec2(clusterI, 0), 0).r * 255);')
+
+        frag.write('#ifdef HLSL')
+        frag.write('viewz += texture(clustersData, vec2(0.0)).r * 1e-9;') # TODO: krafix bug, needs to generate sampler
+        frag.write('#endif')
+
+        if '_Spot' in wrd.world_defs:
+            frag.add_uniform('vec4 lightsArraySpot[maxLights * 2]', link='_lightsArraySpot')
+            frag.write('int numSpots = int(texelFetch(clustersData, ivec2(clusterI, 1 + maxLightsCluster), 0).r * 255);')
+            frag.write('int numPoints = numLights - numSpots;')
+            if is_shadows:
+                if is_shadows_atlas:
+                    if not is_single_atlas:
+                        frag.add_uniform('sampler2DShadow shadowMapAtlasSpot', included=True)
+                    else:
+                        frag.add_uniform('sampler2DShadow shadowMapAtlas', top=True)
+                else:
+                    frag.add_uniform('sampler2DShadow shadowMapSpot[4]', included=True)
+                frag.add_uniform('mat4 LWVPSpotArray[maxLightsCluster]', link='_biasLightWorldViewProjectionMatrixSpotArray', included=True)
+
+        frag.write('for (int i = 0; i < min(numLights, maxLightsCluster); i++) {')
+        frag.write('    int li = int(texelFetch(clustersData, ivec2(clusterI, i + 1), 0).r * 255);')
+        frag.write('    float visibility = 1.0;')
+        frag.write('    vec3 ld = lightsArray[li * 3].xyz - wposition;')
+        frag.write('    vec3 l = normalize(ld);')
+        frag.write('    if (lightsArray[li * 3 + 2].z != 0.0) {//is shadow')
+        if '_Spot' in wrd.world_defs:
+            frag.write('    if (lightsArray[li * 3 + 2].y != 0.0) {//is spot')
+            frag.write('        visibility = spotlightMask(l, lightsArraySpot[li * 2].xyz, lightsArraySpot[li * 2 + 1].xyz, vec2(lightsArray[li * 3].w, lightsArray[li * 3 + 1].w), lightsArray[li * 3 + 2].y, lightsArraySpot[li * 2].w);')
+            frag.write('        vec4 lPos = LWVPSpotArray[li] * vec4(wposition + n * lightsArray[li * 3 + 2].x * 10, 1.0);')
+            frag.write('#ifdef _ShadowMapAtlas')
+            frag.write('        visibility *= shadowTest(')
+            frag.write('#ifndef _SingleAtlas')
+            frag.write('            shadowMapAtlasSpot')
+            frag.write('#else')
+            frag.write('            shadowMapAtlas')
+            frag.write('#endif')
+            frag.write('            , lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x')
+            frag.write('        );')
+            frag.write('#else')
+            frag.write('        if (li == 0) visibility *= shadowTest(shadowMapSpot[0], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
+            frag.write('        else if (li == 1) visibility *= shadowTest(shadowMapSpot[1], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
+            frag.write('        else if (li == 2) visibility *= shadowTest(shadowMapSpot[2], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
+            frag.write('        else if (li == 3) visibility *= shadowTest(shadowMapSpot[3], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
+            frag.write('#endif')
+        frag.write('        }')
+        frag.write('        if (lightsArray[li * 3 + 2].y == 0.0) {')
+        frag.write('            visibility = attenuate(distance(wposition, ld));')
+        frag.write('#ifdef _ShadowMapAtlas')
+        frag.write('            visibility *= PCFFakeCube(')
+        frag.write('#ifndef _SingleAtlas')
+        frag.write('                shadowMapAtlasPoint')
+        frag.write('#else')
+        frag.write('                shadowMapAtlas')
+        frag.write('#endif')
+        frag.write('            , ld, -l, lightsArray[li * 3 + 2].x, lightProj, n, index')
+        frag.write('            );')
+        frag.write('#else')
+        frag.write('            if (li == 0) visibility *= PCFCube(shadowMapPoint[0], ld, -l, lightsArray[li * 3 + 2].x, lightProj, n);')
+        frag.write('            else if (li == 1) visibility *= PCFCube(shadowMapPoint[1], ld, -l, lightsArray[li * 3 + 2].x, lightProj, n);')
+        frag.write('            else if (li == 2) visibility *= PCFCube(shadowMapPoint[2], ld, -l, lightsArray[li * 3 + 2].x, lightProj, n);')
+        frag.write('            else if (li == 3) visibility *= PCFCube(shadowMapPoint[3], ld, -l, lightsArray[li * 3 + 2].x, lightProj, n);')
+        frag.write('#endif')
+        frag.write('        }')
+        frag.write('    }')
+        frag.write('    col += basecol * visibility * lightsArray[li * 3 + 1].xyz;')
+        frag.write('}')
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
@@ -180,17 +370,17 @@ def make_gi(context_id):
     frag.write('vec3 direction_weights = abs(voxnormal);')
 
     frag.write('if (direction_weights.x > 0.0) {')
-    frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
+    frag.write('    vec3 basecol_direction = col * direction_weights.x;')
     frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
-    frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
+    frag.write('    vec3 basecol_direction = col * direction_weights.y;')
     frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
-    frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
+    frag.write('    vec3 basecol_direction = col * direction_weights.z;')
     frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 

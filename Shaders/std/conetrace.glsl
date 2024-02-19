@@ -217,10 +217,10 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 			continue;
 		}
 
-		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0);
+		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			float mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0);
+			float mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
@@ -283,16 +283,16 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		samplePos.y = (samplePos.y + clipmap_index) / voxelgiClipmapCount;
 
 		#ifdef _VoxelAOvar
-		mipSample = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0);
+		mipSample = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod);
 		#else
-		mipSample = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0).a;
+		mipSample = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod).a;
 		#endif
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
 			#ifdef _VoxelAOvar
-			float mipSampleNext = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0);
+			float mipSampleNext = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod);
 			#else
-			float mipSampleNext = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0).a;
+			float mipSampleNext = sampleVoxel(p0, voxels, samplePos, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod).a;
 			#endif
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
