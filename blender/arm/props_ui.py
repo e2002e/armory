@@ -1711,9 +1711,9 @@ class ARM_PT_RenderPathVoxelsPanel(bpy.types.Panel):
         col3.enabled = rpdat.rp_voxels == 'Voxel AO'
         col.prop(rpdat, 'arm_voxelgi_shadows', text='Shadows')
         col2.prop(rpdat, 'arm_voxelgi_refraction', text='Refraction')
-        col2.prop(rpdat, 'arm_voxelgi_bounces')
+        #col2.prop(rpdat, 'arm_voxelgi_bounces')
         col.prop(rpdat, 'arm_voxelgi_clipmap_count')
-        col.prop(rpdat, 'arm_voxelgi_cones')
+        #col.prop(rpdat, 'arm_voxelgi_cones')
         col.prop(rpdat, 'rp_voxelgi_resolution')
         col.prop(rpdat, 'rp_voxelgi_resolution_z')
         col2.enabled = rpdat.rp_voxels == 'Voxel GI'
@@ -1730,7 +1730,7 @@ class ARM_PT_RenderPathVoxelsPanel(bpy.types.Panel):
         col.prop(rpdat, 'arm_voxelgi_step')
         col.prop(rpdat, 'arm_voxelgi_range')
         col.prop(rpdat, 'arm_voxelgi_offset')
-        col.prop(rpdat, 'arm_voxelgi_aperture')
+        #col.prop(rpdat, 'arm_voxelgi_aperture')
 
 class ARM_PT_RenderPathWorldPanel(bpy.types.Panel):
     bl_label = "World"

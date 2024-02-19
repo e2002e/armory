@@ -128,7 +128,7 @@ def make_gi(context_id):
     vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
+    vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
     geom.add_out('vec3 voxposition')
@@ -180,8 +180,6 @@ def make_gi(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('vec3 col = basecol;')
-
     is_shadows = '_ShadowMap' in wrd.world_defs
     is_shadows_atlas = '_ShadowMapAtlas' in wrd.world_defs
     shadowmap_sun = 'shadowMap'
@@ -217,6 +215,7 @@ def make_gi(context_id):
                 else:
                     frag.write(f'    svisibility = texture({shadowmap_sun}, vec3(lPos.xy, lPos.z - shadowsBias)).r;')
                 frag.write('}')
+            frag.write('    basecol += svisibility * sunCol;')
             frag.write('}') # receiveShadow
 
     if '_SinglePoint' in wrd.world_defs:
@@ -262,7 +261,7 @@ def make_gi(context_id):
                     frag.write('visibility = texture(shadowMapPoint[0], vec4(-l + n * pointBias * 20, compare)).r;')
             frag.write('}') # receiveShadow
 
-        frag.write('col += basecol * visibility * pointCol;')
+        frag.write('basecol += visibility * pointCol;')
 
     if '_Clusters' in wrd.world_defs:
         frag.add_include_front('std/clusters.glsl')
@@ -354,7 +353,7 @@ def make_gi(context_id):
         frag.write('#endif')
         frag.write('        }')
         frag.write('    }')
-        frag.write('    col += basecol * visibility * lightsArray[li * 3 + 1].xyz;')
+        frag.write('    basecol += visibility * lightsArray[li * 3 + 1].xyz;')
         frag.write('}')
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
@@ -369,17 +368,17 @@ def make_gi(context_id):
     frag.write('vec3 direction_weights = abs(voxnormal);')
 
     frag.write('if (direction_weights.x > 0.0) {')
-    frag.write('    vec3 basecol_direction = col * direction_weights.x;')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
-    frag.write('    vec3 basecol_direction = col * direction_weights.y;')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
-    frag.write('    vec3 basecol_direction = col * direction_weights.z;')
+    frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
@@ -417,7 +416,7 @@ def make_ao(context_id):
     vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('voxpositionGeom = (P - clipmap_center) / voxelSize * 1.0 / voxelgiResolution.x;')
+    vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
     geom.add_out('vec3 voxposition')
