@@ -53,8 +53,8 @@ def make_gi(context_id):
     frag.add_include('std/brdf.glsl')
 
     rpdat = arm.utils.get_rp()
-    frag.add_uniform('layout(r32ui) uimage3D voxels')
-    frag.add_uniform('layout(r32ui) uimage3D voxelsNor')
+    frag.add_uniform('layout(rgba8) image3D voxels')
+    frag.add_uniform('layout(rgba8) image3D voxelsNor')
 
 
     frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
@@ -180,7 +180,7 @@ def make_gi(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('vec3 col = vec3(0.0);')
+    frag.write('vec3 col = basecol;')
 
     is_shadows = '_ShadowMap' in wrd.world_defs
     is_shadows_atlas = '_ShadowMapAtlas' in wrd.world_defs
@@ -266,6 +266,8 @@ def make_gi(context_id):
 
     if '_Clusters' in wrd.world_defs:
         frag.add_include_front('std/clusters.glsl')
+        frag.add_include('std/shadows.glsl')
+        frag.add_include('std/light_common.glsl')
         frag.add_uniform('vec2 cameraProj', link='_cameraPlaneProj')
         frag.add_uniform('vec2 cameraPlane', link='_cameraPlane')
         frag.add_uniform('vec4 lightsArray[maxLights * 3]', link='_lightsArray')
@@ -278,7 +280,7 @@ def make_gi(context_id):
                     frag.add_uniform('sampler2DShadow shadowMapAtlasPoint')
                 else:
                     frag.add_uniform('sampler2DShadow shadowMapAtlas', top=True)
-                frag.add_uniform('vec4 pointLightDataArray[maxLightsCluster]', link='_pointLightsAtlasArray')
+                frag.add_uniform('vec4 pointLightDataArray[maxLightsCluster]', link='_pointLightsAtlasArray', included=True)
             else:
                 frag.add_uniform('samplerCubeShadow shadowMapPoint[4]')
 
@@ -332,7 +334,7 @@ def make_gi(context_id):
             frag.write('        else if (li == 2) visibility *= shadowTest(shadowMapSpot[2], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
             frag.write('        else if (li == 3) visibility *= shadowTest(shadowMapSpot[3], lPos.xyz / lPos.w, lightsArray[li * 3 + 2].x);')
             frag.write('#endif')
-        frag.write('        }')
+            frag.write('    }')
         frag.write('        if (lightsArray[li * 3 + 2].y == 0.0) {')
         frag.write('            visibility = attenuate(distance(wposition, ld));')
         frag.write('#ifdef _ShadowMapAtlas')
@@ -368,17 +370,17 @@ def make_gi(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    vec3 basecol_direction = col * direction_weights.x;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    vec3 basecol_direction = col * direction_weights.y;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    vec3 basecol_direction = col * direction_weights.z;')
-    frag.write('    imageAtomicMax(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), convVec4ToRGBA8(vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
     frag.write('}')
 
     return con_voxel

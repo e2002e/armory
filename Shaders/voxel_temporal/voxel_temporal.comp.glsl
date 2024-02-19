@@ -28,9 +28,9 @@ THE SOFTWARE.
 #include "std/voxels_constants.h"
 
 #ifdef _VoxelGI
-uniform layout(r32ui) uimage3D voxels;
-uniform layout(r32ui) uimage3D voxelsB;
-uniform layout(r32ui) uimage3D voxelsOut;
+uniform layout(rgba8) image3D voxels;
+uniform layout(rgba8) image3D voxelsB;
+uniform layout(rgba8) image3D voxelsOut;
 #else
 uniform layout(r8) image3D voxels;
 uniform layout(r8) image3D voxelsB;
@@ -79,14 +79,14 @@ void main() {
 					coords.z >= 0 && coords.z < res
 				)
 					#ifdef _VoxelGI
-					col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), 0.5);
+					col = mix(imageLoad(voxelsB, dst), imageLoad(voxels, dst), 0.5);
 					#else
 					opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
 					#endif
 			}
 			else
 				#ifdef _VoxelGI
-				col = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), convRGBA8ToVec4(imageLoad(voxels, dst).r), 0.5);
+				col = mix(imageLoad(voxelsB, dst), imageLoad(voxels, dst), 0.5);
 				#else
 				opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
 				#endif
@@ -124,7 +124,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicAdd(voxelsOut, dst, convVec4ToRGBA8(col));
+		imageStore(voxelsOut, dst, col);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
