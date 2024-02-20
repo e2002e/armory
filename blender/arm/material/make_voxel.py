@@ -54,6 +54,7 @@ def make_gi(context_id):
 
     rpdat = arm.utils.get_rp()
     frag.add_uniform('layout(rgba8) image3D voxels')
+    frag.add_uniform('layout(rgba8) image3D voxelsEmission')
     frag.add_uniform('layout(rgba8) image3D voxelsNor')
 
 
@@ -356,7 +357,6 @@ def make_gi(context_id):
         frag.write('    basecol += visibility * lightsArray[li * 3 + 1].xyz;')
         frag.write('}')
 
-    frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
@@ -368,22 +368,28 @@ def make_gi(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
+    frag.write('    vec3 emission_direction = emissionCol * direction_weights.x;')
     frag.write('    vec3 normal_direction = (voxnormal * direction_weights.x) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsEmission, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(min(emission_direction, vec3(1.0)), 1.0));')
     frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
+    frag.write('    vec3 emission_direction = emissionCol * direction_weights.y;')
     frag.write('    vec3 normal_direction = (voxnormal * direction_weights.y) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsEmission, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(min(emission_direction, vec3(1.0)), 1.0));')
     frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
+    frag.write('    vec3 emission_direction = emissionCol * direction_weights.z;')
     frag.write('    vec3 normal_direction = (voxnormal * direction_weights.z) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsEmission, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(min(emission_direction, vec3(1.0)), 1.0));')
     frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
@@ -449,7 +455,6 @@ def make_ao(context_id):
 
     frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
 
-    frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')

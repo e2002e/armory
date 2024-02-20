@@ -62,7 +62,9 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsOut");
 			Inc.initGI("voxelsOutB");
 			Inc.initGI("voxelsNor");
-			#if (rp_voxels == "Voxel AO")
+			#if (rp_voxels == "Voxel GI")
+			Inc.initGI("voxelsEmission");
+			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
 		}
@@ -569,12 +571,13 @@ class RenderPathDeferred {
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
 			path.bindTarget("voxels", "voxels");
+			#if (rp_voxels == "Voxel GI")
+			path.bindTarget("voxelsEmission", "voxelsEmission");
+			#end
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.drawMeshes("voxel");
 
 			Inc.voxelsStabilize(voxelsOut, voxelsOutLast);
-
-			//Inc.computeVoxelsEnd();
 
 			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 
