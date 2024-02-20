@@ -25,6 +25,10 @@
 					"link": "_clipmap_center"
 				},
 				{
+					"name": "clipmap_position",
+					"link": "_clipmap_position"
+				},
+				{
 					"name": "invVP",
 					"link": "_inverseViewProjectionMatrix"
 				},

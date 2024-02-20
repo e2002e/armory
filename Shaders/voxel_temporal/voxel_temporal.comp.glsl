@@ -83,8 +83,8 @@ void main() {
 			#ifdef _VoxelGI
 			vec4 diffuse = imageLoad(voxels, src);
 			vec4 emission = imageLoad(voxelsEmission, src);
-			radiance = diffuse;// + emission;
-			vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
+			radiance = diffuse + emission;
+			//vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
 			//radiance.rgb *= indirect_diffuse / 3.14159 + indirect_diffuse;
 			#else
 			float opac = imageLoad(voxels, src).r;

@@ -173,6 +173,12 @@ class Uniforms {
 				v.y = armory.renderpath.Clipmap.clipmap_center.y;
 				v.z = armory.renderpath.Clipmap.clipmap_center.z;
 			}
+			case "_clipmap_position": {
+				v = iron.object.Uniforms.helpVec;
+				v.x = armory.renderpath.Clipmap.position.x;
+				v.y = armory.renderpath.Clipmap.position.y;
+				v.z = armory.renderpath.Clipmap.position.z;
+			}
 			#end
 		}
 		return v;
