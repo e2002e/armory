@@ -43,23 +43,24 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
 	const int res = voxelgiResolution.x;
-	const ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	#ifdef _VoxelGI
 	vec4 col;
 	#else
 	float opac;
 	#endif
+	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
+	src.y += clipmapLevel * res;
 
 	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
-		ivec3 dst = src;
-		dst.x += i * res;
-		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		col = vec4(0.0);
 		#else
 		opac = 0.0;
 		#endif
+
+		ivec3 dst = src;
+		dst.x += i * res;
 
 		if (any(notEqual(clipmap_center_last, vec3(0.0))))
 		{

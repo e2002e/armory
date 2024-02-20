@@ -369,17 +369,23 @@ def make_gi(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.x;')
-    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.x) * 0.5 + 0.5;')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.y;')
-    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.y) * 0.5 + 0.5;')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    vec3 basecol_direction = basecol * direction_weights.z;')
-    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), (vec4(min(basecol_direction, vec3(1.0)), 1.0)));')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.z) * 0.5 + 0.5;')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(min(basecol_direction, vec3(1.0)), 1.0));')
+    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     return con_voxel
@@ -404,7 +410,8 @@ def make_ao(context_id):
     frag.add_include('std/math.glsl')
     frag.add_include('std/imageatomic.glsl')
     frag.write_header('#extension GL_ARB_shader_image_load_store : enable')
-    frag.add_uniform('layout(r8) writeonly image3D voxels')
+    frag.add_uniform('layout(r8) image3D voxels')
+    frag.add_uniform('layout(r8) image3D voxelsNor')
 
     vert.add_include('compiled.inc')
     vert.add_uniform('mat4 W', '_worldMatrix')
@@ -456,17 +463,23 @@ def make_ao(context_id):
 
     frag.write('if (direction_weights.x > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.x;')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.x) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(opac_direction));')
+    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.y;')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.y) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(opac_direction));')
+    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
     frag.write('    float opac_direction = 1.0 * direction_weights.z;')
+    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.z) * 0.5 + 0.5;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(opac_direction));')
+    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     return con_voxel

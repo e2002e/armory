@@ -11,6 +11,7 @@ class RenderPathDeferred {
 
 	#if (rp_voxels != "Off")
 	static var voxels = "voxels";
+	static var voxelsLast = "voxels";
 	#end
 
 	#if rp_bloom
@@ -57,9 +58,10 @@ class RenderPathDeferred {
 
 		#if (rp_voxels != 'Off')
 		{
-			Inc.initGI("voxelsOut");
 			Inc.initGI("voxels");
 			Inc.initGI("voxelsB");
+			Inc.initGI("voxelsNor");
+			Inc.initGI("voxelsOut");
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
@@ -528,10 +530,11 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.clearImage(voxtex, 0x00000000);
+				path.clearImage(voxels, 0x00000000);
 
 			Inc.voxelsStabilizeBegin();
 
@@ -565,10 +568,11 @@ class RenderPathDeferred {
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxtex, "voxels");
+			path.bindTarget(voxels, "voxels");
+			path.bindTarget("voxelsNor", "voxelsNor");
 			path.drawMeshes("voxel");
 
-			Inc.voxelsStabilize(voxtex);
+			Inc.voxelsStabilize(voxels, voxelsLast);
 
 			//Inc.computeVoxelsEnd();
 

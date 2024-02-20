@@ -25,18 +25,23 @@ THE SOFTWARE.
 #include "std/math.glsl"
 #include "std/gbuffer.glsl"
 #include "std/imageatomic.glsl"
-#include "std/voxels_constants.h"
+#include "std/conetrace.glsl"
 
 #ifdef _VoxelGI
+uniform sampler3D voxelsSampler;
 uniform layout(rgba8) image3D voxels;
 uniform layout(rgba8) image3D voxelsB;
+uniform layout(rgba8) image3D voxelsNor;
 uniform layout(rgba8) image3D voxelsOut;
 #else
+uniform sampler3D voxelsSampler;
 uniform layout(r8) image3D voxels;
 uniform layout(r8) image3D voxelsB;
+uniform layout(r8) image3D voxelsNor;
 uniform layout(r8) image3D voxelsOut;
 #endif
 
+uniform vec3 clipmap_center;
 uniform vec3 clipmap_center_last;
 uniform int clipmapLevel;
 uniform float voxelBlend;
@@ -45,9 +50,7 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
 	int res = voxelgiResolution.x;
-	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	#ifdef _VoxelGI
-	vec4 col;
 	vec4 aniso_colors[6];
 	#else
 	float opac;
@@ -56,43 +59,73 @@ void main() {
 
 	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
+		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
+		src.x += i * res;
 		ivec3 dst = src;
-		dst.x += i * res;
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
-		col = vec4(0.0);
+		vec4 radiance = vec4(0.0);
 		#else
 		opac = 0.0;
 		#endif
 
 		if (i < 6) {
-			if (any(notEqual(clipmap_center_last, vec3(0.0))))
+			vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
+			wposition = wposition * 2.0 - 1.0;
+			wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
+			wposition *= voxelgiResolution.x;
+			wposition += clipmap_center;
+
+			vec3 n = imageLoad(voxelsNor, dst).xyz;
+
+			#ifdef _VoxelGI
+			vec4 diffuse = imageLoad(voxels, dst);
+			radiance = diffuse;
+			vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
+			radiance.rgb *= indirect_diffuse / 3.14159 + indirect_diffuse;
+			#else
+			opac = traceAO(wposition, n, voxelsSampler, clipmap_center);
+			#endif
+
+			#ifdef _VoxelGI
+			if (radiance.a > 0.0)
+			#else
+			if (opac > 0.0)
+			#endif
 			{
-				ivec3 coords = ivec3(dst - clipmap_center_last);
-				int aniso_face_start_x = i * res;
-				int aniso_face_end_x = aniso_face_start_x + res;
-				int clipmap_face_start_y = clipmapLevel * res;
-				int clipmap_face_end_y = clipmap_face_start_y + res;
-				if (
-					coords.x >= aniso_face_start_x && coords.x < aniso_face_end_x &&
-					coords.y >= clipmap_face_start_y && coords.y < clipmap_face_end_y &&
-					coords.z >= 0 && coords.z < res
-				)
+				if (any(notEqual(clipmap_center_last, vec3(0.0))))
+				{
+					ivec3 coords = ivec3(dst - clipmap_center_last);
+					int aniso_face_start_x = i * res;
+					int aniso_face_end_x = aniso_face_start_x + res;
+					int clipmap_face_start_y = clipmapLevel * res;
+					int clipmap_face_end_y = clipmap_face_start_y + res;
+					if (
+						coords.x >= aniso_face_start_x && coords.x < aniso_face_end_x &&
+						coords.y >= clipmap_face_start_y && coords.y < clipmap_face_end_y &&
+						coords.z >= 0 && coords.z < res
+					)
+						#ifdef _VoxelGI
+						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+						#else
+						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
+						#endif
+				}
+				else
 					#ifdef _VoxelGI
-					col = mix(imageLoad(voxelsB, dst), imageLoad(voxels, dst), 0.5);
+					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
 					#else
-					opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
+					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 					#endif
 			}
 			else
 				#ifdef _VoxelGI
-				col = mix(imageLoad(voxelsB, dst), imageLoad(voxels, dst), 0.5);
+				radiance = vec4(0.0);
 				#else
-				opac = mix(imageLoad(voxelsB, dst).r, imageLoad(voxels, dst).r, 0.5);
+				opac = 0.0;
 				#endif
-
 			#ifdef _VoxelGI
-			aniso_colors[i] = col;
+			aniso_colors[i] = radiance;
 			#else
 			aniso_colors[i] = opac;
 			#endif
@@ -113,7 +146,7 @@ void main() {
 				aniso_colors[face_offsets.y] * direction_weights.y +
 				aniso_colors[face_offsets.z] * direction_weights.z
 				;
-			col = sam;
+			radiance = sam;
 			#else
 			float sam =
 				aniso_colors[face_offsets.x] * direction_weights.x +
@@ -124,7 +157,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageStore(voxelsOut, dst, col);
+		imageStore(voxelsOut, dst, radiance);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

@@ -108,7 +108,8 @@ float sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const 
 
 #ifdef _VoxelGI
 vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precomputed_direction, const float aperture, const float maxDist, const vec3 clipmap_center) {
-    vec4 sampleCol = vec4(0.0);
+    vec3 sampleCol = vec3(0.0);
+	float alpha = 0.0;
 	vec3 indices = faceIndices(dir);
 	float voxelSize0 = voxelgiVoxelSize * 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
@@ -118,7 +119,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 	float coneCoefficient = 2.0 * tan(aperture * 0.5);
 	int clipmap_index0 = 0;
 
-    while (sampleCol.a < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
+    while (alpha < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		vec4 mipSample = vec4(0.0);
 		float diam = max(voxelSize0, dist * coneCoefficient);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
@@ -145,11 +146,13 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 		}
 
 		mipSample *= step_dist / voxelSize;
-		sampleCol += (1.0 - sampleCol) * mipSample;
+		float a = 1.0 - alpha;
+		sampleCol += a * mipSample.rgb;
+		alpha += a * mipSample.a;
 		step_dist = diam * voxelgiStep;
 		dist += step_dist;
 	}
-    return sampleCol;
+    return vec4(sampleCol, alpha);
 }
 
 
@@ -168,7 +171,7 @@ vec4 traceDiffuse(const vec3 origin, const vec3 normal, sampler3D voxels, const 
 	}
 	amount /= sum;
 	sampleCol = max(vec4(0.0), amount);
-	return sampleCol * voxelgiOcc;;
+	return sampleCol;
 }
 
 
@@ -248,7 +251,7 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3
 	}
 	amount /= sum;
 	sampleCol = max(0.0, amount);
-	return sampleCol * voxelgiOcc;
+	return sampleCol;
 }
 #endif
 
