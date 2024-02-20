@@ -10,8 +10,8 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxels = "voxels";
-	static var voxelsLast = "voxels";
+	static var voxelsOut = "voxelsOut";
+	static var voxelsOutLast = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -59,9 +59,9 @@ class RenderPathDeferred {
 		#if (rp_voxels != 'Off')
 		{
 			Inc.initGI("voxels");
-			Inc.initGI("voxelsB");
-			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsOut");
+			Inc.initGI("voxelsOutB");
+			Inc.initGI("voxelsNor");
 			#if (rp_voxels == "Voxel AO")
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
@@ -530,13 +530,13 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.clearImage(voxels, 0x00000000);
+				path.clearImage("voxels", 0x00000000);
 
-			Inc.voxelsStabilizeBegin();
+			Inc.voxelsStabilizeBegin(voxelsOut);
 
 			var camera = iron.Scene.active.camera;
 			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
@@ -568,18 +568,18 @@ class RenderPathDeferred {
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxels, "voxels");
+			path.bindTarget("voxels", "voxels");
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.drawMeshes("voxel");
 
-			Inc.voxelsStabilize(voxels, voxelsLast);
+			Inc.voxelsStabilize(voxelsOut, voxelsOutLast);
 
 			//Inc.computeVoxelsEnd();
 
 			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.generateMipmaps("voxelsOut");
+				path.generateMipmaps(voxelsOut);
 		}
 		#end
 

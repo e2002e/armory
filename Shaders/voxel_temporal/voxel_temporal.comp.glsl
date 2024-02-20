@@ -30,15 +30,15 @@ THE SOFTWARE.
 #ifdef _VoxelGI
 uniform sampler3D voxelsSampler;
 uniform layout(rgba8) image3D voxels;
-uniform layout(rgba8) image3D voxelsB;
-uniform layout(rgba8) image3D voxelsNor;
 uniform layout(rgba8) image3D voxelsOut;
+uniform layout(rgba8) image3D voxelsOutB;
+uniform layout(rgba8) image3D voxelsNor;
 #else
 uniform sampler3D voxelsSampler;
 uniform layout(r8) image3D voxels;
-uniform layout(r8) image3D voxelsB;
-uniform layout(r8) image3D voxelsNor;
 uniform layout(r8) image3D voxelsOut;
+uniform layout(r8) image3D voxelsOutB;
+uniform layout(r8) image3D voxelsNor;
 #endif
 
 uniform vec3 clipmap_center;
@@ -76,13 +76,13 @@ void main() {
 			wposition *= voxelgiResolution.x;
 			wposition += clipmap_center;
 
-			vec3 n = imageLoad(voxelsNor, dst).xyz;
+			vec3 n = imageLoad(voxelsNor, src).xyz;
 
 			#ifdef _VoxelGI
-			vec4 diffuse = imageLoad(voxels, dst);
+			vec4 diffuse = imageLoad(voxels, src);
 			radiance = diffuse;
 			vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
-			radiance.rgb *= indirect_diffuse / 3.14159 + indirect_diffuse;
+			//radiance = indirect_diffuse / 3.14159 + indirect_diffuse;
 			#else
 			opac = traceAO(wposition, n, voxelsSampler, clipmap_center);
 			#endif
@@ -106,16 +106,16 @@ void main() {
 						coords.z >= 0 && coords.z < res
 					)
 						#ifdef _VoxelGI
-						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+						radiance = mix(imageLoad(voxelsOutB, dst), radiance, 0.5);
 						#else
-						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
+						opac = mix(imageLoad(voxelsOutB, dst).r, opac, 0.5);
 						#endif
 				}
 				else
 					#ifdef _VoxelGI
-					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+					radiance = mix(imageLoad(voxelsOutB, dst), radiance, 0.5);
 					#else
-					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
+					opac = mix(imageLoad(voxelsOutB, dst).r, opac, 0.5);
 					#endif
 			}
 			else

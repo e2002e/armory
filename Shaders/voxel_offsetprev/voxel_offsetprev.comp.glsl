@@ -28,11 +28,11 @@ THE SOFTWARE.
 #include "std/voxels_constants.h"
 
 #ifdef _VoxelGI
-uniform layout(rgba8) image3D voxelsB;
 uniform layout(rgba8) image3D voxelsOut;
+uniform layout(rgba8) image3D voxelsOutB;
 #else
-uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
+uniform layout(r8) image3D voxelsOutB;
 #endif
 
 uniform vec3 clipmap_center_last;
@@ -75,9 +75,9 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = imageLoad(voxelsB, dst);
+				col = imageLoad(voxelsOutB, dst);
 				#else
-				opac = imageLoad(voxelsB, coords).r;
+				opac = imageLoad(voxelsOutB, coords).r;
 				#endif
 			else
 				#ifdef _VoxelGI
@@ -88,9 +88,9 @@ void main() {
 		}
 		else
 			#ifdef _VoxelGI
-			col = imageLoad(voxelsB, dst);
+			col = imageLoad(voxelsOutB, dst);
 			#else
-			opac = imageLoad(voxelsB, dst).r;
+			opac = imageLoad(voxelsOutB, dst).r;
 			#endif
 
 		#ifdef _VoxelGI

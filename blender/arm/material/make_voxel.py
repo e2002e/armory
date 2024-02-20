@@ -358,7 +358,6 @@ def make_gi(context_id):
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
-    frag.write('uvw.y += clipmapLevel;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x < 0 ? 0 : 1,')
@@ -452,7 +451,6 @@ def make_ao(context_id):
 
     frag.add_uniform('int clipmapLevel', '_clipmapLevel')
     frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
-    frag.write('uvw.y += clipmapLevel;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x < 0 ? 0 : 1,')
