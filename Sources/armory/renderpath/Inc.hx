@@ -599,7 +599,7 @@ class Inc {
 	#end
 
 	#if (rp_voxels != "Off")
-	public static function voxelsStabilizeBegin() {
+	public static function computeVoxelsBegin() {
 		if (voxel_sh0 == null) {
 			voxel_sh0 = path.getComputeShader("voxel_offsetprev");
 			voxel_sh1 = path.getComputeShader("voxel_temporal");
@@ -626,7 +626,7 @@ class Inc {
 		path.clearImage("voxelsOut", 0x00000000);
 	}
 
-	public static function voxelsStabilize(voxels = "voxels", voxelsLast = "voxelsB") {
+	public static function computeVoxels(voxelsLast = "voxelsB") {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 
@@ -645,7 +645,7 @@ class Inc {
 
 		kha.compute.Compute.setShader(voxel_sh1);
 		kha.compute.Compute.setSampledTexture(voxel_ta1, rts.get(voxelsLast).image);
-		kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxels).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tb1, rts.get("voxels").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tc1, rts.get(voxelsLast).image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_td1, rts.get("voxelsNor").image, kha.compute.Access.Read);
 		#if (rp_voxels == "Voxel GI")

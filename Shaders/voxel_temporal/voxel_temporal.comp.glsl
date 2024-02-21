@@ -46,7 +46,6 @@ uniform layout(r8) image3D voxelsNor;
 uniform vec3 clipmap_center;
 uniform vec3 clipmap_center_last;
 uniform int clipmapLevel;
-uniform float voxelBlend;
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
@@ -83,12 +82,11 @@ void main() {
 			#ifdef _VoxelGI
 			vec4 diffuse = imageLoad(voxels, src);
 			vec4 emission = imageLoad(voxelsEmission, src);
-			radiance = diffuse + emission;
+			radiance = diffuse;// + emission;
 			//vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
 			//radiance.rgb *= indirect_diffuse / 3.14159 + indirect_diffuse;
 			#else
 			float opac = imageLoad(voxels, src).r;
-			//opac = traceAO(wposition, n, voxelsSampler, clipmap_center);
 			#endif
 
 			#ifdef _VoxelGI

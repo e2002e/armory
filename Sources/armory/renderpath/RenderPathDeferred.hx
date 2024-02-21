@@ -537,9 +537,7 @@ class RenderPathDeferred {
 
 			path.clearImage(voxels, 0x00000000);
 
-			Inc.voxelsStabilizeBegin();
-
-			var camera = iron.Scene.active.camera;
+			Inc.computeVoxelsBegin();
 
 			#if (rp_voxels == "Voxel GI")
 			#if rp_shadowmap
@@ -563,7 +561,7 @@ class RenderPathDeferred {
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.drawMeshes("voxel");
 
-			Inc.voxelsStabilize(voxels, voxelsLast);
+			Inc.computeVoxels(voxelsLast);
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");
