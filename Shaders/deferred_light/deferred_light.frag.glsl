@@ -37,11 +37,11 @@ uniform sampler2D gbuffer_refraction;
 
 #ifdef _VoxelGI
 uniform sampler3D voxels;
-uniform vec3 clipmap_position;
+uniform vec3 clipmap_center;
 #endif
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
-uniform vec3 clipmap_position;
+uniform vec3 clipmap_center;
 #endif
 
 uniform float envmapStrength;
@@ -285,20 +285,12 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	float dist = max(abs(clipmap_position.x - p.x), max(abs(clipmap_position.y - p.y), abs(clipmap_position.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * pow(2.0, clipmapLevel) * voxelgiVoxelSize;
-	vec3 clipmap_center = floor(clipmap_position / texelSize) * texelSize;
 	fragColor.rgb = traceDiffuse(p, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;
 	if(roughness < 1.0 && occspec.y > 0.0)
 		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, clipmap_center).rgb * voxelgiRefl * occspec.y;
 #endif
 
 #ifdef _VoxelAOvar
-	float dist = max(abs(clipmap_position.x - eye.x), max(abs(clipmap_position.y - eye.y), abs(clipmap_position.z - eye.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * pow(2.0, clipmapLevel) * voxelgiVoxelSize;
-	vec3 clipmap_center = floor(clipmap_position / texelSize) * texelSize;
 	envl.rgb *= 1.0 - traceAO(p, n, voxels, clipmap_center);
 #endif
 

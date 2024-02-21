@@ -171,7 +171,7 @@ vec4 traceDiffuse(const vec3 origin, const vec3 normal, sampler3D voxels, const 
 	}
 	amount /= sum;
 	sampleCol = max(vec4(0.0), amount);
-	return sampleCol;
+	return sampleCol * voxelgiOcc;
 }
 
 
@@ -251,7 +251,7 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3
 	}
 	amount /= sum;
 	sampleCol = max(0.0, amount);
-	return sampleCol;
+	return sampleCol * voxelgiOcc;
 }
 #endif
 

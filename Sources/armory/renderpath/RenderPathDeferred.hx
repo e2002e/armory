@@ -10,8 +10,8 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxelsOut = "voxelsOut";
-	static var voxelsOutLast = "voxelsOut";
+	static var voxels = "voxels";
+	static var voxelsLast = "voxels";
 	#end
 
 	#if rp_bloom
@@ -59,8 +59,8 @@ class RenderPathDeferred {
 		#if (rp_voxels != 'Off')
 		{
 			Inc.initGI("voxels");
+			Inc.initGI("voxelsB");
 			Inc.initGI("voxelsOut");
-			Inc.initGI("voxelsOutB");
 			Inc.initGI("voxelsNor");
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsEmission");
@@ -532,62 +532,41 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
-			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 
-			path.clearImage("voxels", 0x00000000);
+			path.clearImage(voxels, 0x00000000);
 
-			Inc.voxelsStabilizeBegin(voxelsOut);
+			Inc.voxelsStabilizeBegin();
 
 			var camera = iron.Scene.active.camera;
 
-			//we save the position to be able to recompute the center in deferred_light
-			armory.renderpath.Clipmap.position.x = camera.transform.worldx();
-			armory.renderpath.Clipmap.position.y = camera.transform.worldy();
-			armory.renderpath.Clipmap.position.z = camera.transform.worldz();
-
-			for (i in 0...Main.voxelgiClipmapCount)
+			#if (rp_voxels == "Voxel GI")
+			#if rp_shadowmap
 			{
-				armory.renderpath.Clipmap.clipmapLevel = i;
-				var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, i);
-
-				var center = new iron.math.Vec3(
-					Math.floor(armory.renderpath.Clipmap.position.x / texelSize) * texelSize,
-					Math.floor(armory.renderpath.Clipmap.position.y / texelSize) * texelSize,
-					Math.floor(armory.renderpath.Clipmap.position.z / texelSize) * texelSize
-				);
-
-				armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
-				armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
-				armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
-
-				armory.renderpath.Clipmap.clipmap_center = center;
-
-				#if (rp_voxels == "Voxel GI")
-				#if rp_shadowmap
-				{
-					#if arm_shadowmap_atlas
-					Inc.bindShadowMapAtlas();
-					#else
-					Inc.bindShadowMap();
-					#end
-				}
+				#if arm_shadowmap_atlas
+				Inc.bindShadowMapAtlas();
+				#else
+				Inc.bindShadowMap();
 				#end
-				#end
-
-				path.setTarget("");
-				var res = Inc.getVoxelRes();
-				path.setViewport(res, res);
-				path.bindTarget("voxels", "voxels");
-				#if (rp_voxels == "Voxel GI")
-				path.bindTarget("voxelsEmission", "voxelsEmission");
-				#end
-				path.bindTarget("voxelsNor", "voxelsNor");
-				path.drawMeshes("voxel");
-
-				Inc.voxelsStabilize(voxelsOut, voxelsOutLast);
 			}
-			path.generateMipmaps("voxelsOut");
+			#end
+			#end
+
+			path.setTarget("");
+			var res = Inc.getVoxelRes();
+			path.setViewport(res, res);
+			path.bindTarget(voxels, "voxels");
+			#if (rp_voxels == "Voxel GI")
+			path.bindTarget("voxelsEmission", "voxelsEmission");
+			#end
+			path.bindTarget("voxelsNor", "voxelsNor");
+			path.drawMeshes("voxel");
+
+			Inc.voxelsStabilize(voxels, voxelsLast);
+
+			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
+				path.generateMipmaps("voxelsOut");
 		}
 		#end
 
