@@ -60,7 +60,6 @@ def make_gi(context_id):
 
     frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
     frag.add_uniform('float voxelSize', '_voxelSize')
-    frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
     frag.write('vec3 wposition = (voxposition * voxelgiResolution.x * voxelSize) + clipmap_center;')
 
     frag.write('vec3 basecol;')
@@ -357,7 +356,9 @@ def make_gi(context_id):
         frag.write('    basecol += visibility * lightsArray[li * 3 + 1].xyz;')
         frag.write('}')
 
-    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('vec3 uvw = voxposition / (voxelgiResolution.x * voxelSize);')
+    frag.write('uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x < 0 ? 0 : 1,')
@@ -453,9 +454,9 @@ def make_ao(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('if (abs(voxposition.z) > ' + rpdat.rp_voxelgi_resolution_z + ' || abs(voxposition.x) > 1 || abs(voxposition.y) > 1) return;')
-
-    frag.write('vec3 uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('vec3 uvw = voxposition / (voxelgiResolution.x * voxelSize);')
+    frag.write('uvw = (voxposition * 0.5 + 0.5);')
+    frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
     frag.write('vec3 face_offsets = vec3(')
     frag.write('	voxnormal.x < 0 ? 0 : 1,')
