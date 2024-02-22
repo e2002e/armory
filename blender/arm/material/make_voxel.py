@@ -128,7 +128,7 @@ def make_gi(context_id):
     vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
+    vert.write('voxpositionGeom = P;// - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
     geom.add_out('vec3 voxposition')
@@ -149,9 +149,12 @@ def make_gi(context_id):
     geom.write('vec3 p1 = voxpositionGeom[1] - voxpositionGeom[0];')
     geom.write('vec3 p2 = voxpositionGeom[2] - voxpositionGeom[0];')
 
+    geom.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    geom.add_uniform('float voxelSize', '_voxelSize')
+
     geom.write('vec3 p = abs(cross(p1, p2));')
     geom.write('for (uint i = 0; i < 3; ++i) {')
-    geom.write('    voxposition = voxpositionGeom[i];')
+    geom.write('    voxposition = (voxpositionGeom[i] - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     geom.write('    voxnormal = voxnormalGeom[i];')
     if "_Sun" in wrd.world_defs:
         geom.write('    lightPosition = lightPositionGeom[i];')
@@ -356,7 +359,7 @@ def make_gi(context_id):
         frag.write('    basecol += visibility * lightsArray[li * 3 + 1].xyz;')
         frag.write('}')
 
-    frag.write('vec3 uvw = voxposition;')
+    frag.write('vec3 uvw = voxposition / (voxelSize * voxelgiResolution.x);')
     frag.write('uvw = (voxposition * 0.5 + 0.5);')
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
@@ -432,6 +435,10 @@ def make_ao(context_id):
     vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
+
+    geom.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    geom.add_uniform('float voxelSize', '_voxelSize')
+
     geom.add_out('vec3 voxposition')
     geom.add_out('vec3 voxnormal')
 
@@ -439,7 +446,7 @@ def make_ao(context_id):
     geom.write('vec3 p2 = voxpositionGeom[2] - voxpositionGeom[0];')
     geom.write('vec3 p = abs(cross(p1, p2));')
     geom.write('for (uint i = 0; i < 3; ++i) {')
-    geom.write('    voxposition = voxpositionGeom[i];')
+    geom.write('    voxposition = (voxpositionGeom[i] - clipmap_center) / (voxelSize * voxelgiResolution.x);')
     geom.write('    voxnormal = voxnormalGeom[i];')
     geom.write('    if (p.z > p.x && p.z > p.y) {')
     geom.write('        gl_Position = vec4(voxposition.x, voxposition.y, 0.0, 1.0);')
@@ -454,7 +461,7 @@ def make_ao(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('vec3 uvw = voxposition;')
+    frag.write('vec3 uvw = voxposition / (voxelSize * voxelgiResolution.x);')
     frag.write('uvw = (voxposition * 0.5 + 0.5);')
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
