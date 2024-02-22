@@ -81,7 +81,8 @@ vec4 sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const i
 
 	return col;
 }
-#else
+#endif
+#ifdef _VoxelAOvar
 float sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const int precomputed_direction, const vec3 clipmap_center, const float clipmap_index, const float lod) {
  	dir = abs(dir);
  	float opac = 0.0;
@@ -232,7 +233,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 
 		mipSample *= step_dist / voxelSize;
 
-		float a = 1.0 - alpha;
+		float a = 1.0 - opacity;
 		opacity += a * mipSample;
 
 		step_dist = diam * voxelgiStep;

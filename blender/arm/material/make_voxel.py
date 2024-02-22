@@ -461,6 +461,9 @@ def make_ao(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
+    frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
+    frag.add_uniform('float voxelSize', '_voxelSize')
+
     frag.write('vec3 uvw = voxposition / (voxelSize * voxelgiResolution.x);')
     frag.write('uvw = (voxposition * 0.5 + 0.5);')
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
