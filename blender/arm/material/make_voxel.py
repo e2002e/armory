@@ -356,7 +356,7 @@ def make_gi(context_id):
         frag.write('    basecol += visibility * lightsArray[li * 3 + 1].xyz;')
         frag.write('}')
 
-    frag.write('vec3 uvw = voxposition / (voxelgiResolution.x * voxelSize);')
+    frag.write('vec3 uvw = voxposition;')
     frag.write('uvw = (voxposition * 0.5 + 0.5);')
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
@@ -454,7 +454,7 @@ def make_ao(context_id):
     geom.write('}')
     geom.write('EndPrimitive();')
 
-    frag.write('vec3 uvw = voxposition / (voxelgiResolution.x * voxelSize);')
+    frag.write('vec3 uvw = voxposition;')
     frag.write('uvw = (voxposition * 0.5 + 0.5);')
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('uvw = floor(uvw * voxelgiResolution.x);')
