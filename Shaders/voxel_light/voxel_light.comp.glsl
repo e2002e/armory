@@ -14,6 +14,8 @@ uniform int lightType;
 uniform vec3 lightDir;
 uniform vec2 spotData;
 uniform int clipmapLevel;
+uniform vec3 clipmap_center;
+uniform float voxelSize;
 #ifdef _ShadowMap
 uniform int lightShadow;
 uniform vec2 lightProj;
@@ -21,12 +23,9 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-uniform layout(r32ui) uimage3D voxelsOpac;
+uniform layout(rgba8) image3D voxelsOpac;
 uniform layout(rgba8) image3D voxelsNor;
 uniform layout(r32ui) uimage3D voxels;
-#ifdef _EmissionShaded
-uniform sampler2D gbuffer_emission;
-#endif
 
 #ifdef _ShadowMap
 uniform sampler2DShadow shadowMap;
@@ -36,14 +35,14 @@ uniform samplerCubeShadow shadowMapPoint;
 
 void main() {
 	const ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
-	vec3 wposition = vec3(src) / (voxelgiResolution.x * voxelgiVoxelSize * pow(2.0, clipmapLevel));
+	vec3 wposition = vec3(src) / (voxelgiResolution.x * pow(2.0, clipmapLevel) * voxelgiVoxelSize) + clipmap_center;
 	for (int i = 0; i < 6 + 16; i++) {
 		ivec3 dst = src;
 		dst.y += clipmapLevel * voxelgiResolution.x;
 		dst.x += i * voxelgiResolution.x;
 
-		uint ucol = imageLoad(voxelsOpac, dst).r;
-		vec4 col = convRGBA8ToVec4(ucol);
+		vec4 col = imageLoad(voxelsOpac, dst);
+		//vec4 col = convRGBA8ToVec4(ucol);
 		if (col.a == 0.0) return;
 
 		//uint unor = imageLoad(voxelsNor, adjustedID).r;

@@ -9,9 +9,12 @@ class RenderPathDeferred {
 
 	static var path: RenderPath;
 
-	#if (rp_voxels != "Off")
+	#if (rp_voxels == "Voxels AO")
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
+	#else
+	static var voxelsOpac = "voxelsOpac";
+	static var voxelsOpacLast = "voxelsOpac";
 	#end
 
 	#if rp_bloom
@@ -58,14 +61,15 @@ class RenderPathDeferred {
 
 		#if (rp_voxels != 'Off')
 		{
-			Inc.initGI("voxelsB");
 			Inc.initGI("voxels");
-			Inc.initGI("voxelsB");
 			Inc.initGI("voxelsOut");
 			Inc.initGI("voxelsNor");
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsEmission");
+			Inc.initGI("voxelsOpac");
+			Inc.initGI("voxelsOpacB");
 			#else
+			Inc.initGI("voxelsB");
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
 		}
@@ -533,8 +537,16 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
+			#if (rp_voxels == "Voxel AO")
+			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
+			var voxtexLast = voxels == "voxels" ? "voxelsB" : "voxels";
+			#else
+			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+			var voxtexLast = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+			#end
+
+			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+				path.clearImage(voxtex, 0x00000000);
 
 			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 
@@ -552,12 +564,10 @@ class RenderPathDeferred {
 
 			armory.renderpath.Clipmap.clipmap_center = center;
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.clearImage(voxels, 0x00000000);
-
 			Inc.computeVoxelsBegin();
 
 			#if (rp_voxels == "Voxel GI")
+			Inc.computeVoxelsLightBegin();
 			#if rp_shadowmap
 			{
 				#if arm_shadowmap_atlas
@@ -572,17 +582,18 @@ class RenderPathDeferred {
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxels, "voxels");
+			path.bindTarget(voxtex, "voxels");
 			#if (rp_voxels == "Voxel GI")
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxels(voxels, voxelsLast);
+			Inc.computeVoxels(voxtex, voxtexLast);
 
-			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
-				path.generateMipmaps("voxelsOut");
+			#if (rp_voxels == "Voxel GI")
+			Inc.computeVoxelsLight();
+			#end
 		}
 		#end
 
@@ -635,7 +646,12 @@ class RenderPathDeferred {
 			#if arm_voxelgi_bounces
 			path.bindTarget("voxelsBounce", "voxels");
 			#else
-			path.bindTarget("voxelsOut", "voxels");
+			#if (rp_voxels == "Voxel GI")
+			var voxtex = "voxels";
+			#else
+			var voxtex = "voxelsOut";
+			#end
+			path.bindTarget(voxtex, "voxels");
 			#end
 		}
 		#end
