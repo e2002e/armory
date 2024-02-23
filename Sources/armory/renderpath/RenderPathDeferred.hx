@@ -10,10 +10,8 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels == "Voxel AO")
-	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
 	#else
-	static var voxels = "voxelsOpac";
 	static var voxelsLast = "voxelsOpac";
 	#end
 
@@ -67,7 +65,6 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsOpacB");
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
-			Inc.initGI("voxelsOpacOut");
 			#else
 			Inc.initGI("voxels");
 			Inc.initGI("voxelsB");
@@ -539,31 +536,15 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 
 			#if (rp_voxels == "Voxel AO")
-			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
+			var voxtex = "voxels";
+			voxelsLast = voxelsLast == "voxelsB" ? "voxels" : "voxelsB";
 			#else
-			voxels = voxels == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
-			voxelsLast = voxels == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+			var voxtex = "voxelsOpac";
+			voxelsLast = voxelsLast == "voxelsOpacB" ? "voxelsOpac" : "voxelsOpacB";
 			#end
 
-			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
-
-			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
-			var camera = iron.Scene.active.camera;
-			var center = new iron.math.Vec3(
-				Math.floor(camera.transform.worldx() / texelSize) * texelSize,
-				Math.floor(camera.transform.worldy() / texelSize) * texelSize,
-				Math.floor(camera.transform.worldz() / texelSize) * texelSize
-			);
-
-			armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
-			armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
-			armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
-
-			armory.renderpath.Clipmap.clipmap_center = center;
-
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.clearImage(voxels, 0x00000000);
+				path.clearImage(voxtex, 0x00000000);
 
 			Inc.computeVoxelsBegin();
 
@@ -582,17 +563,14 @@ class RenderPathDeferred {
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxels, "voxels");
+			path.bindTarget(voxtex, "voxels");
 			#if (rp_voxels == "Voxel GI")
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxels(voxels, voxelsLast);
-
-			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
-				path.generateMipmaps("voxelsOut");
+			Inc.computeVoxels(voxtex, voxelsLast);
 		}
 		#end
 
