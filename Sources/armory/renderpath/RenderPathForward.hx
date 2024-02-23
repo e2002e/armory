@@ -10,8 +10,8 @@ class RenderPathForward {
 	static var path: RenderPath;
 
 	#if (rp_voxels == "Voxel AO")
-	static var voxelsOut = "voxelsOut";
-	static var voxelsOutLast = "voxelsOut";
+	static var voxels = "voxelsOut";
+	static var voxelsLast = "voxelsOut";
 	#else
 	static var voxelsOpac = "voxelsOpac";
 	static var voxelsOpacLast = "voxelsOpac";
@@ -315,7 +315,6 @@ class RenderPathForward {
 		}
 		#end
 
-
 		// Voxels
 		#if (rp_voxels != 'Off')
 		if (armory.data.Config.raw.rp_gi != false)
@@ -329,6 +328,22 @@ class RenderPathForward {
 			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			var voxtexLast = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			#end
+
+			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
+
+			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
+			var camera = iron.Scene.active.camera;
+			var center = new iron.math.Vec3(
+				Math.floor(camera.transform.worldx() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldy() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldz() / texelSize) * texelSize
+			);
+
+			armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
+			armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
+			armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
+
+			armory.renderpath.Clipmap.clipmap_center = center;
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
 				path.clearImage(voxtex, 0x00000000);

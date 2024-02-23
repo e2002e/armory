@@ -31,8 +31,6 @@ THE SOFTWARE.
 uniform sampler3D voxelsSampler;
 uniform layout(rgba8) image3D voxels;
 uniform layout(rgba8) image3D voxelsB;
-uniform layout(rgba8) image3D voxelsNor;
-uniform layout(rgba8) image3D voxelsEmission;
 uniform layout(rgba8) image3D voxelsOut;
 #endif
 #ifdef _VoxelAOvar
@@ -40,7 +38,6 @@ uniform sampler3D voxelsSampler;
 uniform layout(r8) image3D voxels;
 uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
-uniform layout(r8) image3D voxelsNor;
 #endif
 
 uniform vec3 clipmap_center;
@@ -77,16 +74,10 @@ void main() {
 			wposition *= voxelgiResolution.x;
 			wposition += clipmap_center;
 
-			vec3 n = imageLoad(voxelsNor, src).xyz;
-
 			#ifdef _VoxelGI
-			vec4 diffuse = imageLoad(voxels, src);
-			vec4 emission = imageLoad(voxelsEmission, src);
-			radiance = diffuse;// + emission;
-			//vec3 indirect_diffuse = traceDiffuse(wposition, n, voxelsSampler, clipmap_center).rgb;
-			//radiance.rgb *= indirect_diffuse / 3.14159 + indirect_diffuse;
+			radiance = imageLoad(voxels, src);
 			#else
-			float opac = imageLoad(voxels, src).r;
+			opac = imageLoad(voxels, src).r;
 			#endif
 
 			#ifdef _VoxelGI

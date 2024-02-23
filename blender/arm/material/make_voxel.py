@@ -249,7 +249,7 @@ def make_ao(context_id):
     vert.add_uniform('float voxelSize', '_voxelSize')
 
     vert.write('vec3 P = vec3(W * vec4(pos.xyz, 1.0));')
-    vert.write('voxpositionGeom = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);')
+    vert.write('voxpositionGeom = P;')
     vert.write('voxnormalGeom = normalize(N * vec3(nor.xy, pos.w));')
 
 

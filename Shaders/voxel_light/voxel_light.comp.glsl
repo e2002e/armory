@@ -24,7 +24,7 @@ uniform mat4 LVP;
 #endif
 
 uniform layout(rgba8) image3D voxelsOpac;
-uniform layout(rgba8) image3D voxelsNor;
+uniform layout(rgba8) image3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxels;
 
 #ifdef _ShadowMap
@@ -40,6 +40,8 @@ void main() {
 	wposition *= pow(2.0, clipmapLevel) * voxelgiVoxelSize;
 	wposition *= voxelgiResolution.x;
 	wposition += clipmap_center;
+
+	vec3 emission = imageLoad(voxelsEmission, src).rgb;
 
 	for (int i = 0; i < 6 + 16; i++) {
 		ivec3 dst = src;
@@ -87,7 +89,7 @@ void main() {
 			}
 		}
 
-		col.rgb *= visibility * lightColor;// * dotNL;
+		col.rgb *= visibility * lightColor + emission;// * dotNL;
 		col = clamp(col, vec4(0.0), vec4(1.0));
 
 		imageAtomicAdd(voxels, dst, convVec4ToRGBA8(col));

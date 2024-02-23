@@ -29,10 +29,10 @@ class Inc {
 	static var voxel_ta1:kha.compute.TextureUnit;
 	static var voxel_tb1:kha.compute.TextureUnit;
 	static var voxel_tc1:kha.compute.TextureUnit;
-	static var voxel_td1:kha.compute.TextureUnit;
+	static var voxel_ca1:kha.compute.ConstantLocation;
+	static var voxel_cb1:kha.compute.ConstantLocation;
+	static var voxel_cc1:kha.compute.ConstantLocation;
 	#if (rp_voxels == "Voxel GI")
-	static var voxel_te1:kha.compute.TextureUnit;
-
 	static var voxel_sh2:kha.compute.Shader = null;
 	static var voxel_ta2:kha.compute.TextureUnit;
 	static var voxel_tb2:kha.compute.TextureUnit;
@@ -53,10 +53,6 @@ class Inc {
 	static var voxel_ck2:kha.compute.ConstantLocation;
 	static var m = iron.math.Mat4.identity();
 	#end
-	static var voxel_tf1:kha.compute.TextureUnit;
-	static var voxel_ca1:kha.compute.ConstantLocation;
-	static var voxel_cb1:kha.compute.ConstantLocation;
-	static var voxel_cc1:kha.compute.ConstantLocation;
 	#end
 
 	public static function init(_path: RenderPath) {
@@ -630,14 +626,9 @@ class Inc {
 	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_center_last");
 	 		voxel_cb0 = voxel_sh0.getConstantLocation("clipmapLevel");
 
-			voxel_ta1 = voxel_sh1.getTextureUnit("voxelsSampler");
-			voxel_tb1 = voxel_sh1.getTextureUnit("voxels");
-			voxel_tc1 = voxel_sh1.getTextureUnit("voxelsB");
-			voxel_td1 = voxel_sh1.getTextureUnit("voxelsNor");
-			#if (rp_voxels == "Voxel GI")
-			voxel_te1 = voxel_sh1.getTextureUnit("voxelsEmission");
-			#end
-			voxel_tf1 = voxel_sh1.getTextureUnit("voxelsOut");
+			voxel_ta1 = voxel_sh1.getTextureUnit("voxels");
+			voxel_tb1 = voxel_sh1.getTextureUnit("voxelsB");
+			voxel_tc1 = voxel_sh1.getTextureUnit("voxelsOut");
 
 	 		voxel_ca1 = voxel_sh1.getConstantLocation("clipmap_center");
 	 		voxel_cb1 = voxel_sh1.getConstantLocation("clipmap_center_last");
@@ -674,14 +665,9 @@ class Inc {
 		kha.compute.Compute.compute(Std.int(res / 8 * (6 + 16)), Std.int(res / 8 * Main.voxelgiClipmapCount), Std.int(res / 8));
 
 		kha.compute.Compute.setShader(voxel_sh1);
-		kha.compute.Compute.setSampledTexture(voxel_ta1, rts.get(voxelsLast).image);
-		kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxels).image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_tc1, rts.get(voxelsLast).image, kha.compute.Access.Read);
-		#if (rp_voxels == "Voxel GI")
-		kha.compute.Compute.setTexture(voxel_td1, rts.get("voxelsNor").image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_te1, rts.get("voxelsEmission").image, kha.compute.Access.Read);
-		#end
-		kha.compute.Compute.setTexture(voxel_tf1, rts.get(out).image, kha.compute.Access.Write);
+		kha.compute.Compute.setTexture(voxel_ta1, rts.get(voxels).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxelsLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tc1, rts.get(out).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca1,
 			armory.renderpath.Clipmap.clipmap_center.x,
@@ -705,7 +691,7 @@ class Inc {
 	 	if (voxel_sh2 == null) {
 	 		voxel_sh2 = path.getComputeShader("voxel_light");
 	 		voxel_ta2 = voxel_sh2.getTextureUnit("voxelsOpac");
-	 		// voxel_tb = voxel_sh.getTextureUnit("voxelsNor");
+	 		voxel_tb2 = voxel_sh2.getTextureUnit("voxelsEmission");
 	 		voxel_tc2 = voxel_sh2.getTextureUnit("voxels");
 	 		voxel_td2 = voxel_sh2.getTextureUnit("shadowMap");
 	 		voxel_te2 = voxel_sh2.getTextureUnit("shadowMapSpot");
@@ -741,6 +727,7 @@ class Inc {
 	 		kha.compute.Compute.setShader(voxel_sh2);
 	 		kha.compute.Compute.setTexture(voxel_ta2, rts.get("voxelsOpacOut").image, kha.compute.Access.Read);
 	 		// kha.compute.Compute.setTexture(voxel_tb, rts.get("voxelsNor").image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_tb2, rts.get("voxelsEmission").image, kha.compute.Access.Read);
 	 		kha.compute.Compute.setTexture(voxel_tc2, rts.get("voxelsOut").image, kha.compute.Access.Write);
 
 	 		#if (rp_shadowmap)

@@ -659,19 +659,14 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
         frag.add_include('std/conetrace.glsl')
         frag.add_uniform('sampler3D voxels')
-        frag.add_uniform('sampler3D voxelsLast')
-
-        rpdat = arm.utils.get_rp()
-        if rpdat.rp_voxels != "Off" and (rpdat.rp_renderer == "Forward" or transluc_pass) and tese is not None:
-            make_tess.interpolate(tese, 'clipmap_center', 3, declare_out=True)
 
     if '_VoxelAOvar' in wrd.world_defs:
         frag.write('indirect *= 1.0 - traceAO(wposition, n, voxels, clipmap_center);')
 
     if '_VoxelGI' in wrd.world_defs:
-        frag.write('indirect += traceDiffuse(wposition, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;')
+        frag.write('indirect += traceDiffuse(wposition, n, voxels, clipmap_center).rgb * voxelgiDiff;')
         frag.write('if (roughness < 1.0 && specular > 0.0)')
-        frag.write('    indirect += traceSpecular(wposition, n, voxels, -eyeDir, roughness, clipmap_center).rgb * voxelgiRefl * specular;')
+        frag.write('    indirect += traceSpecular(wposition, n, voxels, -eyeDir, roughness, clipmap_center).rgb * voxelgiRefl;')
 
     frag.write('vec3 direct = vec3(0.0);')
 
