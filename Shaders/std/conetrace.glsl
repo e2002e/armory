@@ -123,7 +123,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
     while (alpha < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		vec4 mipSample = vec4(0.0);
 		float diam = max(voxelSize0, dist * coneCoefficient);
-        float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
+        float lod = clamp(log2(diam / voxelSize0 * voxelgiResolution.x), clipmap_index0, voxelgiClipmapCount - 1);
 
         float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);
@@ -139,10 +139,10 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 			continue;
 		}
 
-		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0);
+		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			vec4 mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0);
+			vec4 mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 

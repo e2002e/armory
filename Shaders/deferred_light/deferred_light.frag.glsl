@@ -285,12 +285,6 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	/*
-	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = pow(2.0, clipmapLevel) * 2.0 * voxelgiVoxelSize;
-	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
-	*/
 	fragColor.rgb = traceDiffuse(p, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;
 	if(roughness < 1.0 && occspec.y > 0.0)
 		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, clipmap_center).rgb * voxelgiRefl * occspec.y;
