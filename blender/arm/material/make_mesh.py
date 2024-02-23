@@ -656,12 +656,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     frag.write('indirect *= envmapStrength * occlusion;')
 
     if '_VoxelGI' in wrd.world_defs or '_VoxelAOvar' in wrd.world_defs:
-        frag.add_uniform('vec3 clipmap_position', '_clipmap_position')
-        frag.add_uniform('vec3 eye', '_cameraPosition')
-        frag.write('float dist = max(abs(clipmap_position.x - wposition.x), max(abs(clipmap_position.y - wposition.y), abs(clipmap_position.z - wposition.z)));')
-        frag.write('int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));')
-        frag.write('float texelSize = 2.0 * pow(2.0, clipmapLevel) * voxelgiVoxelSize;')
-        frag.write('vec3 clipmap_center = floor(clipmap_position / texelSize) * texelSize;')
+        frag.add_uniform('vec3 clipmap_center', '_clipmap_center')
         frag.add_include('std/conetrace.glsl')
         frag.add_uniform('sampler3D voxels')
         frag.add_uniform('sampler3D voxelsLast')

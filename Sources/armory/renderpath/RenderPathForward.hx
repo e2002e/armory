@@ -14,7 +14,7 @@ class RenderPathForward {
 	static var voxelsOutLast = "voxelsOut";
 	#else
 	static var voxelsOpac = "voxelsOpac";
-	static var voxelsOpacLast = "voxelsOpacB";
+	static var voxelsOpacLast = "voxelsOpac";
 	#end
 
 	#if rp_bloom
@@ -159,16 +159,19 @@ class RenderPathForward {
 		#end
 
 		#if (rp_voxels != "Off")
-		Inc.initGI("voxels");
-		Inc.initGI("voxelsOut");
-		Inc.initGI("voxelsNor");
-		#if (rp_voxels == "Voxel GI")
-		Inc.initGI("voxelsEmission");
-		Inc.initGI("voxelsOpac");
-		Inc.initGI("voxelsOpacB");
-		#else
-		Inc.initGI("voxelsB");
-		#end
+		{
+			Inc.initGI("voxelsOut");
+			#if (rp_voxels == "Voxel GI")
+			Inc.initGI("voxelsOpac");
+			Inc.initGI("voxelsOpacB");
+			Inc.initGI("voxelsNor");
+			Inc.initGI("voxelsEmission");
+			Inc.initGI("voxelsOpacOut");
+			#else
+			Inc.initGI("voxels");
+			Inc.initGI("voxelsB");
+			#end
+		}
 		#end
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA") || (rp_ssr && !rp_ssr_half) || (rp_water) || (rp_depth_texture))
@@ -359,9 +362,9 @@ class RenderPathForward {
 
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();
-
 			#if arm_voxelgi_bounces
 			Inc.computeVoxelsBounce();
+			#end
 			#end
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
@@ -405,12 +408,7 @@ class RenderPathForward {
 			#if arm_voxelgi_bounces
 			path.bindTarget("voxelsBounce", "voxels");
 			#else
-			#if (rp_voxels == "Voxel AO")
-			var voxtex = "voxelsOut";
-			#else
-			var voxtex = "voxels";
-			#end
-			path.bindTarget(voxtex, "voxels");
+			path.bindTarget("voxelsOut", "voxels");
 			#end
 		}
 		#end

@@ -594,10 +594,9 @@ class RenderPathDeferred {
 
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();
-			#end
-
 			#if arm_voxelgi_bounces
 			Inc.computeVoxelsBounce();
+			#end
 			#end
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
