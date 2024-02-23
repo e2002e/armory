@@ -568,7 +568,6 @@ class RenderPathDeferred {
 			Inc.computeVoxelsBegin();
 
 			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLightBegin();
 			#if rp_shadowmap
 			{
 				#if arm_shadowmap_atlas
@@ -591,13 +590,6 @@ class RenderPathDeferred {
 			path.drawMeshes("voxel");
 
 			Inc.computeVoxels(voxtex, voxtexLast);
-
-			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight();
-			#if arm_voxelgi_bounces
-			Inc.computeVoxelsBounce();
-			#end
-			#end
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");
