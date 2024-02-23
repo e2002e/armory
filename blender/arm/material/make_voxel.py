@@ -293,24 +293,18 @@ def make_ao(context_id):
     frag.write('vec3 direction_weights = abs(voxnormal);')
 
     frag.write('if (direction_weights.x > 0.0) {')
-    frag.write('    float opac_direction = 1.0 * direction_weights.x;')
-    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.x) * 0.5 + 0.5;')
+    frag.write('    float opac_direction = direction_weights.x;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(opac_direction));')
-    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.x, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.y > 0.0) {')
-    frag.write('    float opac_direction = 1.0 * direction_weights.y;')
-    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.y) * 0.5 + 0.5;')
+    frag.write('    float opac_direction = direction_weights.y;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(opac_direction));')
-    frag.write('    imageStore(voxelsNor, ivec3(uvw + ivec3(face_offsets.y, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     frag.write('if (direction_weights.z > 0.0) {')
-    frag.write('    float opac_direction = 1.0 * direction_weights.z;')
-    frag.write('    vec3 normal_direction = (voxnormal * direction_weights.z) * 0.5 + 0.5;')
+    frag.write('    float opac_direction = direction_weights.z;')
     frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(opac_direction));')
-    frag.write('    imageStore(voxels, ivec3(uvw + ivec3(face_offsets.z, 0, 0)), vec4(normal_direction, 1.0));')
     frag.write('}')
 
     return con_voxel

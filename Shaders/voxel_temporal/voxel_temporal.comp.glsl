@@ -83,6 +83,7 @@ void main() {
 		dst.y += clipmapLevel * res;
 		#ifdef _VoxelGI
 		vec4 radiance = vec4(0.0);
+		vec4 emission = vec4(0.0);
 		vec3 N = vec3(0.0);
 		#else
 		opac = 0.0;
@@ -97,10 +98,10 @@ void main() {
 			wposition += clipmap_center;
 
 			radiance = imageLoad(voxels, src);
+			emission = imageLoad(voxelsEmission, src);
 			N = imageLoad(voxelsNor, src).xyz;
 			//vec4 col = convRGBA8ToVec4(ucol);
-			if (radiance.a == 0.0) return;
-
+			//if (radiance.a == 0.0) return;
 			//uint unor = imageLoad(voxelsNor, adjustedID).r;
 			//vec3 wnormal = normalize(decNor(unor));
 

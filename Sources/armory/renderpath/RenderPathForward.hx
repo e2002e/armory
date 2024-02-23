@@ -10,11 +10,11 @@ class RenderPathForward {
 	static var path: RenderPath;
 
 	#if (rp_voxels == "Voxel AO")
-	static var voxels = "voxelsOut";
-	static var voxelsLast = "voxelsOut";
+	static var voxels = "voxels";
+	static var voxelsLast = "voxels";
 	#else
-	static var voxelsOpac = "voxelsOpac";
-	static var voxelsOpacLast = "voxelsOpac";
+	static var voxels = "voxelsOpac";
+	static var voxelsLast = "voxelsOpac";
 	#end
 
 	#if rp_bloom
@@ -322,11 +322,11 @@ class RenderPathForward {
 			var path = RenderPath.active;
 
 			#if (rp_voxels == "Voxel AO")
-			var voxtex = voxels == "voxels" ? "voxelsB" : "voxels";
-			var voxtexLast = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
+			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
 			#else
-			var voxtex = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
-			var voxtexLast = voxelsOpac == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+			voxels = voxels == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+			voxelsLast = voxels == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 			#end
 
 			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
@@ -346,7 +346,7 @@ class RenderPathForward {
 			armory.renderpath.Clipmap.clipmap_center = center;
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-				path.clearImage(voxtex, 0x00000000);
+				path.clearImage(voxels, 0x00000000);
 
 			Inc.computeVoxelsBegin();
 
@@ -366,14 +366,14 @@ class RenderPathForward {
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxtex, "voxels");
+			path.bindTarget(voxels, "voxels");
 			#if (rp_voxels == "Voxel GI")
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxels(voxtex, voxtexLast);
+			Inc.computeVoxels(voxels, voxelsLast);
 
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();
