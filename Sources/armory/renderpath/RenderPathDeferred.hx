@@ -9,12 +9,12 @@ class RenderPathDeferred {
 
 	static var path: RenderPath;
 
-	#if (rp_voxels == "Voxels GI")
-	static var voxelsOpac = "voxelsOpac";
-	static var voxelsOpacLast = "voxelsOpac";
-	#else
+	#if (rp_voxels == "Voxel AO")
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
+	#else
+	static var voxelsOpac = "voxelsOpac";
+	static var voxelsOpacLast = "voxelsOpac";
 	#end
 
 	#if rp_bloom
