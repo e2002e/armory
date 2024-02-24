@@ -541,8 +541,9 @@ class RenderPathDeferred {
 			var voxtex = "voxelsOpac";
 			#end
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0) {
-				path.clearImage(voxtex, 0x00000000);
+			path.clearImage(voxtex, 0x00000000);
+			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			{
 				#if (rp_voxels == "Voxel AO")
 				voxelsLast = voxelsLast == "voxels" ? "voxelsB" : "voxels";
 				#else

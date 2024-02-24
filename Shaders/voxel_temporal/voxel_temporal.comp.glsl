@@ -140,7 +140,7 @@ void main() {
 			}
 
 			radiance.rgb *= visibility * lightColor;// * dotNL;
-			radiance = clamp(radiance, vec4(0.0), vec4(1.0));
+			radiance = clamp(radiance + emission, vec4(0.0), vec4(1.0));
 
 			//vec3 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center).rgb;
 

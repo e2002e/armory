@@ -208,7 +208,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
     while (opacity < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		float mipSample = 0.0;
 		float diam = max(voxelSize0, dist * coneCoefficient);
-        float lod = clamp(log2(diam / voxelSize0 * voxelgiResolution.x), clipmap_index0, voxelgiClipmapCount - 1);
+        float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
 		float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);
 		vec3 p0 = start_pos + dir * dist;
