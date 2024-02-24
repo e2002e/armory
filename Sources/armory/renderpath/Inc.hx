@@ -653,7 +653,6 @@ class Inc {
 	 		#end
 	 		#end
 		}
-		path.clearImage("voxelsOut", 0x00000000);
 	}
 
 	public static function computeVoxels(voxels:String, voxelsLast:String) {

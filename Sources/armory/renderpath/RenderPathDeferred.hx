@@ -537,14 +537,19 @@ class RenderPathDeferred {
 
 			#if (rp_voxels == "Voxel AO")
 			var voxtex = "voxels";
-			voxelsLast = voxelsLast == "voxelsB" ? "voxels" : "voxelsB";
 			#else
 			var voxtex = "voxelsOpac";
-			voxelsLast = voxelsLast == "voxelsOpacB" ? "voxelsOpac" : "voxelsOpacB";
 			#end
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			if (armory.renderpath.Clipmap.clipmapLevel == 0) {
 				path.clearImage(voxtex, 0x00000000);
+				#if (rp_voxels == "Voxel AO")
+				voxelsLast = voxelsLast == "voxels" ? "voxelsB" : "voxels";
+				#else
+				voxelsLast = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+				#end
+				path.clearImage("voxelsOut", 0x00000000);
+			}
 
 			Inc.computeVoxelsBegin();
 
@@ -571,6 +576,9 @@ class RenderPathDeferred {
 			path.drawMeshes("voxel");
 
 			Inc.computeVoxels(voxtex, voxelsLast);
+
+			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
+				path.generateMipmaps("voxelsOut");
 		}
 		#end
 
