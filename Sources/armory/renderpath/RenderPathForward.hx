@@ -10,8 +10,10 @@ class RenderPathForward {
 	static var path: RenderPath;
 
 	#if (rp_voxels == "Voxel AO")
+	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
 	#else
+	static var voxels = "voxelsOpac";
 	static var voxelsLast = "voxelsOpac";
 	#end
 
@@ -318,47 +320,32 @@ class RenderPathForward {
 		{
 			var path = RenderPath.active;
 
-			#if (rp_voxels == "Voxel AO")
-			var voxtex = "voxels";
-			#else
-			var voxtex = "voxelsOpac";
-			#end
-
-			if (armory.renderpath.Clipmap.clipmapLevel == 0) {
-				path.clearImage(voxtex, 0x00000000);
+			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			{
 				#if (rp_voxels == "Voxel AO")
+				voxels = voxelsLast == "voxels" ? "voxelsB" : "voxels";
 				voxelsLast = voxelsLast == "voxels" ? "voxelsB" : "voxels";
 				#else
+				voxels = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 				voxelsLast = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
 				#end
+				path.clearImage(voxels, 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 			}
 
 			Inc.computeVoxelsBegin();
 
-			#if (rp_voxels == "Voxel GI")
-			#if rp_shadowmap
-			{
-				#if arm_shadowmap_atlas
-				Inc.bindShadowMapAtlas();
-				#else
-				Inc.bindShadowMap();
-				#end
-			}
-			#end
-			#end
-
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxtex, "voxels");
+			path.bindTarget(voxels, "voxels");
 			#if (rp_voxels == "Voxel GI")
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxels(voxtex, voxelsLast);
+			Inc.computeVoxels(voxels, voxelsLast);
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");

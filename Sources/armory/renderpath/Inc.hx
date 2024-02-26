@@ -706,7 +706,7 @@ class Inc {
 
 	 		kha.compute.Compute.setShader(voxel_sh1);
 
-			kha.compute.Compute.setTexture(voxel_ta1, rts.get("voxelsOpac").image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_ta1, rts.get(voxels).image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxelsLast).image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tc1, rts.get("voxelsOut").image, kha.compute.Access.Write);
 
@@ -724,7 +724,7 @@ class Inc {
 
 			kha.compute.Compute.setInt(voxel_cc1, armory.renderpath.Clipmap.clipmapLevel);
 
-			kha.compute.Compute.setSampledTexture(voxel_td1, rts.get("voxelsOpac").image);
+			kha.compute.Compute.setSampledTexture(voxel_td1, rts.get(voxelsLast).image);
 			kha.compute.Compute.setTexture(voxel_te1, rts.get("voxelsNor").image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tf1, rts.get("voxelsEmission").image, kha.compute.Access.Read);
 
@@ -791,7 +791,7 @@ class Inc {
 	 			kha.compute.Compute.setFloat2(voxel_ch1, vx, vy);
 	 		}
 
-			kha.compute.Compute.compute(Std.int(res), Std.int(res / 8), Std.int(res / 8));
+			kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
 		}
 		#end
 	}
