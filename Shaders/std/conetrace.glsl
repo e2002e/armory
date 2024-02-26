@@ -117,12 +117,11 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 	float step_dist = dist;
 	vec3 samplePos;
 	vec3 start_pos = origin + n * voxelSize0;
-	float coneCoefficient = 2.0 * tan(aperture * 0.5);
 	int clipmap_index0 = 0;
 
     while (alpha < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		vec4 mipSample = vec4(0.0);
-		float diam = max(voxelSize0, dist * coneCoefficient);
+		float diam = max(voxelSize0, dist * 2.0);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
 
         float clipmap_index = floor(lod);
@@ -202,12 +201,11 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 	float step_dist = dist;
 	vec3 samplePos;
 	vec3 start_pos = origin + n * voxelSize0;
-	float coneCoefficient = 2.0 * tan(aperture * 0.5);
 	int clipmap_index0 = 0;
 
     while (opacity < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		float mipSample = 0.0;
-		float diam = max(voxelSize0, dist * coneCoefficient);
+		float diam = max(voxelSize0, dist * 2.0);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
 		float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);
@@ -268,12 +266,11 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 	float step_dist = dist;
 	vec3 samplePos;
 	vec3 start_pos = origin + n * voxelSize0;
-	float coneCoefficient = 2.0 * tan(aperture * 0.5);
 	int clipmap_index0 = 0;
 
     while (sampleCol < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		float mipSample = 0.0;
-		float diam = max(voxelSize0, dist * coneCoefficient);
+		float diam = max(voxelSize0, dist * 2.0);
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
 		float clipmap_index = floor(lod);
 		float clipmap_blend = fract(lod);

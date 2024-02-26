@@ -320,20 +320,7 @@ class RenderPathForward {
 		{
 			var path = RenderPath.active;
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-			{
-				#if (rp_voxels == "Voxel AO")
-				voxels = voxelsLast == "voxels" ? "voxelsB" : "voxels";
-				voxelsLast = voxelsLast == "voxels" ? "voxelsB" : "voxels";
-				#else
-				voxels = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
-				voxelsLast = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
-				path.clearImage("voxelsNor", 0x00000000);
-				path.clearImage("voxelsEmission", 0x00000000);
-				#end
-				path.clearImage(voxels, 0x00000000);
-				path.clearImage("voxelsOut", 0x00000000);
-			}
+			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 
 			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
 			var camera = iron.Scene.active.camera;
@@ -348,6 +335,21 @@ class RenderPathForward {
 			armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
 
 			armory.renderpath.Clipmap.clipmap_center = center;
+
+			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			{
+				#if (rp_voxels == "Voxel AO")
+				voxels = voxelsLast == "voxels" ? "voxelsB" : "voxels";
+				voxelsLast = voxelsLast == "voxels" ? "voxelsB" : "voxels";
+				#else
+				voxels = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+				voxelsLast = voxelsLast == "voxelsOpac" ? "voxelsOpacB" : "voxelsOpac";
+				path.clearImage("voxelsNor", 0x00000000);
+				path.clearImage("voxelsEmission", 0x00000000);
+				#end
+				path.clearImage(voxels, 0x00000000);
+				path.clearImage("voxelsOut", 0x00000000);
+			}
 
 			Inc.computeVoxelsBegin();
 
@@ -365,8 +367,6 @@ class RenderPathForward {
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");
-
-			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 		}
 		#end
 

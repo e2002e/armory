@@ -552,20 +552,6 @@ class RenderPathDeferred {
 				path.clearImage("voxelsOut", 0x00000000);
 			}
 
-			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
-			var camera = iron.Scene.active.camera;
-			var center = new iron.math.Vec3(
-				Math.floor(camera.transform.worldx() / texelSize) * texelSize,
-				Math.floor(camera.transform.worldy() / texelSize) * texelSize,
-				Math.floor(camera.transform.worldz() / texelSize) * texelSize
-			);
-
-			armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
-			armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
-			armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
-
-			armory.renderpath.Clipmap.clipmap_center = center;
-
 			Inc.computeVoxelsBegin();
 
 			path.setTarget("");
@@ -582,6 +568,20 @@ class RenderPathDeferred {
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");
+
+			var texelSize = Main.voxelgiVoxelSize * 2.0 * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
+			var camera = iron.Scene.active.camera;
+			var center = new iron.math.Vec3(
+				Math.floor(camera.transform.worldx() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldy() / texelSize) * texelSize,
+				Math.floor(camera.transform.worldz() / texelSize) * texelSize
+			);
+
+			armory.renderpath.Clipmap.clipmap_center_last.x = Std.int((armory.renderpath.Clipmap.clipmap_center.x - center.x) / texelSize);
+			armory.renderpath.Clipmap.clipmap_center_last.y = Std.int((armory.renderpath.Clipmap.clipmap_center.y - center.y) / texelSize);
+			armory.renderpath.Clipmap.clipmap_center_last.z = Std.int((armory.renderpath.Clipmap.clipmap_center.z - center.z) / texelSize);
+
+			armory.renderpath.Clipmap.clipmap_center = center;
 
 			armory.renderpath.Clipmap.clipmapLevel = (armory.renderpath.Clipmap.clipmapLevel + 1) % Main.voxelgiClipmapCount;
 		}
