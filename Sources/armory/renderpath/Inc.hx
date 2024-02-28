@@ -492,7 +492,10 @@ class Inc {
 		}
 		#else
 		{
-			t.format = "RGBA32";
+			if (tname == "voxelsOut")
+				t.format = "RGBA32";
+			else
+				t.format = "R32";
 		}
 		#end
 
@@ -655,13 +658,13 @@ class Inc {
 		}
 	}
 
-	public static function computeVoxels(voxels:String, voxelsLast:String) {
+	public static function computeVoxelsOffsetPrev() {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsB").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get("voxelsOut").image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
@@ -672,12 +675,17 @@ class Inc {
 		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.Clipmap.clipmapLevel);
 
 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
+	}
+
+	public static function computeVoxelsTemporal() {
+		var rts = path.renderTargets;
+	 	var res = Inc.getVoxelRes();
 
 		#if (rp_voxels == "Voxel AO")
 		kha.compute.Compute.setShader(voxel_sh1);
 
-		kha.compute.Compute.setTexture(voxel_ta1, rts.get(voxels).image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxelsLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta1, rts.get("voxels").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tb1, rts.get("voxelsB").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tc1, rts.get("voxelsOut").image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca1,
@@ -706,8 +714,8 @@ class Inc {
 
 	 		kha.compute.Compute.setShader(voxel_sh1);
 
-			kha.compute.Compute.setTexture(voxel_ta1, rts.get(voxels).image, kha.compute.Access.Read);
-			kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxelsLast).image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_ta1, rts.get("voxels").image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_tb1, rts.get("voxelsB").image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tc1, rts.get("voxelsOut").image, kha.compute.Access.Write);
 
 			kha.compute.Compute.setFloat3(voxel_ca1,
@@ -724,7 +732,7 @@ class Inc {
 
 			kha.compute.Compute.setInt(voxel_cc1, armory.renderpath.Clipmap.clipmapLevel);
 
-			kha.compute.Compute.setSampledTexture(voxel_td1, rts.get(voxelsLast).image);
+			kha.compute.Compute.setSampledTexture(voxel_td1, rts.get("voxelsB").image);
 			kha.compute.Compute.setTexture(voxel_te1, rts.get("voxelsNor").image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tf1, rts.get("voxelsEmission").image, kha.compute.Access.Read);
 

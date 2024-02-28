@@ -213,12 +213,8 @@ class Uniforms {
 			}
 			#end
 			#if (rp_voxels != 'Off')
-			case "_voxelBlend": { // Blend current and last voxels
-				var freq = armory.renderpath.Clipmap.voxelFreq;
-				return (armory.renderpath.Clipmap.voxelFrame % freq) / freq;
-			}
 			case "_voxelSize": {
-				return Main.voxelgiVoxelSize * Math.pow(2.0, armory.renderpath.Clipmap.clipmapLevel);
+				return armory.renderpath.Clipmap.voxelSize;
 			}
 			#end
 		}

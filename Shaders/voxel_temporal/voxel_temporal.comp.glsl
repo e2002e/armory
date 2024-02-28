@@ -30,10 +30,10 @@ THE SOFTWARE.
 
 #ifdef _VoxelGI
 uniform sampler3D voxelsSampler;
-uniform layout(rgba8) image3D voxels;
-uniform layout(rgba8) image3D voxelsB;
-uniform layout(rgba8) image3D voxelsEmission;
-uniform layout(rgba8) image3D voxelsNor;
+uniform layout(r32ui) uimage3D voxels;
+uniform layout(r32ui) uimage3D voxelsB;
+uniform layout(r32ui) uimage3D voxelsEmission;
+uniform layout(r32ui) uimage3D voxelsNor;
 uniform layout(r32ui) uimage3D voxelsOut;
 
 uniform vec3 lightPos;
@@ -97,9 +97,9 @@ void main() {
 			wposition *= voxelgiResolution.x;
 			wposition += clipmap_center;
 
-			radiance = imageLoad(voxels, src);
-			emission = imageLoad(voxelsEmission, src);
-			N = imageLoad(voxelsNor, src).xyz;
+			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
+			emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
+			N = decNor(imageLoad(voxelsNor, src).r);
 			//vec4 col = convRGBA8ToVec4(ucol);
 			//if (radiance.a == 0.0) return;
 			//uint unor = imageLoad(voxelsNor, adjustedID).r;
@@ -142,7 +142,7 @@ void main() {
 			radiance.rgb *= visibility * lightColor;// * dotNL;
 			radiance = clamp(radiance + emission, vec4(0.0), vec4(1.0));
 
-			//vec3 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center).rgb;
+			vec3 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center).rgb;
 
 			//radiance.rgb *= indirect / 3,1415 + indirect;
 
@@ -169,14 +169,14 @@ void main() {
 						coords.z >= 0 && coords.z < res
 					)
 						#ifdef _VoxelGI
-						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+						radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
 						#else
 						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 						#endif
 				}
 				else
 					#ifdef _VoxelGI
-					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
 					#else
 					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 					#endif
@@ -196,11 +196,11 @@ void main() {
 		else {
 			// precompute cone sampling:
 			vec3 coneDirection = DIFFUSE_CONE_DIRECTIONS[i - 6];
-			vec3 aniso_direction = coneDirection;
+			vec3 aniso_direction = -coneDirection;
 			uvec3 face_offsets = uvec3(
-				aniso_direction.x < 0 ? 0 : 1,
-				aniso_direction.y < 0 ? 2 : 3,
-				aniso_direction.z < 0 ? 4 : 5
+				aniso_direction.x > 0 ? 0 : 1,
+				aniso_direction.y > 0 ? 2 : 3,
+				aniso_direction.z > 0 ? 4 : 5
 			);
 			vec3 direction_weights = abs(coneDirection);
 			#ifdef _VoxelGI
