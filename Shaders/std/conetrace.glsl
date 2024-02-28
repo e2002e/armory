@@ -56,7 +56,7 @@ vec3 faceIndices(const vec3 dir) {
  	ret.x = (dir.x > 0.0) ? 0 : 1;
  	ret.y = (dir.y > 0.0) ? 2 : 3;
  	ret.z = (dir.z > 0.0) ? 4 : 5;
- 	return ret / (6);
+ 	return ret / (6 + DIFFUSE_CONE_COUNT);
 }
 
 #ifdef _VoxelGI
@@ -68,7 +68,7 @@ vec4 sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const i
 	float half_texel = 0.5 / voxelgiResolution.x;
 	tc = tc * 0.5 + 0.5;
 	tc = clamp(tc, half_texel, 1.0 - half_texel);
-	tc.x = (tc.x) / (6);
+	tc.x = (tc.x + precomputed_direction) / (6 + DIFFUSE_CONE_COUNT);
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {
@@ -91,10 +91,10 @@ float sampleVoxel(vec3 P, sampler3D voxels, vec3 dir, const vec3 indices, const 
 	float half_texel = 0.5 / voxelgiResolution.x;
 	tc = tc * 0.5 + 0.5;
 	tc = clamp(tc, half_texel, 1.0 - half_texel);
-	tc.x = (tc.x) / (6);
+	tc.x = (tc.x + precomputed_direction) / (6 + DIFFUSE_CONE_COUNT);
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
-	if (precomputed_direction != -1) {
+	if (precomputed_direction == 0) {
 		opac = dir.x * textureLod(voxels, vec3(tc.x + indices.x, tc.y, tc.z), lod).r
 			+ dir.y * textureLod(voxels, vec3(tc.x + indices.y, tc.y, tc.z), lod).r
 			+ dir.z * textureLod(voxels, vec3(tc.x + indices.z, tc.y, tc.z), lod).r;
@@ -166,7 +166,7 @@ vec4 traceDiffuse(const vec3 origin, const vec3 normal, sampler3D voxels, const 
 		const float cosTheta = dot(normal, coneDir);
 		if (cosTheta <= 0)
 			continue;
-		amount += traceCone(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center);
+		amount += traceCone(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center) * cosTheta;
 		sum += cosTheta;
 	}
 	amount /= sum;
@@ -246,7 +246,7 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3
 		const float cosTheta = dot(normal, coneDir);
 		if (cosTheta <= 0)
 			continue;
-		amount += traceConeAO(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center);
+		amount += traceConeAO(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center) * cosTheta;
 		sum += cosTheta;
 	}
 	amount /= sum;
