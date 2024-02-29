@@ -10,7 +10,7 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxelsOutLast = "voxelsOut";
+	static var voxelsOut = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -531,7 +531,7 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			voxelsOutLast = voxelsOutLast == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			Inc.computeVoxelsBegin();
 
@@ -550,7 +550,7 @@ class RenderPathDeferred {
 				else
 				{
 					path.clearImage("voxels", 0x00000000);
-					Inc.computeVoxelsOffsetPrev(voxelsOutLast);
+					Inc.computeVoxelsOffsetPrev(voxelsOut);
 				}
 			}
 			path.setTarget("");
@@ -563,7 +563,7 @@ class RenderPathDeferred {
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxelsTemporal(voxelsOutLast);
+			Inc.computeVoxelsTemporal();
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");
