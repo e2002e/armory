@@ -137,14 +137,12 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 			continue;
 		}
 
-		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0);
+		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod);
 
-		/*
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			vec4 mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0);
+			vec4 mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
-		*/
 
 		mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
@@ -219,10 +217,10 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 			continue;
 		}
 
-		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, 0.0);
+		mipSample = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index, lod);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			float mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, 0.0);
+			float mipSampleNext = sampleVoxel(p0, voxels, dir, indices, precomputed_direction, clipmap_center, clipmap_index + 1.0, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
