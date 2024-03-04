@@ -534,22 +534,23 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
+			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+			voxelsLightOut = voxelsLightOut == "voxelsLightOut" ? "voxelsLightOutB" : "voxelsLightOut";
+
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
 			{
-				voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
-				voxelsLightOut = voxelsLightOut == "voxelsLightOut" ? "voxelsLightOutB" : "voxelsLightOut";
 				if (armory.renderpath.Clipmap.pre_clear == true)
 				{
 					#if (rp_voxels == "Voxel GI")
 					path.clearImage("voxelsNor", 0x00000000);
 					path.clearImage("voxelsEmission", 0x00000000);
-					path.clearImage(voxelsLightOut, 0x00000000);
 					#end
 					path.clearImage("voxels", 0x00000000);
 					path.clearImage("voxelsOut", 0x00000000);
 					path.clearImage("voxelsOutB", 0x00000000);
+					path.clearImage(voxelsLightOut, 0x00000000);
 					armory.renderpath.Clipmap.pre_clear = false;
 				}
 				else
@@ -557,6 +558,7 @@ class RenderPathDeferred {
 					#if (rp_voxels == "Voxel GI")
 					path.clearImage("voxelsNor", 0x00000000);
 					path.clearImage("voxelsEmission", 0x00000000);
+					path.clearImage(voxelsLightOut, 0x00000000);
 					#end
 					path.clearImage("voxels", 0x00000000);
 					Inc.computeVoxelsOffsetPrev(voxelsOut);

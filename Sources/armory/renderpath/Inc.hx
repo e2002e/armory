@@ -497,7 +497,10 @@ class Inc {
 		}
 		#else
 		{
-			t.format = "RGBA32";
+			if (t.name == "voxelsOut")
+				t.format = "RGBA32";
+			else
+				t.format = "R32";
 		}
 		#end
 
@@ -697,7 +700,7 @@ class Inc {
 	 	var voxtex = "voxels";
 	 	var voxtexLast = "voxelsOutB";
 	 	#else
-	 	var voxtex = "voxelsLightOut";
+	 	var voxtex = "voxels";
 	 	var voxtexLast = "voxelsLightOutB";
 	 	#end
 
@@ -739,7 +742,7 @@ class Inc {
 	 		kha.compute.Compute.setShader(voxel_sh2);
 
 			kha.compute.Compute.setTexture(voxel_ta2, rts.get("voxels").image, kha.compute.Access.Read);
-			kha.compute.Compute.setTexture(voxel_tb2, rts.get("voxelsOutB").image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_tb2, rts.get("voxelsLightOutB").image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_tc2, rts.get("voxelsEmission").image, kha.compute.Access.Read);
 			kha.compute.Compute.setTexture(voxel_td2, rts.get(voxelsLightOut).image, kha.compute.Access.Write);
 
