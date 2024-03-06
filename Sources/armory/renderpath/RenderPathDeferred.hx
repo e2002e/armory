@@ -10,12 +10,7 @@ class RenderPathDeferred {
 	static var path: RenderPath;
 
 	#if (rp_voxels != "Off")
-	static var voxels = "voxels";
-	static var voxelsLast = "voxels";
-	#if (rp_voxels == "Voxel GI")
-	static var voxelsLight = "voxelsLight";
-	static var voxelsLightLast = "voxelsLight";
-	#end
+	static var voxelsOut = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -63,13 +58,12 @@ class RenderPathDeferred {
 		#if (rp_voxels != 'Off')
 		{
 			Inc.initGI("voxels");
-			Inc.initGI("voxelsB");
 			Inc.initGI("voxelsOut");
+			Inc.initGI("voxelsOutB");
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
 			Inc.initGI("voxelsLight");
-			Inc.initGI("voxelsLightB");
 			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
@@ -538,12 +532,7 @@ class RenderPathDeferred {
 		{
 			var path = RenderPath.active;
 
-			voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-			voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
-			#if (rp_voxels == "Voxel GI")
-			voxelsLight = voxelsLight == "voxelsLight" ? "voxelsLightB" : "voxelsLight";
-			voxelsLightLast = voxelsLight == "voxelsLight" ? "voxelsLightB" : "voxelsLight";
-			#end
+			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			Inc.computeVoxelsBegin();
 
@@ -554,10 +543,11 @@ class RenderPathDeferred {
 					#if (rp_voxels == "Voxel GI")
 					path.clearImage("voxelsNor", 0x00000000);
 					path.clearImage("voxelsEmission", 0x00000000);
-					path.clearImage(voxelsLight, 0x00000000);
+					path.clearImage("voxelsLight", 0x00000000);
 					#end
-					path.clearImage(voxels, 0x00000000);
+					path.clearImage("voxels", 0x00000000);
 					path.clearImage("voxelsOut", 0x00000000);
+					path.clearImage("voxelsOutB", 0x00000000);
 					armory.renderpath.Clipmap.pre_clear = false;
 				}
 				else
@@ -565,17 +555,17 @@ class RenderPathDeferred {
 					#if (rp_voxels == "Voxel GI")
 					path.clearImage("voxelsNor", 0x00000000);
 					path.clearImage("voxelsEmission", 0x00000000);
-					path.clearImage(voxelsLight, 0x00000000);
+					path.clearImage("voxelsLight", 0x00000000);
 					#end
-					path.clearImage(voxels, 0x00000000);
-					Inc.computeVoxelsOffsetPrev(voxelsLast);
+					path.clearImage("voxels", 0x00000000);
+					Inc.computeVoxelsOffsetPrev(voxelsOut);
 				}
 			}
 
 			path.setTarget("");
 			var res = Inc.getVoxelRes();
 			path.setViewport(res, res);
-			path.bindTarget(voxels, "voxels");
+			path.bindTarget("voxels", "voxels");
 			#if (rp_voxels == "Voxel GI")
 			path.bindTarget("voxelsNor", "voxelsNor");
 			path.bindTarget("voxelsEmission", "voxelsEmission");
@@ -583,10 +573,10 @@ class RenderPathDeferred {
 			path.drawMeshes("voxel");
 
 			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight(voxels, voxelsLast, voxelsLight);
+			Inc.computeVoxelsLight();
 			#end
 
-			Inc.computeVoxelsTemporal(#if (rp_voxels == "Voxel AO") voxels, voxelsLast #else voxelsLight, voxelsLightLast #end);
+			Inc.computeVoxelsTemporal();
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");

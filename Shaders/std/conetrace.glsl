@@ -144,7 +144,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
-		mipSample *= step_dist / voxelSize;
+		//mipSample *= step_dist / voxelSize;
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
 
 		step_dist = diam * voxelgiStep;
@@ -224,7 +224,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
-		mipSample *= step_dist / voxelSize;
+		//mipSample *= step_dist / voxelSize;
 		opacity += (1.0 - opacity) * mipSample;
 
 		step_dist = diam * voxelgiStep;
