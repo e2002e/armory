@@ -95,12 +95,15 @@ void main() {
 			wposition = wposition * 2.0 - 1.0;
 			wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
 			wposition *= voxelgiResolution.x;
-			wposition += clipmap_center;
+			//wposition += clipmap_center;
 
 			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 			emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 			N = decNor(imageLoad(voxelsNor, src).r);
-			//TODO second bounce;
+
+			//vec4 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center);
+			//radiance *= indirect / 3.1415 + indirect;
+
 			#else
 			opac = imageLoad(voxels, src).r;
 			#endif

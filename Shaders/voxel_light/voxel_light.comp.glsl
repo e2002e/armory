@@ -27,7 +27,6 @@ uniform vec3 clipmap_center_last;
 uniform int clipmapLevel;
 
 uniform layout(r32ui) uimage3D voxels;
-uniform layout(r32ui) uimage3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsLight;
 #ifdef _ShadowMap
@@ -42,7 +41,7 @@ void main() {
 	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 	//src.y += clipmapLevel * res;
 
-	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		ivec3 dst = src;
 		dst.x += i * res;
