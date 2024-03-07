@@ -113,7 +113,7 @@ void main() {
 			radiance.rgb *= visibility * lightColor;// * dotNL;
 			radiance = clamp(radiance, vec4(0.0), vec4(1.0));
 
-			imageAtomicAdd(voxelsLight, ivec3(gl_GlobalInvocationID.xyz), convVec4ToRGBA8(radiance));
+			imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
 		}
 	}
 }
