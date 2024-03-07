@@ -100,54 +100,7 @@ void main() {
 			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 			emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 			N = decNor(imageLoad(voxelsNor, src).r);
-
-			/*
-			//vec4 col = convRGBA8ToVec4(ucol);
-			//if (radiance.a == 0.0) return;
-			//uint unor = imageLoad(voxelsNor, adjustedID).r;
-			//vec3 wnormal = normalize(decNor(unor));
-
-			//wposition -= wnormal * 0.01; // Offset
-
-			float visibility;
-			vec3 ld = lightPos - wposition;
-			vec3 l;
-			if (lightType == 0) { l = lightDir; visibility = 1.0; }
-			else { l = normalize(ld); visibility = attenuate(distance(wposition, lightPos)); }
-
-			//float dotNL = max(dot(wnormal, l), 0.0);
-			//if (dotNL == 0.0) return;
-
-	#ifdef _ShadowMap
-			if (lightShadow == 1) {
-				vec4 lightPosition = LVP * vec4(wposition, 1.0);
-				vec3 lPos = lightPosition.xyz / lightPosition.w;
-				visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).r;
-			}
-			else if (lightShadow == 2) {
-				vec4 lightPosition = LVP * vec4(wposition, 1.0);
-				vec3 lPos = lightPosition.xyz / lightPosition.w;
-				visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
-			}
-			else if (lightShadow == 3) {
-				visibility *= texture(shadowMapPoint, vec4(-l, lpToDepth(ld, lightProj) - shadowsBias)).r;
-			}
-	#endif
-
-			if (lightType == 2) {
-				float spotEffect = dot(lightDir, l);
-				if (spotEffect < spotData.x) {
-					visibility *= smoothstep(spotData.y, spotData.x, spotEffect);
-				}
-			}
-
-			radiance.rgb *= visibility * lightColor;// * dotNL;
-			radiance = clamp(radiance + emission, vec4(0.0), vec4(1.0));
-
-			vec3 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center).rgb;
-
-			//radiance.rgb *= indirect / 3,1415 + indirect;
-			*/
+			//TODO second bounce;
 			#else
 			opac = imageLoad(voxels, src).r;
 			#endif

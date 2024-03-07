@@ -56,7 +56,7 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const floa
 	else
 		col = textureLod(voxels, tc, lod);
 
-	col *= step_dist / voxelSize;
+	//col *= step_dist / voxelSize;
 
 	return col;
 }

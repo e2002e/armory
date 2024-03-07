@@ -39,27 +39,26 @@ uniform samplerCubeShadow shadowMapPoint;
 void main() {
 	int res = voxelgiResolution.x;
 
-	vec4 radiance = vec4(0.0);
-	vec4 emission = vec4(0.0);
+	ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
+	//src.y += clipmapLevel * res;
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
-		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
-		src.x += i * res;
 		ivec3 dst = src;
-		//dst.y += clipmapLevel * res;
+		dst.x += i * res;
 
 		vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 		wposition = wposition * 2.0 - 1.0;
-		wposition *= voxelgiVoxelSize;// * pow(2.0, clipmapLevel);
+		wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
 		wposition *= voxelgiResolution.x;
-		wposition += clipmap_center;
+		//wposition += clipmap_center;
 
-		radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
-		emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
+		vec4 radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
+		vec4 emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 
-		if (radiance.a > 0.0)
+		//if (radiance.a > 0.0)
 		{
+			/*
 			if (any(notEqual(clipmap_center_last, vec3(0.0))))
 			{
 				ivec3 coords = ivec3(dst - clipmap_center_last);
@@ -72,11 +71,13 @@ void main() {
 					coords.y >= 0 && coords.y < res &&
 					coords.z >= 0 && coords.z < res
 				)
-					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
+					radiance = mix(convRGBA8ToVec4(imageLoad(voxels, coords).r), radiance, 0.5);
+				else
+					radiance = vec4(0.0);
 			}
 			else
-				radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
-
+				radiance = mix(convRGBA8ToVec4(imageLoad(voxels, dst).r), radiance, 0.5);
+			*/
 
 			float visibility;
 			vec3 lp = lightPos - wposition;
@@ -111,7 +112,7 @@ void main() {
 			}
 
 			radiance.rgb *= visibility * lightColor;// * dotNL;
-			radiance = clamp(radiance, vec4(0.0), vec4(1.0));
+			radiance = clamp(radiance + emission, vec4(0.0), vec4(1.0));
 
 			imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
 		}
