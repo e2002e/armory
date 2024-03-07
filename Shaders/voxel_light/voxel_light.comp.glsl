@@ -51,7 +51,7 @@ void main() {
 
 		vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 		wposition = wposition * 2.0 - 1.0;
-		wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
+		wposition *= voxelgiVoxelSize;// * pow(2.0, clipmapLevel);
 		wposition *= voxelgiResolution.x;
 		wposition += clipmap_center;
 
@@ -69,7 +69,7 @@ void main() {
 				int clipmap_face_end_y = clipmap_face_start_y + res;
 				if (
 					coords.x >= aniso_face_start_x && coords.x < aniso_face_end_x &&
-					coords.y >= clipmap_face_start_y && coords.y < clipmap_face_end_y &&
+					coords.y >= 0 && coords.y < res &&
 					coords.z >= 0 && coords.z < res
 				)
 					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
