@@ -94,7 +94,7 @@ void main() {
 			#endif
 
 		#ifdef _VoxelGI
-		imageAtomicAdd(voxelsOut, dst, col);
+		imageAtomicMax(voxelsOut, dst, col);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

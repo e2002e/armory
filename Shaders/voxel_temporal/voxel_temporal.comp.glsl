@@ -178,7 +178,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
+		imageAtomicMax(voxelsLight, dst, convVec4ToRGBA8(radiance));
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

@@ -322,28 +322,26 @@ class RenderPathForward {
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			if (armory.renderpath.Clipmap.pre_clear == true)
 			{
-				if (armory.renderpath.Clipmap.pre_clear == true)
-				{
-					#if (rp_voxels == "Voxel GI")
-					path.clearImage("voxelsNor", 0x00000000);
-					path.clearImage("voxelsEmission", 0x00000000);
-					path.clearImage("voxelsLight", 0x00000000);
-					#end
-					path.clearImage("voxels", 0x00000000);
-					path.clearImage("voxelsOut", 0x00000000);
-					path.clearImage("voxelsOutB", 0x00000000);
-					armory.renderpath.Clipmap.pre_clear = false;
-				}
-				else
-				{
-					#if (rp_voxels == "Voxel GI")
-					path.clearImage("voxelsNor", 0x00000000);
-					path.clearImage("voxelsEmission", 0x00000000);
-					#end
-					path.clearImage("voxels", 0x00000000);
-					Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
-				}
+				#if (rp_voxels == "Voxel GI")
+				path.clearImage("voxelsNor", 0x00000000);
+				path.clearImage("voxelsEmission", 0x00000000);
+				path.clearImage("voxelsLight", 0x00000000);
+				#end
+				path.clearImage("voxels", 0x00000000);
+				path.clearImage("voxelsOut", 0x00000000);
+				path.clearImage("voxelsOutB", 0x00000000);
+				armory.renderpath.Clipmap.pre_clear = false;
+			}
+			else
+			{
+				#if (rp_voxels == "Voxel GI")
+				path.clearImage("voxelsNor", 0x00000000);
+				path.clearImage("voxelsEmission", 0x00000000);
+				#end
+				path.clearImage("voxels", 0x00000000);
+				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
 			}
 
 			path.setTarget("");
@@ -363,7 +361,11 @@ class RenderPathForward {
 			#end
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
+				#if (rp_voxels == "Voxel AO")
 				path.generateMipmaps("voxelsOut");
+				#else
+				path.generateMipmaps("voxelsLight");
+				#end
 		}
 		#end
 
@@ -400,10 +402,10 @@ class RenderPathForward {
 		#if (rp_voxels != 'Off')
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			#if arm_voxelgi_bounces
-			path.bindTarget("voxelsBounce", "voxels");
-			#else
+			#if (rp_voxels == "Voxel AO")
 			path.bindTarget("voxelsOut", "voxels");
+			#else
+			path.bindTarget("voxelsLight", "voxels");
 			#end
 		}
 		#end

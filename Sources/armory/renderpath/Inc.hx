@@ -705,8 +705,8 @@ class Inc {
 		kha.compute.Compute.setShader(voxel_sh1);
 
 		kha.compute.Compute.setTexture(voxel_ta1, rts.get("voxels").image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_tb1, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
-		kha.compute.Compute.setTexture(voxel_tc1, rts.get(voxelsOut).image, kha.compute.Access.Write);
+		kha.compute.Compute.setTexture(voxel_tb1, rts.get("voxelsOutB").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_tc1, rts.get(out).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca1,
 			armory.renderpath.Clipmap.clipmap_center.x,

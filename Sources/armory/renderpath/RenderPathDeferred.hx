@@ -539,28 +539,26 @@ class RenderPathDeferred {
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.Clipmap.clipmapLevel == 0)
+			if (armory.renderpath.Clipmap.pre_clear == true)
 			{
-				if (armory.renderpath.Clipmap.pre_clear == true)
-				{
-					#if (rp_voxels == "Voxel GI")
-					path.clearImage("voxelsNor", 0x00000000);
-					path.clearImage("voxelsEmission", 0x00000000);
-					path.clearImage("voxelsLight", 0x00000000);
-					#end
-					path.clearImage("voxels", 0x00000000);
-					path.clearImage("voxelsOut", 0x00000000);
-					path.clearImage("voxelsOutB", 0x00000000);
-					armory.renderpath.Clipmap.pre_clear = false;
-				}
-				else
-				{
-					#if (rp_voxels == "Voxel GI")
-					path.clearImage("voxelsNor", 0x00000000);
-					path.clearImage("voxelsEmission", 0x00000000);
-					#end
-					path.clearImage("voxels", 0x00000000);
-					Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
-				}
+				#if (rp_voxels == "Voxel GI")
+				path.clearImage("voxelsNor", 0x00000000);
+				path.clearImage("voxelsEmission", 0x00000000);
+				path.clearImage("voxelsLight", 0x00000000);
+				#end
+				path.clearImage("voxels", 0x00000000);
+				path.clearImage("voxelsOut", 0x00000000);
+				path.clearImage("voxelsOutB", 0x00000000);
+				armory.renderpath.Clipmap.pre_clear = false;
+			}
+			else
+			{
+				#if (rp_voxels == "Voxel GI")
+				path.clearImage("voxelsNor", 0x00000000);
+				path.clearImage("voxelsEmission", 0x00000000);
+				#end
+				path.clearImage("voxels", 0x00000000);
+				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
 			}
 
 			path.setTarget("");
