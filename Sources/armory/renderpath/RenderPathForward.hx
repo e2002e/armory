@@ -356,11 +356,11 @@ class RenderPathForward {
 			#end
 			path.drawMeshes("voxel");
 
+			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
+
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight(voxelsOutLast);
 			#end
-
-			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
 
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
 				path.generateMipmaps("voxelsOut");

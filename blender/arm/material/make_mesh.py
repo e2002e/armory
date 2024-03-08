@@ -658,7 +658,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     if '_VoxelGI' in wrd.world_defs or '_VoxelAOvar' in wrd.world_defs:
         frag.add_uniform('vec3 eye', '_cameraPosition')
         frag.write('float dist = max(abs(eye.x - wposition.x), max(abs(eye.y - wposition.y), abs(eye.z - wposition.z)));')
-        frag.write('int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 1.0 / voxelgiVoxelSize), 0.0));')
+        frag.write('int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 2.0 / voxelgiVoxelSize), 0.0));')
         frag.write('float texelSize = 2.0 * voxelgiVoxelSize * pow(2.0, clipmapLevel);')
         frag.write('vec3 clipmap_center = floor(eye / texelSize) * texelSize;')
 

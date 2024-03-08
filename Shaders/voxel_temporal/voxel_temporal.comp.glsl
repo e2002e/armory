@@ -34,7 +34,7 @@ uniform layout(r32ui) uimage3D voxels;
 uniform layout(r32ui) uimage3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsNor;
-uniform layout(r32ui) uimage3D voxelsOut;
+uniform layout(r32ui) uimage3D voxelsLight;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -178,7 +178,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicAdd(voxelsOut, dst, convVec4ToRGBA8(radiance));
+		imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

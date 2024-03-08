@@ -573,14 +573,18 @@ class RenderPathDeferred {
 			#end
 			path.drawMeshes("voxel");
 
+			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
+
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight(voxelsOutLast);
 			#end
 
-			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
-
 			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
+				#if (rp_voxels == "Voxel AO")
 				path.generateMipmaps("voxelsOut");
+				#else
+				path.generateMipmaps("voxelsLight");
+				#end
 		}
 		#end
 
@@ -630,10 +634,10 @@ class RenderPathDeferred {
 			voxelao_pass = true;
 			#end
 
-			#if arm_voxelgi_bounces
-			path.bindTarget("voxelsBounce", "voxels");
-			#else
+			#if (rp_voxels == "Voxel AO")
 			path.bindTarget("voxelsOut", "voxels");
+			#else
+			path.bindTarget("voxelsLight", "voxels");
 			#end
 		}
 		#end
