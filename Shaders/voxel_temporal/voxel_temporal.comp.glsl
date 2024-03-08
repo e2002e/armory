@@ -31,10 +31,10 @@ THE SOFTWARE.
 #ifdef _VoxelGI
 uniform sampler3D voxelsSampler;
 uniform layout(r32ui) uimage3D voxels;
-uniform layout(r32ui) uimage3D voxelsB;
+uniform layout(rgba8) image3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsNor;
-uniform layout(r32ui) uimage3D voxelsLight;
+uniform layout(rgba8) image3D voxelsOut;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -95,15 +95,53 @@ void main() {
 			wposition = wposition * 2.0 - 1.0;
 			wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
 			wposition *= voxelgiResolution.x;
-			//wposition += clipmap_center;
+			wposition += clipmap_center;
 
 			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 			emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 			N = decNor(imageLoad(voxelsNor, src).r);
 
-			//vec4 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center);
-			//radiance *= indirect / 3.1415 + indirect;
+			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
+			vec4 emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 
+			vec4 indirect = traceDiffuse(wposition, N, voxelsSampler, clipmap_center);
+			radiance *= indirect / 3.1415 + indirect;
+
+			float visibility;
+			vec3 lp = lightPos - wposition;
+			vec3 l;
+			if (lightType == 0) { l = lightDir; visibility = 1.0; }
+			else { l = normalize(lp); visibility = attenuate(distance(wposition, lightPos)); }
+
+			// float dotNL = max(dot(wnormal, l), 0.0);
+			// if (dotNL == 0.0) return;
+
+		#ifdef _ShadowMap
+			if (lightShadow == 1) {
+				vec4 lightPosition = LVP * vec4(wposition, 1.0);
+				vec3 lPos = lightPosition.xyz / lightPosition.w;
+				visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).r;
+			}
+			else if (lightShadow == 2) {
+				vec4 lightPosition = LVP * vec4(wposition, 1.0);
+				vec3 lPos = lightPosition.xyz / lightPosition.w;
+				visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
+			}
+			else if (lightShadow == 3) {
+				visibility *= texture(shadowMapPoint, vec4(-l, lpToDepth(lp, lightProj) - shadowsBias)).r;
+			}
+		#endif
+
+			if (lightType == 2) {
+				float spotEffect = dot(lightDir, l);
+				if (spotEffect < spotData.x) {
+					visibility *= smoothstep(spotData.y, spotData.x, spotEffect);
+				}
+			}
+
+			radiance.rgb *= visibility * lightColor;// * dotNL;
+
+			radiance = clamp(radiance + emission, vec4(0.0), vec4(1.0));
 			#else
 			opac = imageLoad(voxels, src).r;
 			#endif
@@ -127,14 +165,14 @@ void main() {
 						coords.z >= 0 && coords.z < res
 					)
 						#ifdef _VoxelGI
-						radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
+						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
 						#else
 						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 						#endif
 				}
 				else
 					#ifdef _VoxelGI
-					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
+					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
 					#else
 					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 					#endif
@@ -178,7 +216,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicMax(voxelsLight, dst, convVec4ToRGBA8(radiance));
+		imageStore(voxelsOut, dst, radiance);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

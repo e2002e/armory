@@ -54,10 +54,9 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const floa
 			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), 0.0);
 	}
 	else
-		col = textureLod(voxels, tc, 0.0
-		);
+		col = textureLod(voxels, tc, 0.0);
 
-	//col *= step_dist / voxelSize;
+	col *= step_dist / voxelSize;
 
 	return col;
 }
@@ -80,8 +79,6 @@ float sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const flo
 	}
 	else
 		opac = textureLod(voxels, tc, 0.0).r;
-
-	//opac *= step_dist / voxelSize;
 
 	return opac;
 }
@@ -133,7 +130,7 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 		}
 
 		sampleCol += (1.0 - sampleCol.a) * mipSample;
-		step_dist = diam * step_size;
+		step_dist = diam * voxelgiStep;
 		dist += step_dist;
 	}
     return sampleCol;
@@ -174,9 +171,8 @@ vec3 traceRefraction(const vec3 origin, const vec3 normal, sampler3D voxels, con
 
 
 #ifdef _VoxelAOvar
-float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precomputed_direction, const float aperture, const float step_size, const vec3 clipmap_center) {
+float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precomputed_direction, const float aperture, const float maxDist, const vec3 clipmap_center) {
 	float opacity = 0.0;
-	float alpha = 0.0;
 	float voxelSize0 = voxelgiVoxelSize * 2.0 * voxelgiOffset;
 	float dist = voxelSize0;
 	float step_dist = dist;
@@ -192,7 +188,7 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 	) / (6 + DIFFUSE_CONE_COUNT);
 	vec3 direction_weight = abs(dir);
 
-    while (alpha < 1.0 && dist < MAX_DISTANCE && clipmap_index0 < voxelgiClipmapCount) {
+    while (opacity < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		float mipSample = 0.0;
 		float diam = max(voxelSize0, dist * 2.0 * tan(aperture * 0.5));
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
@@ -216,12 +212,8 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
-		float a = 1.0 - alpha;
-		opacity += mipSample * a;
-		alpha += mipSample * a;
-
 		opacity += (1.0 - opacity) * mipSample;
-		step_dist = diam * step_size;
+		step_dist = diam * voxelgiStep;
 		dist += step_dist;
 	}
     return opacity;
@@ -238,12 +230,12 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3
 		const float cosTheta = dot(normal, coneDir);
 		if (cosTheta <= 0)
 			continue;
-		amount += traceConeAO(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, 1.0, clipmap_center) * cosTheta;
+		amount += traceConeAO(voxels, origin, normal, coneDir, precomputed_direction, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center) * cosTheta;
 		sum += cosTheta;
 	}
 	amount /= sum;
 	opacity = max(0.0, amount);
-	return opacity * voxelgiOcc;
+	return opacity;
 }
 #endif
 
@@ -266,7 +258,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 	) / (6 + DIFFUSE_CONE_COUNT);
 	vec3 direction_weight = abs(dir);
 
-    while (sampleCol < 1.0 && dist < MAX_DISTANCE && clipmap_index0 < voxelgiClipmapCount) {
+    while (sampleCol < 1.0 && dist < maxDist && clipmap_index0 < voxelgiClipmapCount) {
 		float mipSample = 0.0;
 		float diam = max(voxelSize0, dist * 2.0 * tan(aperture * 0.5));
         float lod = clamp(log2(diam / voxelSize0), clipmap_index0, voxelgiClipmapCount - 1);
@@ -307,7 +299,7 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 
 
 float traceShadow(const vec3 origin, const vec3 normal, sampler3D voxels, const vec3 dir, const vec3 clipmap_center) {
-	return traceConeShadow(voxels, origin, normal, dir, 0, DIFFUSE_CONE_APERTURE, 1.0, clipmap_center) * voxelgiOcc;
+	return traceConeShadow(voxels, origin, normal, dir, 0, DIFFUSE_CONE_APERTURE, MAX_DISTANCE, clipmap_center) * voxelgiOcc;
 }
 #endif
 #endif // _CONETRACE_GLSL_

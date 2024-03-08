@@ -542,17 +542,16 @@ class RenderPathDeferred {
 
 			Inc.computeVoxelsBegin();
 
-			if (armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear == true)
+			if (armory.renderpath.RenderPathCreator.pre_clear == true)
 			{
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
-				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
-				armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear = false;
+				armory.renderpath.RenderPathCreator.pre_clear = false;
 			}
 			else
 			{
@@ -561,7 +560,7 @@ class RenderPathDeferred {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
+				Inc.computeVoxelsOffsetPrev(voxelsOut);
 			}
 
 			path.setTarget("");
@@ -574,11 +573,7 @@ class RenderPathDeferred {
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
-
-			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight(voxelsOutLast);
-			#end
+			Inc.computeVoxelsTemporal();
 		}
 		#end
 
@@ -627,12 +622,7 @@ class RenderPathDeferred {
 			#if (arm_config && (rp_voxels == "Voxel AO"))
 			voxelao_pass = true;
 			#end
-
-			#if (rp_voxels == "Voxel AO")
 			path.bindTarget("voxelsOut", "voxels");
-			#else
-			path.bindTarget("voxelsLight", "voxels");
-			#end
 		}
 		#end
 

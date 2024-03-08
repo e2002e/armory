@@ -324,7 +324,7 @@ class RenderPathForward {
 
 			Inc.computeVoxelsBegin();
 
-			if (armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear == true)
+			if (armory.renderpath.RenderPathCreator.pre_clear == true)
 			{
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
@@ -334,7 +334,7 @@ class RenderPathForward {
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
-				armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear = false;
+				armory.renderpath.RenderPathCreator.pre_clear = false;
 			}
 			else
 			{
@@ -343,7 +343,7 @@ class RenderPathForward {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
+				Inc.computeVoxelsOffsetPrev(voxelsOut);
 			}
 
 			path.setTarget("");
@@ -356,11 +356,7 @@ class RenderPathForward {
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
-
-			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight(voxelsOutLast);
-			#end
+			Inc.computeVoxelsTemporal();
 		}
 		#end
 
