@@ -68,6 +68,10 @@ class RenderPathDeferred {
 			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
+			for (i in 0...Main.voxelgiClipmapCount) {
+				var clipmap = new armory.renderpath.Clipmap();
+				armory.renderpath.RenderPathCreator.clipmaps.push(clipmap);
+			}
 		}
 		#end
 
@@ -538,8 +542,7 @@ class RenderPathDeferred {
 
 			Inc.computeVoxelsBegin();
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-			if (armory.renderpath.Clipmap.pre_clear == true)
+			if (armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear == true)
 			{
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
@@ -549,7 +552,7 @@ class RenderPathDeferred {
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
-				armory.renderpath.Clipmap.pre_clear = false;
+				armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear = false;
 			}
 			else
 			{
@@ -576,13 +579,6 @@ class RenderPathDeferred {
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight(voxelsOutLast);
 			#end
-
-			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
-				#if (rp_voxels == "Voxel AO")
-				path.generateMipmaps("voxelsOut");
-				#else
-				path.generateMipmaps("voxelsLight");
-				#end
 		}
 		#end
 

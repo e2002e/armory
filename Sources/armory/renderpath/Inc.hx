@@ -676,18 +676,17 @@ class Inc {
 	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
-
 		kha.compute.Compute.setShader(voxel_sh0);
 
 		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
-			armory.renderpath.Clipmap.clipmap_center_last.x,
-			armory.renderpath.Clipmap.clipmap_center_last.y,
-			armory.renderpath.Clipmap.clipmap_center_last.z
+			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.z
 		);
-		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.Clipmap.clipmapLevel);
+		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
 
 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
 	}
@@ -695,6 +694,7 @@ class Inc {
 	public static function computeVoxelsTemporal(voxelsOut:String, voxelsOutLast:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
+	 	var clipmap = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
 	 	#if (rp_voxels == "Voxel AO")
 	 	var out = "voxelsOut";
@@ -709,18 +709,18 @@ class Inc {
 		kha.compute.Compute.setTexture(voxel_tc1, rts.get(out).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca1,
-			armory.renderpath.Clipmap.clipmap_center.x,
-			armory.renderpath.Clipmap.clipmap_center.y,
-			armory.renderpath.Clipmap.clipmap_center.z
+			clipmap.center.x,
+			clipmap.center.y,
+			clipmap.center.z
 		);
 
 		kha.compute.Compute.setFloat3(voxel_cb1,
-			armory.renderpath.Clipmap.clipmap_center_last.x,
-			armory.renderpath.Clipmap.clipmap_center_last.y,
-			armory.renderpath.Clipmap.clipmap_center_last.z
+			armory.renderpath.RenderPathCreator.clipmap_center_last.x,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.y,
+			armory.renderpath.RenderPathCreator.clipmap_center_last.z
 		);
 
-		kha.compute.Compute.setInt(voxel_cc1, armory.renderpath.Clipmap.clipmapLevel);
+		kha.compute.Compute.setInt(voxel_cc1, armory.renderpath.RenderPathCreator.clipmapLevel);
 
 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
 	}
@@ -729,6 +729,7 @@ class Inc {
 	public static function computeVoxelsLight(voxelsOutLast:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
+	 	var clipmap = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
 		var lights = iron.Scene.active.lights;
 	 	pointIndex = spotIndex = 0;
@@ -745,18 +746,18 @@ class Inc {
 			kha.compute.Compute.setTexture(voxel_td2, rts.get("voxelsLight").image, kha.compute.Access.Write);
 
 			kha.compute.Compute.setFloat3(voxel_ca2,
-				armory.renderpath.Clipmap.clipmap_center.x,
-				armory.renderpath.Clipmap.clipmap_center.y,
-				armory.renderpath.Clipmap.clipmap_center.z
+				clipmap.center.x,
+				clipmap.center.y,
+				clipmap.center.z
 			);
 
 			kha.compute.Compute.setFloat3(voxel_cb2,
-				armory.renderpath.Clipmap.clipmap_center_last.x,
-				armory.renderpath.Clipmap.clipmap_center_last.y,
-				armory.renderpath.Clipmap.clipmap_center_last.z
+				armory.renderpath.RenderPathCreator.clipmap_center_last.x,
+				armory.renderpath.RenderPathCreator.clipmap_center_last.y,
+				armory.renderpath.RenderPathCreator.clipmap_center_last.z
 			);
 
-			kha.compute.Compute.setInt(voxel_cc2, armory.renderpath.Clipmap.clipmapLevel);
+			kha.compute.Compute.setInt(voxel_cc2, armory.renderpath.RenderPathCreator.clipmapLevel);
 
 	 		#if (rp_shadowmap)
 	 		if (l.data.raw.type == "sun") {

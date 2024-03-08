@@ -165,6 +165,10 @@ class RenderPathForward {
 			Inc.initGI("voxelsEmission");
 			Inc.initGI("voxelsLight");
 			#end
+			for (i in 0...Main.voxelgiClipmapCount) {
+				var clipmap = new armory.renderpath.Clipmap();
+				armory.renderpath.RenderPathCreator.clipmaps.push(clipmap);
+			}
 		}
 		#end
 
@@ -309,7 +313,6 @@ class RenderPathForward {
 		}
 		#end
 
-
 		// Voxels
 		#if (rp_voxels != 'Off')
 		if (armory.data.Config.raw.rp_gi != false)
@@ -321,8 +324,7 @@ class RenderPathForward {
 
 			Inc.computeVoxelsBegin();
 
-			if (armory.renderpath.Clipmap.clipmapLevel == 0)
-			if (armory.renderpath.Clipmap.pre_clear == true)
+			if (armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear == true)
 			{
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
@@ -332,7 +334,7 @@ class RenderPathForward {
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
-				armory.renderpath.Clipmap.pre_clear = false;
+				armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].pre_clear = false;
 			}
 			else
 			{
@@ -359,13 +361,6 @@ class RenderPathForward {
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight(voxelsOutLast);
 			#end
-
-			if (armory.renderpath.Clipmap.clipmapLevel == Main.voxelgiClipmapCount - 1)
-				#if (rp_voxels == "Voxel AO")
-				path.generateMipmaps("voxelsOut");
-				#else
-				path.generateMipmaps("voxelsLight");
-				#end
 		}
 		#end
 

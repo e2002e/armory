@@ -37,7 +37,7 @@ const float MAX_DISTANCE = voxelgiRange * 100.0;
 
 
 #ifdef _VoxelGI
-vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const float clipmap_index, const float step_dist, const int precomputed_direction, vec3 face_offset, const vec3 direction_weight, const float lod) {
+vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const float clipmap_index, const float step_dist, const int precomputed_direction, vec3 face_offset, const vec3 direction_weight) {
  	vec4 col = vec4(0.0);
 
 	float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
@@ -49,12 +49,13 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const floa
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {
-		col = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), lod)
-			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), lod)
-			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), lod);
+		col = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), 0.0)
+			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), 0.0)
+			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), 0.0);
 	}
 	else
-		col = textureLod(voxels, tc, lod);
+		col = textureLod(voxels, tc, 0.0
+		);
 
 	//col *= step_dist / voxelSize;
 
@@ -62,7 +63,7 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const floa
 }
 #endif
 #ifdef _VoxelAOvar
-float sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const float clipmap_index, const float step_dist, const int precomputed_direction, vec3 face_offset, const vec3 direction_weight, const float lod) {
+float sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const float clipmap_index, const float step_dist, const int precomputed_direction, vec3 face_offset, const vec3 direction_weight) {
  	float opac = 0.0;
 	float voxelSize = pow(2.0, clipmap_index) * voxelgiVoxelSize;
  	vec3 tc = (P - clipmap_center) / (voxelSize * voxelgiResolution.x);
@@ -73,12 +74,12 @@ float sampleVoxel(sampler3D voxels, vec3 P, const vec3 clipmap_center, const flo
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {
-		opac = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), lod).r
-			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), lod).r
-			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), lod).r;
+		opac = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), 0.0).r
+			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), 0.0).r
+			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), 0.0).r;
 	}
 	else
-		opac = textureLod(voxels, tc, lod).r;
+		opac = textureLod(voxels, tc, 0.0).r;
 
 	//opac *= step_dist / voxelSize;
 
@@ -124,10 +125,10 @@ vec4 traceCone(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int precom
 			continue;
 		}
 
-		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+			vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
@@ -208,10 +209,10 @@ float traceConeAO(sampler3D voxels, vec3 origin, vec3 n, vec3 dir, const int pre
 			continue;
 		}
 
-		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
@@ -283,16 +284,16 @@ float traceConeShadow(sampler3D voxels, const vec3 origin, vec3 n, vec3 dir, con
 		}
 
 		#ifdef _VoxelAOvar
-		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight);
 		#else
-		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod).a;
+		mipSample = sampleVoxel(voxels, p0, clipmap_center, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight).a;
 		#endif
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
 			#ifdef _VoxelAOvar
-			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod);
+			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight);
 			#else
-			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod).a;
+			float mipSampleNext = sampleVoxel(voxels, p0, clipmap_center, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight).a;
 			#endif
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
