@@ -343,7 +343,7 @@ class RenderPathForward {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut);
+				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
 			}
 
 			path.setTarget("");
@@ -355,6 +355,10 @@ class RenderPathForward {
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
+
+			#if (rp_voxels == "Voxel GI")
+			Inc.computeVoxelsLight();
+			#end
 
 			Inc.computeVoxelsTemporal();
 		}
@@ -393,11 +397,7 @@ class RenderPathForward {
 		#if (rp_voxels != 'Off')
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			#if (rp_voxels == "Voxel AO")
 			path.bindTarget("voxelsOut", "voxels");
-			#else
-			path.bindTarget("voxelsLight", "voxels");
-			#end
 		}
 		#end
 

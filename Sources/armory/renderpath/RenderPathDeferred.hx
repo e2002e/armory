@@ -576,10 +576,10 @@ class RenderPathDeferred {
 			path.drawMeshes("voxel");
 
 			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight(voxelsOutLast);
+			Inc.computeVoxelsLight();
 			#end
 
-			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
+			Inc.computeVoxelsTemporal();
 		}
 		#end
 

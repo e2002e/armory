@@ -37,7 +37,6 @@ uniform samplerCubeShadow shadowMapPoint;
 
 void main() {
 	int res = voxelgiResolution.x;
-	vec4 aniso_colors[6];
 
 	for (int i = 0; i < 6; i++)
 	{
