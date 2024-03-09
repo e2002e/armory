@@ -547,6 +547,7 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
+				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
@@ -558,9 +559,10 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
+				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut);
+				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
 			}
 
 			path.setTarget("");
@@ -573,7 +575,11 @@ class RenderPathDeferred {
 			#end
 			path.drawMeshes("voxel");
 
-			Inc.computeVoxelsTemporal();
+			#if (rp_voxels == "Voxel GI")
+			Inc.computeVoxelsLight(voxelsOutLast);
+			#end
+
+			Inc.computeVoxelsTemporal(voxelsOut, voxelsOutLast);
 		}
 		#end
 
