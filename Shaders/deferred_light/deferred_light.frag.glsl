@@ -38,10 +38,14 @@ uniform sampler2D gbuffer_refraction;
 #ifdef _VoxelGI
 uniform sampler3D voxels;
 uniform vec3 clipmap_center;
+uniform float voxelSize;
+uniform int clipmapLevel;
 #endif
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
 uniform vec3 clipmap_center;
+uniform float voxelSize;
+uniform int clipmapLevel;
 #endif
 
 uniform float envmapStrength;
@@ -285,21 +289,13 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 1.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * voxelgiVoxelSize * pow(2.0, clipmapLevel);
-	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
-	fragColor.rgb = traceDiffuse(p, n, voxels, clipmap_center).rgb * voxelgiDiff * albedo;
+	fragColor.rgb = traceDiffuse(p, n, voxels, eye).rgb * voxelgiDiff * albedo;
 	if(roughness < 1.0 && occspec.y > 0.0)
-		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, clipmap_center).rgb * voxelgiRefl * occspec.y;
+		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, eye).rgb * voxelgiRefl * occspec.y;
 #endif
 
 #ifdef _VoxelAOvar
-	float dist = max(abs(eye.x - p.x), max(abs(eye.y - p.y), abs(eye.z - p.z)));
-	int clipmapLevel = int(max(log2(dist / voxelgiResolution.x * 1.0 / voxelgiVoxelSize), 0.0));
-	float texelSize = 2.0 * voxelgiVoxelSize * pow(2.0, clipmapLevel);
-	vec3 clipmap_center = floor(eye / texelSize) * texelSize;
-	envl.rgb *= 1.0 - traceAO(p, n, voxels, clipmap_center);
+	envl.rgb *= 1.0 - traceAO(p, n, voxels, eye);
 #endif
 
 #ifdef _VoxelGI
@@ -388,13 +384,13 @@ void main() {
 
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
-	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, eye);
 	#endif
 	#endif
 
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
-	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmap_center);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, eye);
 	#endif
 	#endif
 	
@@ -468,7 +464,7 @@ void main() {
 		#ifdef _VoxelGI
 		#ifdef _VoxelShadow
 		, voxels
-		, clipmap_center
+		, eye
 		#endif
 		#endif
 		#ifdef _MicroShadowing
@@ -535,7 +531,7 @@ void main() {
 			#ifdef _VoxelGI
 			#ifdef _VoxelShadow
 			, voxels
-			, clipmap_center
+			, eye
 			#endif
 			#endif
 			#ifdef _MicroShadowing
@@ -550,7 +546,7 @@ void main() {
 
 #ifdef _VoxelRefract
 if(opac < 1.0) {
-	vec3 refraction = traceRefraction(p, n, voxels, v, ior, roughness, clipmap_center) * voxelgiRefr;
+	vec3 refraction = traceRefraction(p, n, voxels, v, ior, roughness, eye) * voxelgiRefr;
 	fragColor.rgb = mix(refraction, fragColor.rgb, opac);
 }
 #endif

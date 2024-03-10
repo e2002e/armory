@@ -22,7 +22,7 @@ uniform mat4 LVP;
 #endif
 
 uniform vec3 clipmap_center;
-uniform vec3 clipmap_center_last;
+uniform vec3 eye;
 uniform int clipmapLevel;
 
 uniform layout(r32ui) uimage3D voxels;
@@ -89,7 +89,7 @@ void main() {
 			}
 		}
 
-		vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, clipmap_center);
+		vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, eye);
 		radiance.rgb *= (visibility * lightColor) / 3.1415 + indirect.rgb;
 		radiance += emission;
 		radiance = clamp(radiance, vec4(0.0), vec4(1.0));

@@ -653,7 +653,7 @@ class Inc {
 			voxel_te2 = voxel_sh2.getTextureUnit("voxelsLight");
 
 	 		voxel_ca2 = voxel_sh2.getConstantLocation("clipmap_center");
-	 		voxel_cb2 = voxel_sh2.getConstantLocation("clipmap_center_last");
+	 		voxel_cb2 = voxel_sh2.getConstantLocation("eye");
 	 		voxel_cc2 = voxel_sh2.getConstantLocation("clipmapLevel");
 
 	 		voxel_cd2 = voxel_sh2.getConstantLocation("lightPos");
@@ -733,6 +733,7 @@ class Inc {
 	public static function computeVoxelsLight() {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
+	 	var camera = iron.Scene.active.camera;
 	 	var clipmap = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
 		var lights = iron.Scene.active.lights;
@@ -757,9 +758,9 @@ class Inc {
 			);
 
 			kha.compute.Compute.setFloat3(voxel_cb2,
-				clipmap.center_last.x,
-				clipmap.center_last.y,
-				clipmap.center_last.z
+				camera.transform.worldx(),
+				camera.transform.worldy(),
+				camera.transform.worldz()
 			);
 
 			kha.compute.Compute.setInt(voxel_cc2, armory.renderpath.RenderPathCreator.clipmapLevel);
