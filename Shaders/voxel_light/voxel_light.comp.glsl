@@ -1,6 +1,5 @@
 #version 450
 
-// layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 #include "compiled.inc"
@@ -8,7 +7,7 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 #include "std/gbuffer.glsl"
 #include "std/shadows.glsl"
 #include "std/imageatomic.glsl"
-#include "std/voxels_constants.h"
+#include "std/conetrace.glsl"
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -27,6 +26,8 @@ uniform vec3 clipmap_center_last;
 uniform int clipmapLevel;
 
 uniform layout(r32ui) uimage3D voxels;
+uniform layout(r32ui) uimage3D voxelsNor;
+uniform sampler3D voxelsSampler;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsLight;
 #ifdef _ShadowMap
@@ -43,7 +44,6 @@ void main() {
 		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 		src.x += i * res;
 		ivec3 dst = src;
-//		dst.y += clipmapLevel * res;
 
 		vec4 radiance = vec4(0.0);
 
@@ -55,6 +55,7 @@ void main() {
 
 		radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 		vec4 emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
+		vec3 normal = decNor(imageLoad(voxelsNor, src).r);
 
 		float visibility;
 		vec3 lp = lightPos - wposition;
@@ -88,7 +89,10 @@ void main() {
 			}
 		}
 
-		radiance.rgb *= visibility * lightColor;// * dotNL;
+		vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, clipmap_center);
+		radiance.rgb *= (visibility * lightColor) / 3.1415 + indirect.rgb;
+		radiance += emission;
+		radiance = clamp(radiance, vec4(0.0), vec4(1.0));
 
 		imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
 	}

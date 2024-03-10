@@ -40,6 +40,7 @@ class Inc {
 	static var voxel_te2:kha.compute.TextureUnit;
 	static var voxel_tf2:kha.compute.TextureUnit;
 	static var voxel_tg2:kha.compute.TextureUnit;
+	static var voxel_th2:kha.compute.TextureUnit;
 	static var voxel_ca2:kha.compute.ConstantLocation;
 	static var voxel_cb2:kha.compute.ConstantLocation;
 	static var voxel_cc2:kha.compute.ConstantLocation;
@@ -646,9 +647,10 @@ class Inc {
 		{
 			voxel_sh2 = path.getComputeShader("voxel_light");
 			voxel_ta2 = voxel_sh2.getTextureUnit("voxels");
-			voxel_tb2 = voxel_sh2.getTextureUnit("voxelsB");
-			voxel_tc2 = voxel_sh2.getTextureUnit("voxelsEmission");
-			voxel_td2 = voxel_sh2.getTextureUnit("voxelsLight");
+			voxel_tb2 = voxel_sh2.getTextureUnit("voxelsNor");
+			voxel_tc2 = voxel_sh2.getTextureUnit("voxelsSampler");
+			voxel_td2 = voxel_sh2.getTextureUnit("voxelsEmission");
+			voxel_te2 = voxel_sh2.getTextureUnit("voxelsLight");
 
 	 		voxel_ca2 = voxel_sh2.getConstantLocation("clipmap_center");
 	 		voxel_cb2 = voxel_sh2.getConstantLocation("clipmap_center_last");
@@ -660,9 +662,9 @@ class Inc {
 	 		voxel_cg2 = voxel_sh2.getConstantLocation("lightDir");
 	 		voxel_ch2 = voxel_sh2.getConstantLocation("spotData");
 	 		#if (rp_shadowmap)
-	 		voxel_te2 = voxel_sh2.getTextureUnit("shadowMap");
-	 		voxel_tf2 = voxel_sh2.getTextureUnit("shadowMapSpot");
-	 		voxel_tg2 = voxel_sh2.getTextureUnit("shadowMapPoint");
+	 		voxel_tf2 = voxel_sh2.getTextureUnit("shadowMap");
+	 		voxel_tg2 = voxel_sh2.getTextureUnit("shadowMapSpot");
+	 		voxel_th2 = voxel_sh2.getTextureUnit("shadowMapPoint");
 
 	 		voxel_ci2 = voxel_sh2.getConstantLocation("lightShadow");
 	 		voxel_cj2 = voxel_sh2.getConstantLocation("lightProj");
@@ -743,9 +745,10 @@ class Inc {
 	 		kha.compute.Compute.setShader(voxel_sh2);
 
 			kha.compute.Compute.setTexture(voxel_ta2, rts.get("voxels").image, kha.compute.Access.Read);
-			kha.compute.Compute.setTexture(voxel_tb2, rts.get("voxelsOutB").image, kha.compute.Access.Read);
-			kha.compute.Compute.setTexture(voxel_tc2, rts.get("voxelsEmission").image, kha.compute.Access.Read);
-			kha.compute.Compute.setTexture(voxel_td2, rts.get("voxelsLight").image, kha.compute.Access.Write);
+			kha.compute.Compute.setTexture(voxel_tb2, rts.get("voxelsNor").image, kha.compute.Access.Read);
+			kha.compute.Compute.setSampledTexture(voxel_tc2, rts.get("voxelsOutB").image);
+			kha.compute.Compute.setTexture(voxel_td2, rts.get("voxelsEmission").image, kha.compute.Access.Read);
+			kha.compute.Compute.setTexture(voxel_te2, rts.get("voxelsLight").image, kha.compute.Access.Write);
 
 			kha.compute.Compute.setFloat3(voxel_ca2,
 				clipmap.center.x,
@@ -764,28 +767,28 @@ class Inc {
 	 		#if (rp_shadowmap)
 	 		if (l.data.raw.type == "sun") {
 				#if arm_shadowmap_atlas
-	 			kha.compute.Compute.setSampledTexture(voxel_te2, rts.get("shadowMapAtlasSun").image);
+	 			kha.compute.Compute.setSampledTexture(voxel_tf2, rts.get("shadowMapAtlasSun").image);
 	 			#else
-	 			kha.compute.Compute.setSampledTexture(voxel_te2, rts.get("shadowMap").image);
+	 			kha.compute.Compute.setSampledTexture(voxel_tf2, rts.get("shadowMap").image);
 	 			#end
 	 			kha.compute.Compute.setInt(voxel_ci2, 1); // lightShadow
 	 		}
 	 		else if (l.data.raw.type == "spot") {
 				#if arm_shadowmap_atlas
-	 			kha.compute.Compute.setSampledTexture(voxel_tf2, rts.get("shadowMapAtlasSpot").image);
+	 			kha.compute.Compute.setSampledTexture(voxel_tg2, rts.get("shadowMapAtlasSpot").image);
 	 			#else
-	 			kha.compute.Compute.setSampledTexture(voxel_tf2, rts.get("shadowMapSpot[" + spotIndex + "]").image);
-	 			#end
+	 			kha.compute.Compute.setSampledTexture(voxel_tg2, rts.get("shadowMapSpot[" + spotIndex + "]").image);
 	 			spotIndex++;
+	 			#end
 	 			kha.compute.Compute.setInt(voxel_ci2, 2);
 	 		}
 	 		else {
 				#if arm_shadowmap_atlas
-				kha.compute.Compute.setSampledCubeMap(voxel_tg2, rts.get("shadowMapAtlasPoint").cubeMap);
+				kha.compute.Compute.setSampledCubeMap(voxel_th2, rts.get("shadowMapAtlasPoint").cubeMap);
 				#else
-	 			kha.compute.Compute.setSampledCubeMap(voxel_tg2, rts.get("shadowMapPoint[" + pointIndex + "]").cubeMap);
-	 			#end
+	 			kha.compute.Compute.setSampledCubeMap(voxel_th2, rts.get("shadowMapPoint[" + pointIndex + "]").cubeMap);
 	 			pointIndex++;
+	 			#end
 	 			kha.compute.Compute.setInt(voxel_ci2, 3);
 	 		}
 
