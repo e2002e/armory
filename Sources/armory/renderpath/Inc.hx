@@ -54,6 +54,15 @@ class Inc {
 	static var voxel_ck2:kha.compute.ConstantLocation;
 	static var voxel_cl2:kha.compute.ConstantLocation;
 	static var m = iron.math.Mat4.identity();
+	#else
+	static var voxel_sh3:kha.compute.Shader = null;
+	static var voxel_ta3:kha.compute.TextureUnit;
+	static var voxel_tb3:kha.compute.TextureUnit;
+	static var voxel_tc3:kha.compute.TextureUnit;
+	static var voxel_td3:kha.compute.TextureUnit;
+	static var voxel_ca3:kha.compute.ConstantLocation;
+	static var voxel_cb3:kha.compute.ConstantLocation;
+	static var m = iron.math.Mat4.identity();
 	#end
 	#end
 
@@ -498,18 +507,23 @@ class Inc {
 		}
 		#else
 		{
-			if (t.name == "voxelsOut" || t.name == "voxelsOutB")
-				t.format = "RGBA32";
-			else
-				t.format = "R32";
+			t.format = "RGBA32";
 		}
 		#end
 
-		var res = getVoxelRes();
-		var resZ =  getVoxelResZ();
-		t.width = res * (6 + 16);
-		t.height = res * Main.voxelgiClipmapCount;
-		t.depth = Std.int(res * resZ);
+
+		if (t.name == "voxels_ao") {
+			t.width = Main.resolutionSize;
+			t.height = Main.resolutionSize;
+			t.depth = 0;
+		}
+		else {
+			var res = getVoxelRes();
+			var resZ =  getVoxelResZ();
+			t.width = res * (6 + 16);
+			t.height = res * Main.voxelgiClipmapCount;
+			t.depth = Std.int(res * resZ);
+		}
 		t.is_image = true;
 		t.mipmaps = true;
 		path.createRenderTarget(t);
@@ -628,7 +642,7 @@ class Inc {
 			voxel_ta0 = voxel_sh0.getTextureUnit("voxelsB");
 			voxel_tb0 = voxel_sh0.getTextureUnit("voxelsOut");
 
-	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_center_last");
+	 		voxel_ca0 = voxel_sh0.getConstantLocation("clipmap_offset_prevs");
 	 		voxel_cb0 = voxel_sh0.getConstantLocation("clipmapLevel");
 		}
 		if (voxel_sh1 == null)
@@ -639,7 +653,7 @@ class Inc {
 			voxel_tc1 = voxel_sh1.getTextureUnit("voxelsOut");
 
 	 		voxel_ca1 = voxel_sh1.getConstantLocation("clipmap_center");
-	 		voxel_cb1 = voxel_sh1.getConstantLocation("clipmap_center_last");
+	 		voxel_cb1 = voxel_sh1.getConstantLocation("clipmap_offset_prev");
 	 		voxel_cc1 = voxel_sh1.getConstantLocation("clipmapLevel");
 		}
 		#if (rp_voxels == "Voxel GI")
@@ -673,6 +687,16 @@ class Inc {
 	 		#end
 		}
 		#end
+		if (voxel_sh3 == null) {
+			voxel_sh3 = path.getComputeShader("voxel_resolve_ao");
+			voxel_ta3 = voxel_sh3.getTextureUnit("voxels");
+			voxel_tb3 = voxel_sh3.getTextureUnit("gbufferD");
+			voxel_tc3 = voxel_sh3.getTextureUnit("gbuffer0");
+			voxel_td3 = voxel_sh3.getTextureUnit("voxelsOut");
+
+	 		voxel_ca3 = voxel_sh3.getConstantLocation("InvVP");
+	 		voxel_cb3 = voxel_sh3.getConstantLocation("eye");
+		}
 	}
 
 	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
@@ -682,13 +706,13 @@ class Inc {
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
-			clipmap.center_last.x,
-			clipmap.center_last.y,
-			clipmap.center_last.z
+			clipmap.offset_prev.x,
+			clipmap.offset_prev.y,
+			clipmap.offset_prev.z
 		);
 		kha.compute.Compute.setInt(voxel_cb0, armory.renderpath.RenderPathCreator.clipmapLevel);
 
@@ -719,9 +743,9 @@ class Inc {
 		);
 
 		kha.compute.Compute.setFloat3(voxel_cb1,
-			clipmap.center_last.x,
-			clipmap.center_last.y,
-			clipmap.center_last.z
+			clipmap.offset_prev.x,
+			clipmap.offset_prev.y,
+			clipmap.offset_prev.z
 		);
 
 		kha.compute.Compute.setInt(voxel_cc1, armory.renderpath.RenderPathCreator.clipmapLevel);
@@ -832,6 +856,37 @@ class Inc {
 		}
 	}
 	#end
+
+	public static function resolveAO() {
+		var rts = path.renderTargets;
+	 	var res = Inc.getVoxelRes();
+	 	var camera = iron.Scene.active.camera;
+
+		kha.compute.Compute.setShader(voxel_sh3);
+
+		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
+		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
+		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
+		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_ao").image, kha.compute.Access.Write);
+
+		#if arm_centerworld
+		m.setFrom(vmat(camera.V));
+		#else
+		m.setFrom(camera.V);
+		#end
+		m.multmat(camera.P);
+		m.getInverse(m);
+
+		kha.compute.Compute.setMatrix(voxel_ca3, m.self);
+
+		kha.compute.Compute.setFloat3(voxel_cb3,
+			camera.transform.worldx(),
+			camera.transform.worldy(),
+			camera.transform.worldz()
+		);
+
+		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
+	}
 	#end
 }
 

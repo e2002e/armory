@@ -42,10 +42,7 @@ uniform float voxelSize;
 uniform int clipmapLevel;
 #endif
 #ifdef _VoxelAOvar
-uniform sampler3D voxels;
-uniform vec3 clipmap_center;
-uniform float voxelSize;
-uniform int clipmapLevel;
+uniform sampler2D voxels_ao;
 #endif
 
 uniform float envmapStrength;
@@ -295,7 +292,7 @@ void main() {
 #endif
 
 #ifdef _VoxelAOvar
-	envl.rgb *= 1.0 - traceAO(p, n, voxels, eye);
+	envl.rgb *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).rgb;
 #endif
 
 #ifdef _VoxelGI

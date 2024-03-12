@@ -31,10 +31,10 @@ THE SOFTWARE.
 #ifdef _VoxelGI
 uniform sampler3D voxelsSampler;
 uniform layout(r32ui) uimage3D voxels;
-uniform layout(rgba8) image3D voxelsB;
+uniform layout(r32ui) uimage3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsNor;
-uniform layout(rgba8) image3D voxelsOut;
+uniform layout(r32ui) uimage3D voxelsOut;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -61,7 +61,7 @@ uniform layout(r8) image3D voxelsOut;
 #endif
 
 uniform vec3 clipmap_center;
-uniform vec3 clipmap_center_last;
+uniform vec3 clipmap_offset_prev;
 uniform int clipmapLevel;
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
@@ -86,7 +86,7 @@ void main() {
 		vec4 emission = vec4(0.0);
 		vec3 N = vec3(0.0);
 		#else
-		opac = 0.0;
+		float opac = 0.0;
 		#endif
 
 		if (i < 6) {
@@ -102,9 +102,9 @@ void main() {
 			if (opac > 0.0)
 			#endif
 			{
-				if (any(notEqual(clipmap_center_last, vec3(0.0))))
+				if (any(notEqual(clipmap_offset_prev, vec3(0.0))))
 				{
-					ivec3 coords = ivec3(dst - clipmap_center_last);
+					ivec3 coords = ivec3(dst - clipmap_offset_prev);
 					int aniso_face_start_x = i * res;
 					int aniso_face_end_x = aniso_face_start_x + res;
 					int clipmap_face_start_y = clipmapLevel * res;
@@ -115,14 +115,14 @@ void main() {
 						coords.z >= 0 && coords.z < res
 					)
 						#ifdef _VoxelGI
-						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+						radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
 						#else
 						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 						#endif
 				}
 				else
 					#ifdef _VoxelGI
-					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
+					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
 					#else
 					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 					#endif
@@ -166,7 +166,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageStore(voxelsOut, dst, radiance);
+		imageAtomicMax(voxelsOut, dst, convVec4ToRGBA8(radiance));
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif

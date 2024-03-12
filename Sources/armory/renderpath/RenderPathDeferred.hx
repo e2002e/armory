@@ -67,6 +67,7 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsLight");
 			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+			Inc.initGI("voxels_ao");
 			#end
 			for (i in 0...Main.voxelgiClipmapCount) {
 				var clipmap = new armory.renderpath.Clipmap();
@@ -552,6 +553,7 @@ class RenderPathDeferred {
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
+				path.clearImage("voxels_ao", 0x00000000);
 				armory.renderpath.RenderPathCreator.pre_clear = false;
 			}
 			else
@@ -580,6 +582,10 @@ class RenderPathDeferred {
 			#end
 
 			Inc.computeVoxelsTemporal();
+
+			#if (rp_voxels == "Voxel AO")
+			Inc.resolveAO();
+			#end
 		}
 		#end
 
@@ -628,7 +634,9 @@ class RenderPathDeferred {
 			#if (arm_config && (rp_voxels == "Voxel AO"))
 			voxelao_pass = true;
 			#end
-			path.bindTarget("voxelsOut", "voxels");
+			#if (rp_voxels == "Voxel AO")
+			path.bindTarget("voxels_ao", "voxels_ao");
+			#end
 		}
 		#end
 

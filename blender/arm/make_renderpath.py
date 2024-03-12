@@ -112,6 +112,7 @@ def add_world_defs():
                 assets.add_khafile_def('rp_voxelgi_refract')
 
         elif voxelao:
+            assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_resolve_ao/voxel_resolve_ao.comp.glsl')
             wrd.world_defs += '_VoxelAOvar' # Write a shader variant
             if rpdat.arm_voxelgi_occ == 0.0:
                 wrd.world_defs += '_VoxelAONoTrace'

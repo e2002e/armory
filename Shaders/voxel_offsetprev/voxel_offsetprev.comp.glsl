@@ -28,14 +28,14 @@ THE SOFTWARE.
 #include "std/voxels_constants.h"
 
 #ifdef _VoxelGI
-uniform layout(rgba8) image3D voxelsB;
-uniform layout(rgba8) image3D voxelsOut;
+uniform layout(r32ui) uimage3D voxelsB;
+uniform layout(r32ui) uimage3D voxelsOut;
 #else
 uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
 #endif
 
-uniform vec3 clipmap_center_last;
+uniform vec3 clipmap_offset_prev;
 uniform int clipmapLevel;
 uniform float voxelBlend;
 
@@ -44,7 +44,7 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 void main() {
 	const int res = voxelgiResolution.x;
 	#ifdef _VoxelGI
-	vec4 col;
+	uint col;
 	#else
 	float opac;
 	#endif
@@ -54,7 +54,7 @@ void main() {
 	for (int i = 0; i < 6 + DIFFUSE_CONE_COUNT; i++)
 	{
 		#ifdef _VoxelGI
-		col = vec4(0.0);
+		col = 0;
 		#else
 		opac = 0.0;
 		#endif
@@ -62,9 +62,9 @@ void main() {
 		ivec3 dst = src;
 		dst.x += i * res;
 
-		if (any(notEqual(clipmap_center_last, vec3(0.0))))
+		if (any(notEqual(clipmap_offset_prev, vec3(0.0))))
 		{
-			ivec3 coords = ivec3(dst - clipmap_center_last);
+			ivec3 coords = ivec3(dst - clipmap_offset_prev);
 			int aniso_face_start_x = i * res;
 			int aniso_face_end_x = aniso_face_start_x + res;
 			int clipmap_face_start_y = clipmapLevel * res;
@@ -75,26 +75,26 @@ void main() {
 				coords.z >= 0 && coords.z < res
 			)
 				#ifdef _VoxelGI
-				col = imageLoad(voxelsB, coords);
+				col = imageLoad(voxelsB, coords).r;
 				#else
 				opac = imageLoad(voxelsB, coords).r;
 				#endif
 			else
 				#ifdef _VoxelGI
-				col = vec4(0.0);
+				col = 0;
 				#else
 				opac = 0.0;
 				#endif
 		}
 		else
 			#ifdef _VoxelGI
-			col = imageLoad(voxelsB, dst);
+			col = imageLoad(voxelsB, dst).r;
 			#else
 			opac = imageLoad(voxelsB, dst).r;
 			#endif
 
 		#ifdef _VoxelGI
-		imageStore(voxelsOut, dst, col);
+		imageAtomicMax(voxelsOut, dst, col);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
