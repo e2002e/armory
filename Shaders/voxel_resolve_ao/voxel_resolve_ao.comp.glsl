@@ -41,7 +41,8 @@ void main() {
 	const vec2 pixel = gl_GlobalInvocationID.xy;
 	const vec2 uv = (pixel + 0.5) / postprocess_resolution;
 
-	float depth = textureLod(gbufferD, uv, 0.0).r;
+	float depth = textureLod(gbufferD, uv, 0.0).r * 2.0 - 1.0;
+	if (depth == 0) return;
 
 	float x = uv.x * 2 - 1;
 	#ifdef _InvY

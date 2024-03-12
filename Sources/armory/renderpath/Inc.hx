@@ -739,14 +739,14 @@ class Inc {
 		#end
 	}
 
-	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
+	public static function computeVoxelsOffsetPrev(voxelsOut:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var clipmap = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,

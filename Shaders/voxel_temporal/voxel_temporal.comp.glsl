@@ -29,30 +29,9 @@ THE SOFTWARE.
 #include "std/conetrace.glsl"
 
 #ifdef _VoxelGI
-uniform sampler3D voxelsSampler;
 uniform layout(r32ui) uimage3D voxels;
 uniform layout(rgba8) image3D voxelsB;
-uniform layout(r32ui) uimage3D voxelsEmission;
-uniform layout(r32ui) uimage3D voxelsNor;
 uniform layout(rgba8) image3D voxelsOut;
-
-uniform vec3 lightPos;
-uniform vec3 lightColor;
-uniform int lightType;
-uniform vec3 lightDir;
-uniform vec2 spotData;
-#ifdef _ShadowMap
-uniform int lightShadow;
-uniform vec2 lightProj;
-uniform float shadowsBias;
-uniform mat4 LVP;
-#endif
-
-#ifdef _ShadowMap
-uniform sampler2DShadow shadowMap;
-uniform sampler2DShadow shadowMapSpot;
-uniform samplerCubeShadow shadowMapPoint;
-#endif
 #endif
 #ifdef _VoxelAOvar
 uniform layout(r8) image3D voxels;

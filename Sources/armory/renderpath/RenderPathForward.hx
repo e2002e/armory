@@ -164,6 +164,10 @@ class RenderPathForward {
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
 			Inc.initGI("voxelsLight");
+			Inc.initGI("voxels_diffuse");
+			Inc.initGI("voxels_specular");
+			#else
+			Inc.initGI("voxels_ao");
 			#end
 			for (i in 0...Main.voxelgiClipmapCount) {
 				var clipmap = new armory.renderpath.Clipmap();
@@ -330,6 +334,10 @@ class RenderPathForward {
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
 				path.clearImage("voxelsLight", 0x00000000);
+				path.clearImage("voxels_diffuse", 0x00000000);
+				path.clearImage("voxels_specular", 0x00000000);
+				#else
+				path.clearImage("voxels_ao", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
@@ -362,6 +370,13 @@ class RenderPathForward {
 			#end
 
 			Inc.computeVoxelsTemporal();
+
+			#if (rp_voxels == "Voxel AO")
+			Inc.resolveAO();
+			#else
+			Inc.resolveDiffuse();
+			Inc.resolveSpecular();
+			#end
 		}
 		#end
 
@@ -398,7 +413,12 @@ class RenderPathForward {
 		#if (rp_voxels != 'Off')
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			path.bindTarget("voxelsOut", "voxels");
+			#if (rp_voxels == "Voxel AO")
+			path.bindTarget("voxels_ao", "voxels_ao");
+			#else
+			path.bindTarget("voxels_diffuse", "voxels_diffuse");
+			path.bindTarget("voxels_specular", "voxels_specular");
+			#end
 		}
 		#end
 
