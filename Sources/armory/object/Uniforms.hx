@@ -18,7 +18,7 @@ class Uniforms {
 		iron.object.Uniforms.externalVec3Links = [vec3Link];
 		iron.object.Uniforms.externalVec4Links = [];
 		iron.object.Uniforms.externalFloatLinks = [floatLink];
-		iron.object.Uniforms.externalIntLinks = [];
+		iron.object.Uniforms.externalIntLinks = [intLink];
 	}
 
 	public static function textureLink(object: Object, mat: MaterialData, link: String): Null<kha.Image> {
@@ -215,6 +215,17 @@ class Uniforms {
 			#if (rp_voxels != "Off")
 			case "_voxelSize": {
 				return armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].voxelSize;
+			}
+			#end
+		}
+		return null;
+	}
+
+	public static function intLink(object: Object, mat: MaterialData, link: String): Null<Int> {
+		switch (link) {
+			#if (rp_voxels != "Off")
+			case "_clipmapLevel": {
+				return armory.renderpath.RenderPathCreator.clipmapLevel;
 			}
 			#end
 		}

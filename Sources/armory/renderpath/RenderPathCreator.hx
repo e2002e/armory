@@ -60,6 +60,7 @@ class RenderPathCreator {
 	// Last target before drawing to framebuffer
 	public static var finalTarget: RenderTarget = null;
 	#if (rp_voxels != "Off")
+	public static var eye = new iron.math.Vec3(0.0);
 	public static var pre_clear = true;
 	public static var clipmapLevel = 0;
 	public static var clipmaps:Array<Clipmap> = new Array<Clipmap>();

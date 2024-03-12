@@ -11,6 +11,7 @@ class RenderPathDeferred {
 
 	#if (rp_voxels != "Off")
 	static var voxelsOut = "voxelsOut";
+	static var voxelsOutLast = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -63,7 +64,6 @@ class RenderPathDeferred {
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
-			Inc.initGI("voxelsLight");
 			Inc.initGI("voxels_diffuse");
 			Inc.initGI("voxels_specular");
 			//Inc.initGI("voxels_refraction");
@@ -578,6 +578,15 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
+
+			//this tampers with the lagging due to eye being updated on a time scheduler
+			if (armory.renderpath.RenderPathCreator.clipmapLevel == 0) {
+				var camera = iron.Scene.active.camera;
+				armory.renderpath.RenderPathCreator.eye.x = camera.transform.worldx();
+				armory.renderpath.RenderPathCreator.eye.y = camera.transform.worldy();
+				armory.renderpath.RenderPathCreator.eye.z = camera.transform.worldz();
+			}
 
 			Inc.computeVoxelsBegin();
 
@@ -586,7 +595,6 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
-				path.clearImage("voxelsLight", 0x00000000);
 				path.clearImage("voxels_diffuse", 0x00000000);
 				path.clearImage("voxels_specular", 0x00000000);
 				#else
@@ -602,10 +610,9 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
-				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut);
+				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
 			}
 
 			path.setTarget("");
@@ -617,10 +624,6 @@ class RenderPathDeferred {
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
-
-			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight();
-			#end
 
 			Inc.computeVoxelsTemporal();
 

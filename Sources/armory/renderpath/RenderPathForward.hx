@@ -199,7 +199,6 @@ class RenderPathForward {
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
-			Inc.initGI("voxelsLight");
 			Inc.initGI("voxels_diffuse");
 			Inc.initGI("voxels_specular");
 			#else
@@ -369,6 +368,13 @@ class RenderPathForward {
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
+			if (armory.renderpath.RenderPathCreator.clipmapLevel == 0) {
+				var camera = iron.Scene.active.camera;
+				armory.renderpath.RenderPathCreator.eye.x = camera.transform.worldx();
+				armory.renderpath.RenderPathCreator.eye.y = camera.transform.worldy();
+				armory.renderpath.RenderPathCreator.eye.z = camera.transform.worldz();
+			}
+
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.RenderPathCreator.pre_clear == true)
@@ -376,7 +382,6 @@ class RenderPathForward {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
-				path.clearImage("voxelsLight", 0x00000000);
 				path.clearImage("voxels_diffuse", 0x00000000);
 				path.clearImage("voxels_specular", 0x00000000);
 				#else
@@ -392,7 +397,6 @@ class RenderPathForward {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
-				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
 				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
@@ -407,10 +411,6 @@ class RenderPathForward {
 			path.bindTarget("voxelsEmission", "voxelsEmission");
 			#end
 			path.drawMeshes("voxel");
-
-			#if (rp_voxels == "Voxel GI")
-			Inc.computeVoxelsLight();
-			#end
 
 			Inc.computeVoxelsTemporal();
 
