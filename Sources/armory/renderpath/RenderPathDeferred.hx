@@ -65,6 +65,9 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsNor");
 			Inc.initGI("voxelsEmission");
 			Inc.initGI("voxelsLight");
+			Inc.initGI("voxels_diffuse");
+			Inc.initGI("voxels_specular");
+			//Inc.initGI("voxels_refraction");
 			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			Inc.initGI("voxels_ao");
@@ -549,11 +552,14 @@ class RenderPathDeferred {
 				path.clearImage("voxelsNor", 0x00000000);
 				path.clearImage("voxelsEmission", 0x00000000);
 				path.clearImage("voxelsLight", 0x00000000);
+				path.clearImage("voxels_diffuse", 0x00000000);
+				path.clearImage("voxels_specular", 0x00000000);
+				#else
+				path.clearImage("voxels_ao", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
 				path.clearImage("voxelsOut", 0x00000000);
 				path.clearImage("voxelsOutB", 0x00000000);
-				path.clearImage("voxels_ao", 0x00000000);
 				armory.renderpath.RenderPathCreator.pre_clear = false;
 			}
 			else
@@ -585,6 +591,9 @@ class RenderPathDeferred {
 
 			#if (rp_voxels == "Voxel AO")
 			Inc.resolveAO();
+			#else
+			Inc.resolveDiffuse();
+			Inc.resolveSpecular();
 			#end
 		}
 		#end
@@ -636,6 +645,9 @@ class RenderPathDeferred {
 			#end
 			#if (rp_voxels == "Voxel AO")
 			path.bindTarget("voxels_ao", "voxels_ao");
+			#else
+			path.bindTarget("voxels_diffuse", "voxels_diffuse");
+			path.bindTarget("voxels_specular", "voxels_specular");
 			#end
 		}
 		#end

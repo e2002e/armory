@@ -36,10 +36,8 @@ uniform sampler2D gbuffer_refraction;
 #endif
 
 #ifdef _VoxelGI
-uniform sampler3D voxels;
-uniform vec3 clipmap_center;
-uniform float voxelSize;
-uniform int clipmapLevel;
+uniform sampler2D voxels_diffuse;
+uniform sampler2D voxels_specular;
 #endif
 #ifdef _VoxelAOvar
 uniform sampler2D voxels_ao;
@@ -286,13 +284,13 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	fragColor.rgb = traceDiffuse(p, n, voxels, eye).rgb * voxelgiDiff * albedo;
+	fragColor.rgb = textureLod(voxels_diffuse, texCoord, 0.0).rgb * voxelgiDiff * albedo;
 	if(roughness < 1.0 && occspec.y > 0.0)
-		fragColor.rgb += traceSpecular(p, n, voxels, -v, roughness, eye).rgb * voxelgiRefl * occspec.y;
+		fragColor.rgb += textureLod(voxels_specular, texCoord, 0.0).rgb * voxelgiRefl * occspec.y;
 #endif
 
 #ifdef _VoxelAOvar
-	envl.rgb *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).rgb;
+	envl.rgb *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).r;
 #endif
 
 #ifdef _VoxelGI
@@ -541,11 +539,13 @@ void main() {
 	}
 #endif // _Clusters
 
+/*
 #ifdef _VoxelRefract
 if(opac < 1.0) {
 	vec3 refraction = traceRefraction(p, n, voxels, v, ior, roughness, eye) * voxelgiRefr;
 	fragColor.rgb = mix(refraction, fragColor.rgb, opac);
 }
 #endif
+*/
 	fragColor.a = 1.0; // Mark as opaque
 }

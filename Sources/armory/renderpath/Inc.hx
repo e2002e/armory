@@ -31,7 +31,16 @@ class Inc {
 	static var voxel_ca1:kha.compute.ConstantLocation;
 	static var voxel_cb1:kha.compute.ConstantLocation;
 	static var voxel_cc1:kha.compute.ConstantLocation;
-	#if (rp_voxels == "Voxel GI")
+	#if (rp_voxels == "Voxel AO")
+	static var voxel_sh3:kha.compute.Shader = null;
+	static var voxel_ta3:kha.compute.TextureUnit;
+	static var voxel_tb3:kha.compute.TextureUnit;
+	static var voxel_tc3:kha.compute.TextureUnit;
+	static var voxel_td3:kha.compute.TextureUnit;
+	static var voxel_ca3:kha.compute.ConstantLocation;
+	static var voxel_cb3:kha.compute.ConstantLocation;
+	static var m = iron.math.Mat4.identity();
+	#else
 	static var voxel_sh2:kha.compute.Shader = null;
 	static var voxel_ta2:kha.compute.TextureUnit;
 	static var voxel_tb2:kha.compute.TextureUnit;
@@ -54,15 +63,22 @@ class Inc {
 	static var voxel_ck2:kha.compute.ConstantLocation;
 	static var voxel_cl2:kha.compute.ConstantLocation;
 	static var m = iron.math.Mat4.identity();
-	#else
-	static var voxel_sh3:kha.compute.Shader = null;
-	static var voxel_ta3:kha.compute.TextureUnit;
-	static var voxel_tb3:kha.compute.TextureUnit;
-	static var voxel_tc3:kha.compute.TextureUnit;
-	static var voxel_td3:kha.compute.TextureUnit;
-	static var voxel_ca3:kha.compute.ConstantLocation;
-	static var voxel_cb3:kha.compute.ConstantLocation;
-	static var m = iron.math.Mat4.identity();
+
+	static var voxel_sh4:kha.compute.Shader = null;
+	static var voxel_ta4:kha.compute.TextureUnit;
+	static var voxel_tb4:kha.compute.TextureUnit;
+	static var voxel_tc4:kha.compute.TextureUnit;
+	static var voxel_td4:kha.compute.TextureUnit;
+	static var voxel_ca4:kha.compute.ConstantLocation;
+	static var voxel_cb4:kha.compute.ConstantLocation;
+
+	static var voxel_sh5:kha.compute.Shader = null;
+	static var voxel_ta5:kha.compute.TextureUnit;
+	static var voxel_tb5:kha.compute.TextureUnit;
+	static var voxel_tc5:kha.compute.TextureUnit;
+	static var voxel_td5:kha.compute.TextureUnit;
+	static var voxel_ca5:kha.compute.ConstantLocation;
+	static var voxel_cb5:kha.compute.ConstantLocation;
 	#end
 	#end
 
@@ -501,21 +517,11 @@ class Inc {
 		voxelsCreated = true;
 		#end
 
-		#if (rp_voxels == "Voxel AO")
-		{
-			t.format = "R8";
-		}
-		#else
-		{
-			t.format = "RGBA32";
-		}
-		#end
-
-
-		if (t.name == "voxels_ao") {
+		if (t.name == "voxels_ao" || t.name == "voxels_diffuse" || t.name == "voxels_specular") {
 			t.width = Main.resolutionSize;
 			t.height = Main.resolutionSize;
-			t.depth = 0;
+			t.depth = null;
+			t.format = "RGBA32";
 		}
 		else {
 			var res = getVoxelRes();
@@ -523,9 +529,21 @@ class Inc {
 			t.width = res * (6 + 16);
 			t.height = res * Main.voxelgiClipmapCount;
 			t.depth = Std.int(res * resZ);
+			t.mipmaps = true;
+			#if (rp_voxels == "Voxel AO")
+			{
+				t.format = "R8";
+			}
+			#else
+			{
+				if (t.name == "voxelsOut" || t.name == "voxelsOutB")
+					t.format = "RGBA32";
+				else
+					t.format = "R32";
+			}
+			#end
 		}
 		t.is_image = true;
-		t.mipmaps = true;
 		path.createRenderTarget(t);
 	}
 	#end
@@ -656,7 +674,18 @@ class Inc {
 	 		voxel_cb1 = voxel_sh1.getConstantLocation("clipmap_offset_prev");
 	 		voxel_cc1 = voxel_sh1.getConstantLocation("clipmapLevel");
 		}
-		#if (rp_voxels == "Voxel GI")
+		#if (rp_voxels == "Voxel AO")
+		if (voxel_sh3 == null) {
+			voxel_sh3 = path.getComputeShader("voxel_resolve_ao");
+			voxel_ta3 = voxel_sh3.getTextureUnit("voxels");
+			voxel_tb3 = voxel_sh3.getTextureUnit("gbufferD");
+			voxel_tc3 = voxel_sh3.getTextureUnit("gbuffer0");
+			voxel_td3 = voxel_sh3.getTextureUnit("voxels_ao");
+
+	 		voxel_ca3 = voxel_sh3.getConstantLocation("InvVP");
+	 		voxel_cb3 = voxel_sh3.getConstantLocation("eye");
+		}
+		#else
 		if (voxel_sh2 == null)
 		{
 			voxel_sh2 = path.getComputeShader("voxel_light");
@@ -686,17 +715,28 @@ class Inc {
 	 		voxel_cl2 = voxel_sh2.getConstantLocation("shadowsBias");
 	 		#end
 		}
-		#end
-		if (voxel_sh3 == null) {
-			voxel_sh3 = path.getComputeShader("voxel_resolve_ao");
-			voxel_ta3 = voxel_sh3.getTextureUnit("voxels");
-			voxel_tb3 = voxel_sh3.getTextureUnit("gbufferD");
-			voxel_tc3 = voxel_sh3.getTextureUnit("gbuffer0");
-			voxel_td3 = voxel_sh3.getTextureUnit("voxelsOut");
+		if (voxel_sh4 == null) {
+			voxel_sh4 = path.getComputeShader("voxel_resolve_diffuse");
+			voxel_ta4 = voxel_sh4.getTextureUnit("voxels");
+			voxel_tb4 = voxel_sh4.getTextureUnit("gbufferD");
+			voxel_tc4 = voxel_sh4.getTextureUnit("gbuffer0");
+			voxel_td4 = voxel_sh4.getTextureUnit("voxels_diffuse");
 
-	 		voxel_ca3 = voxel_sh3.getConstantLocation("InvVP");
-	 		voxel_cb3 = voxel_sh3.getConstantLocation("eye");
+	 		voxel_ca4 = voxel_sh4.getConstantLocation("InvVP");
+	 		voxel_cb4 = voxel_sh4.getConstantLocation("eye");
 		}
+
+		if (voxel_sh5 == null) {
+			voxel_sh5 = path.getComputeShader("voxel_resolve_specular");
+			voxel_ta5 = voxel_sh5.getTextureUnit("voxels");
+			voxel_tb5 = voxel_sh5.getTextureUnit("gbufferD");
+			voxel_tc5 = voxel_sh5.getTextureUnit("gbuffer0");
+			voxel_td5 = voxel_sh5.getTextureUnit("voxels_specular");
+
+	 		voxel_ca5 = voxel_sh5.getConstantLocation("InvVP");
+	 		voxel_cb5 = voxel_sh5.getConstantLocation("eye");
+		}
+		#end
 	}
 
 	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
@@ -706,7 +746,7 @@ class Inc {
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		kha.compute.Compute.setFloat3(voxel_ca0,
@@ -753,7 +793,41 @@ class Inc {
 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
 	}
 
-	#if (rp_voxels == "Voxel GI")
+	#if (rp_voxels == "Voxel AO")
+	public static function resolveAO() {
+		var rts = path.renderTargets;
+	 	var res = Inc.getVoxelRes();
+	 	var camera = iron.Scene.active.camera;
+
+		kha.compute.Compute.setShader(voxel_sh3);
+
+		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
+		#if (rp_ssgi_half || rp_ssr_half)
+		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
+		#end
+		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
+		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_ao").image, kha.compute.Access.Write);
+
+		#if arm_centerworld
+		m.setFrom(vmat(camera.V));
+		#else
+		m.setFrom(camera.V);
+		#end
+		m.multmat(camera.P);
+		m.getInverse(m);
+
+		kha.compute.Compute.setMatrix(voxel_ca3, m.self);
+
+		kha.compute.Compute.setFloat3(voxel_cb3,
+			camera.transform.worldx(),
+			camera.transform.worldy(),
+			camera.transform.worldz()
+		);
+
+		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
+	}
+
+	#else
 	public static function computeVoxelsLight() {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
@@ -855,19 +929,20 @@ class Inc {
 	 		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
 		}
 	}
-	#end
 
-	public static function resolveAO() {
+	public static function resolveDiffuse() {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var camera = iron.Scene.active.camera;
 
-		kha.compute.Compute.setShader(voxel_sh3);
+		kha.compute.Compute.setShader(voxel_sh4);
 
-		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
-		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
-		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
-		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_ao").image, kha.compute.Access.Write);
+		kha.compute.Compute.setSampledTexture(voxel_ta4, rts.get("voxelsOut").image);
+		#if (rp_ssgi_half || rp_ssr_half)
+		kha.compute.Compute.setSampledTexture(voxel_tb4, rts.get("half").image);
+		#end
+		kha.compute.Compute.setSampledTexture(voxel_tc4, rts.get("gbuffer0").image);
+		kha.compute.Compute.setTexture(voxel_td4, rts.get("voxels_diffuse").image, kha.compute.Access.Write);
 
 		#if arm_centerworld
 		m.setFrom(vmat(camera.V));
@@ -877,16 +952,50 @@ class Inc {
 		m.multmat(camera.P);
 		m.getInverse(m);
 
-		kha.compute.Compute.setMatrix(voxel_ca3, m.self);
+		kha.compute.Compute.setMatrix(voxel_ca4, m.self);
 
-		kha.compute.Compute.setFloat3(voxel_cb3,
+		kha.compute.Compute.setFloat3(voxel_cb4,
 			camera.transform.worldx(),
 			camera.transform.worldy(),
 			camera.transform.worldz()
 		);
 
-		kha.compute.Compute.compute(Std.int(res / 8), Std.int(res / 8), Std.int(res / 8));
+		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
 	}
+
+	public static function resolveSpecular() {
+		var rts = path.renderTargets;
+	 	var res = Inc.getVoxelRes();
+	 	var camera = iron.Scene.active.camera;
+
+		kha.compute.Compute.setShader(voxel_sh5);
+
+		kha.compute.Compute.setSampledTexture(voxel_ta5, rts.get("voxelsOut").image);
+		#if (rp_ssgi_half || rp_ssr_half)
+		kha.compute.Compute.setSampledTexture(voxel_tb5, rts.get("half").image);
+		#end
+		kha.compute.Compute.setSampledTexture(voxel_tc5, rts.get("gbuffer0").image);
+		kha.compute.Compute.setTexture(voxel_td5, rts.get("voxels_specular").image, kha.compute.Access.Write);
+
+		#if arm_centerworld
+		m.setFrom(vmat(camera.V));
+		#else
+		m.setFrom(camera.V);
+		#end
+		m.multmat(camera.P);
+		m.getInverse(m);
+
+		kha.compute.Compute.setMatrix(voxel_ca5, m.self);
+
+		kha.compute.Compute.setFloat3(voxel_cb5,
+			camera.transform.worldx(),
+			camera.transform.worldy(),
+			camera.transform.worldz()
+		);
+
+		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
+	}
+	#end
 	#end
 }
 

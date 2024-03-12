@@ -94,6 +94,6 @@ void main() {
 		radiance += emission;
 		radiance = clamp(radiance, vec4(0.0), vec4(1.0));
 
-		imageAtomicMax(voxelsLight, dst, convVec4ToRGBA8(radiance));
+		imageAtomicAdd(voxelsLight, dst, convVec4ToRGBA8(radiance));
 	}
 }

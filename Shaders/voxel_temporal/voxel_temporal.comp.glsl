@@ -31,10 +31,10 @@ THE SOFTWARE.
 #ifdef _VoxelGI
 uniform sampler3D voxelsSampler;
 uniform layout(r32ui) uimage3D voxels;
-uniform layout(r32ui) uimage3D voxelsB;
+uniform layout(rgba8) image3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsEmission;
 uniform layout(r32ui) uimage3D voxelsNor;
-uniform layout(r32ui) uimage3D voxelsOut;
+uniform layout(rgba8) image3D voxelsOut;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -115,14 +115,14 @@ void main() {
 						coords.z >= 0 && coords.z < res
 					)
 						#ifdef _VoxelGI
-						radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
+						radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
 						#else
 						opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 						#endif
 				}
 				else
 					#ifdef _VoxelGI
-					radiance = mix(convRGBA8ToVec4(imageLoad(voxelsB, dst).r), radiance, 0.5);
+					radiance = mix(imageLoad(voxelsB, dst), radiance, 0.5);
 					#else
 					opac = mix(imageLoad(voxelsB, dst).r, opac, 0.5);
 					#endif
@@ -166,7 +166,7 @@ void main() {
 			#endif
 		}
 		#ifdef _VoxelGI
-		imageAtomicMax(voxelsOut, dst, convVec4ToRGBA8(radiance));
+		imageStore(voxelsOut, dst, radiance);
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
 		#endif
