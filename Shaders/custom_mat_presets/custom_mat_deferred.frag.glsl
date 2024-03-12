@@ -40,6 +40,8 @@ void main() {
 	float specular = 1.0;
 	uint materialId = 0;
 	vec3 emissionCol = vec3(0.0);
+	float ior = 1.450;
+	float opacity = 1.0;
 
 	// Store in gbuffer (see layout table above)
 	fragColor[GBUF_IDX_0] = vec4(n.xy, roughness, packFloatInt16(metallic, materialId));
@@ -49,7 +51,7 @@ void main() {
 		fragColor[GBUF_IDX_EMISSION] = vec4(emissionCol, 0.0);
 	#endif
 
-	#ifdef _VoxelRefract
+	#ifdef _SSRefraction
 		fragColor[GBUF_IDX_REFRACTION] = vec4(ior, opacity, 0.0, 0.0);
 	#endif
 }

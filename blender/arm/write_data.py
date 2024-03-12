@@ -439,6 +439,7 @@ def write_config(resx, resy):
         'rp_shadowmap_cascade': rp_shadowmap_cascade,
         'rp_ssgi': rpdat.rp_ssgi != 'Off',
         'rp_ssr': rpdat.rp_ssr != 'Off',
+        'rp_ss_refraction': rpdat.rp_ss_refraction != 'Off',
         'rp_bloom': rpdat.rp_bloom != 'Off',
         'rp_motionblur': rpdat.rp_motionblur != 'Off',
         'rp_gi': rpdat.rp_voxels != "Off",
@@ -582,7 +583,7 @@ def write_compiledglsl(defs, make_variants):
                 continue # Write a shader variant instead
             f.write("#define " + d + "\n")
 
-        if rpdat.rp_renderer == 'Deferred':
+        if rpdat.rp_renderer == "Deferred":
             gbuffer_size = make_renderpath.get_num_gbuffer_rts_deferred()
             f.write(f'#define GBUF_SIZE {gbuffer_size}\n')
 
@@ -601,7 +602,7 @@ def write_compiledglsl(defs, make_variants):
                 f.write(f'#define GBUF_IDX_EMISSION {idx_emission}\n')
                 idx_refraction += 1
 
-            if '_VoxelRefract' in wrd.world_defs:
+            if '_SSRefraction' in wrd.world_defs:
                 f.write(f'#define GBUF_IDX_REFRACTION {idx_refraction}\n')
 
         f.write("""#if defined(HLSL) || defined(METAL)
@@ -666,12 +667,18 @@ const float bloomRadius = """ + str(round(rpdat.arm_bloom_radius * 100) / 100) +
         if rpdat.rp_ssr:
             f.write(
 """const float ssrRayStep = """ + str(round(rpdat.arm_ssr_ray_step * 100) / 100) + """;
-
-const float ssrMinRayStep = """ + str(round(rpdat.arm_ssr_min_ray_step * 100) / 100) + """;
 const float ssrSearchDist = """ + str(round(rpdat.arm_ssr_search_dist * 100) / 100) + """;
 const float ssrFalloffExp = """ + str(round(rpdat.arm_ssr_falloff_exp * 100) / 100) + """;
 const float ssrJitter = """ + str(round(rpdat.arm_ssr_jitter * 100) / 100) + """;
 """)
+        if rpdat.rp_ss_refraction:
+            f.write(
+"""const float ss_refractionRayStep = """ + str(round(rpdat.arm_ss_refraction_ray_step * 100) / 100) + """;
+const float ss_refractionSearchDist = """ + str(round(rpdat.arm_ss_refraction_search_dist * 100) / 100) + """;
+const float ss_refractionFalloffExp = """ + str(round(rpdat.arm_ss_refraction_falloff_exp * 100) / 100) + """;
+const float ss_refractionJitter = """ + str(round(rpdat.arm_ss_refraction_jitter * 100) / 100) + """;
+""")
+
 
         if rpdat.arm_ssrs:
             f.write(

@@ -61,6 +61,7 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const vec3 eye, const float clipmap_i
 
 	return col;
 }
+
 #endif
 #ifdef _VoxelAOvar
 float sampleVoxel(sampler3D voxels, vec3 P, const vec3 eye, const float clipmap_index, const float step_dist, const int precomputed_direction, const vec3 face_offset, const vec3 direction_weight) {

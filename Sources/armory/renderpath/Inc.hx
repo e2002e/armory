@@ -607,6 +607,8 @@ class Inc {
 		return 0.5;
 		#elseif (rp_voxelgi_resolution_z == 0.25)
 		return 0.25;
+		#elseif (rp_voxelgi_resolution_z == 0.125)
+		return 0.125;
 		#else
 		return 0.0;
 		#end
