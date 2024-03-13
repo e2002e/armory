@@ -99,13 +99,13 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
 		, sampler3D voxels
-		, vec3 eye
+		, float clipmaps[voxelgiClipmapCount * 10]
 	#endif
 	#endif
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
 		, sampler3D voxels
-		, vec3 eye
+		, float clipmaps[voxelgiClipmapCount * 10]
 	#endif
 	#endif
 	#ifdef _MicroShadowing
@@ -152,13 +152,13 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
-	direct *= 1.0 - traceShadow(p, n, voxels, l, eye);
+	direct *= 1.0 - traceShadow(p, n, voxels, l, clipmaps);
 	#endif
 	#endif
 
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
-	direct *= 1.0 - traceShadow(p, n, voxels, l, eye);
+	direct *= 1.0 - traceShadow(p, n, voxels, l, clipmaps);
 	#endif
 	#endif
 

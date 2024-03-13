@@ -52,6 +52,22 @@ class Inc {
 	static var voxel_cm1:kha.compute.ConstantLocation;
 	#end
 	#if (rp_voxels == "Voxel AO")
+	static var voxel_sh2:kha.compute.Shader = null;
+	static var voxel_ta2:kha.compute.TextureUnit;
+	static var voxel_tb2:kha.compute.TextureUnit;
+	static var voxel_tc2:kha.compute.TextureUnit;
+	static var voxel_td2:kha.compute.TextureUnit;
+	static var voxel_ca2:kha.compute.ConstantLocation;
+	static var voxel_cb2:kha.compute.ConstantLocation;
+	#else
+	static var voxel_sh2:kha.compute.Shader = null;
+	static var voxel_ta2:kha.compute.TextureUnit;
+	static var voxel_tb2:kha.compute.TextureUnit;
+	static var voxel_tc2:kha.compute.TextureUnit;
+	static var voxel_td2:kha.compute.TextureUnit;
+	static var voxel_ca2:kha.compute.ConstantLocation;
+	static var voxel_cb2:kha.compute.ConstantLocation;
+
 	static var voxel_sh3:kha.compute.Shader = null;
 	static var voxel_ta3:kha.compute.TextureUnit;
 	static var voxel_tb3:kha.compute.TextureUnit;
@@ -59,23 +75,7 @@ class Inc {
 	static var voxel_td3:kha.compute.TextureUnit;
 	static var voxel_ca3:kha.compute.ConstantLocation;
 	static var voxel_cb3:kha.compute.ConstantLocation;
-	#else
-	static var voxel_sh4:kha.compute.Shader = null;
-	static var voxel_ta4:kha.compute.TextureUnit;
-	static var voxel_tb4:kha.compute.TextureUnit;
-	static var voxel_tc4:kha.compute.TextureUnit;
-	static var voxel_td4:kha.compute.TextureUnit;
-	static var voxel_ca4:kha.compute.ConstantLocation;
-	static var voxel_cb4:kha.compute.ConstantLocation;
-
-	static var voxel_sh5:kha.compute.Shader = null;
-	static var voxel_ta5:kha.compute.TextureUnit;
-	static var voxel_tb5:kha.compute.TextureUnit;
-	static var voxel_tc5:kha.compute.TextureUnit;
-	static var voxel_td5:kha.compute.TextureUnit;
-	static var voxel_ca5:kha.compute.ConstantLocation;
-	static var voxel_cb5:kha.compute.ConstantLocation;
-	static var voxel_cc5:kha.compute.ConstantLocation;
+	static var voxel_cc3:kha.compute.ConstantLocation;
 	#end
 	#end
 
@@ -695,43 +695,43 @@ class Inc {
 			#end
 		}
 		#if (rp_voxels == "Voxel AO")
+		if (voxel_sh2 == null) {
+			voxel_sh2 = path.getComputeShader("voxel_resolve_ao");
+			voxel_ta2 = voxel_sh2.getTextureUnit("voxels");
+			voxel_tb2 = voxel_sh2.getTextureUnit("gbufferD");
+			voxel_tc2 = voxel_sh2.getTextureUnit("gbuffer0");
+			voxel_td2 = voxel_sh2.getTextureUnit("voxels_ao");
+
+	 		voxel_ca2 = voxel_sh2.getConstantLocation("InvVP");
+	 		voxel_cb2 = voxel_sh2.getConstantLocation("clipmaps");
+		}
+		#else
+		if (voxel_sh2 == null) {
+			voxel_sh2 = path.getComputeShader("voxel_resolve_diffuse");
+			voxel_ta2 = voxel_sh2.getTextureUnit("voxels");
+			voxel_tb2 = voxel_sh2.getTextureUnit("gbufferD");
+			voxel_tc2 = voxel_sh2.getTextureUnit("gbuffer0");
+			voxel_td2 = voxel_sh2.getTextureUnit("voxels_diffuse");
+
+	 		voxel_ca2 = voxel_sh2.getConstantLocation("InvVP");
+	 		voxel_cb2 = voxel_sh2.getConstantLocation("clipmaps");
+		}
+
 		if (voxel_sh3 == null) {
-			voxel_sh3 = path.getComputeShader("voxel_resolve_ao");
+			voxel_sh3 = path.getComputeShader("voxel_resolve_specular");
 			voxel_ta3 = voxel_sh3.getTextureUnit("voxels");
 			voxel_tb3 = voxel_sh3.getTextureUnit("gbufferD");
 			voxel_tc3 = voxel_sh3.getTextureUnit("gbuffer0");
-			voxel_td3 = voxel_sh3.getTextureUnit("voxels_ao");
+			voxel_td3 = voxel_sh3.getTextureUnit("voxels_specular");
 
 	 		voxel_ca3 = voxel_sh3.getConstantLocation("InvVP");
-	 		voxel_cb3 = voxel_sh3.getConstantLocation("clipmaps");
-		}
-		#else
-		if (voxel_sh4 == null) {
-			voxel_sh4 = path.getComputeShader("voxel_resolve_diffuse");
-			voxel_ta4 = voxel_sh4.getTextureUnit("voxels");
-			voxel_tb4 = voxel_sh4.getTextureUnit("gbufferD");
-			voxel_tc4 = voxel_sh4.getTextureUnit("gbuffer0");
-			voxel_td4 = voxel_sh4.getTextureUnit("voxels_diffuse");
-
-	 		voxel_ca4 = voxel_sh4.getConstantLocation("InvVP");
-	 		voxel_cb4 = voxel_sh4.getConstantLocation("clipmaps");
-		}
-
-		if (voxel_sh5 == null) {
-			voxel_sh5 = path.getComputeShader("voxel_resolve_specular");
-			voxel_ta5 = voxel_sh5.getTextureUnit("voxels");
-			voxel_tb5 = voxel_sh5.getTextureUnit("gbufferD");
-			voxel_tc5 = voxel_sh5.getTextureUnit("gbuffer0");
-			voxel_td5 = voxel_sh5.getTextureUnit("voxels_specular");
-
-	 		voxel_ca5 = voxel_sh5.getConstantLocation("InvVP");
-	 		voxel_cb5 = voxel_sh5.getConstantLocation("eye");
-	 		voxel_cc5 = voxel_sh5.getConstantLocation("clipmaps");
+	 		voxel_cb3 = voxel_sh3.getConstantLocation("eye");
+	 		voxel_cc3 = voxel_sh3.getConstantLocation("clipmaps");
 		}
 		#end
 	}
 
-	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
+	public static function computeVoxelsOffsetPrev(voxelsOut:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
@@ -739,7 +739,7 @@ class Inc {
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
@@ -907,12 +907,16 @@ class Inc {
 	 	var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
 	 	var clipmap = clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
-		kha.compute.Compute.setShader(voxel_sh3);
+		kha.compute.Compute.setShader(voxel_sh2);
 
-		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
-		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
-		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
-		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_ao").image, kha.compute.Access.Write);
+		kha.compute.Compute.setSampledTexture(voxel_ta2, rts.get("voxelsOut").image);
+		kha.compute.Compute.setSampledTexture(voxel_tb2, rts.get("half").image);
+		#if arm_deferred
+		kha.compute.Compute.setSampledTexture(voxel_tc2, rts.get("gbuffer0").image);
+		#else
+		kha.compute.Compute.setSampledTexture(voxel_tc2, rts.get("lbuffer1").image);
+		#end
+		kha.compute.Compute.setTexture(voxel_td2, rts.get("voxels_ao").image, kha.compute.Access.Write);
 
 		#if arm_centerworld
 		m.setFrom(vmat(camera.V));
@@ -922,7 +926,7 @@ class Inc {
 		m.multmat(camera.P);
 		m.getInverse(m);
 
-		kha.compute.Compute.setMatrix(voxel_ca3, m.self);
+		kha.compute.Compute.setMatrix(voxel_ca2, m.self);
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
 		for (i in 0...Main.voxelgiClipmapCount) {
@@ -938,7 +942,7 @@ class Inc {
 			fa[i * 10 + 9] = clipmaps[i].offset_prev.z;
 		}
 
-		kha.compute.Compute.setFloats(voxel_cb3, fa);
+		kha.compute.Compute.setFloats(voxel_cb2, fa);
 
 		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
 	}
@@ -951,12 +955,16 @@ class Inc {
 	 	var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
 	 	var clipmap = clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
-		kha.compute.Compute.setShader(voxel_sh4);
+		kha.compute.Compute.setShader(voxel_sh2);
 
-		kha.compute.Compute.setSampledTexture(voxel_ta4, rts.get("voxelsOut").image);
-		kha.compute.Compute.setSampledTexture(voxel_tb4, rts.get("half").image);
-		kha.compute.Compute.setSampledTexture(voxel_tc4, rts.get("gbuffer0").image);
-		kha.compute.Compute.setTexture(voxel_td4, rts.get("voxels_diffuse").image, kha.compute.Access.Write);
+		kha.compute.Compute.setSampledTexture(voxel_ta2, rts.get("voxelsOut").image);
+		kha.compute.Compute.setSampledTexture(voxel_tb2, rts.get("half").image);
+		#if arm_deferred
+		kha.compute.Compute.setSampledTexture(voxel_tc2, rts.get("gbuffer0").image);
+		#else
+		kha.compute.Compute.setSampledTexture(voxel_tc2, rts.get("lbuffer1").image);
+		#end
+		kha.compute.Compute.setTexture(voxel_td2, rts.get("voxels_diffuse").image, kha.compute.Access.Write);
 
 		#if arm_centerworld
 		m.setFrom(vmat(camera.V));
@@ -966,7 +974,7 @@ class Inc {
 		m.multmat(camera.P);
 		m.getInverse(m);
 
-		kha.compute.Compute.setMatrix(voxel_ca4, m.self);
+		kha.compute.Compute.setMatrix(voxel_ca2, m.self);
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
 		for (i in 0...Main.voxelgiClipmapCount) {
@@ -982,7 +990,7 @@ class Inc {
 			fa[i * 10 + 9] = clipmaps[i].offset_prev.z;
 		}
 
-		kha.compute.Compute.setFloats(voxel_cb4, fa);
+		kha.compute.Compute.setFloats(voxel_cb2, fa);
 
 		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
 	}
@@ -994,12 +1002,16 @@ class Inc {
 	 	var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
 	 	var clipmap = clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel];
 
-		kha.compute.Compute.setShader(voxel_sh5);
+		kha.compute.Compute.setShader(voxel_sh3);
 
-		kha.compute.Compute.setSampledTexture(voxel_ta5, rts.get("voxelsOut").image);
-		kha.compute.Compute.setSampledTexture(voxel_tb5, rts.get("half").image);
-		kha.compute.Compute.setSampledTexture(voxel_tc5, rts.get("gbuffer0").image);
-		kha.compute.Compute.setTexture(voxel_td5, rts.get("voxels_specular").image, kha.compute.Access.Write);
+		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
+		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
+		#if arm_deferred
+		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
+		#else
+		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("lbuffer1").image);
+		#end
+		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_specular").image, kha.compute.Access.Write);
 
 		#if arm_centerworld
 		m.setFrom(vmat(camera.V));
@@ -1009,9 +1021,9 @@ class Inc {
 		m.multmat(camera.P);
 		m.getInverse(m);
 
-		kha.compute.Compute.setMatrix(voxel_ca5, m.self);
+		kha.compute.Compute.setMatrix(voxel_ca3, m.self);
 
-		kha.compute.Compute.setFloat3(voxel_cb5, camera.transform.worldx(), camera.transform.worldy(), camera.transform.worldz());
+		kha.compute.Compute.setFloat3(voxel_cb3, camera.transform.worldx(), camera.transform.worldy(), camera.transform.worldz());
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
 		for (i in 0...Main.voxelgiClipmapCount) {
@@ -1027,7 +1039,7 @@ class Inc {
 			fa[i * 10 + 9] = clipmaps[i].offset_prev.z;
 		}
 
-		kha.compute.Compute.setFloats(voxel_cc5, fa);
+		kha.compute.Compute.setFloats(voxel_cc3, fa);
 
 		kha.compute.Compute.compute(Std.int(Main.resolutionSize / 8), Std.int(Main.resolutionSize / 8), 1);
 	}

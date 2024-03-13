@@ -674,7 +674,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
 
     if '_VoxelAOvar' in wrd.world_defs:
         frag.add_uniform('sampler2D voxels_ao')
-        frag.write('indirect *= 1.0 - textureLod(voxels_ao, texCoord, 0.0);')
+        frag.write('indirect *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).r;')
 
     if '_VoxelGI' in wrd.world_defs:
         frag.add_uniform('sampler2D voxels_diffuse')
@@ -682,6 +682,10 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.write('indirect += textureLod(voxels_diffuse, texCoord, 0.0).rgb * albedo * voxelgiDiff;')
         frag.write('if (roughness < 1.0 && specular > 0.0)')
         frag.write('    indirect += textureLod(voxels_specular, texCoord, 0.0).rgb * specular * voxelgiRefl;')
+
+    if '_VoxelShadow' in wrd.world_defs:
+        frag.add_uniform('sampler3D voxels')
+        frag.add_uniform('float clipmaps[voxelgiClipmapCount * 10]', link='_clipmaps')
 
     frag.write('vec3 direct = vec3(0.0);')
 
@@ -721,8 +725,8 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
                 frag.write('const vec2 smSize = shadowmapSize;')
                 frag.write(f'svisibility = PCF({shadowmap_sun}, lPos.xy, lPos.z - shadowsBias, smSize);')
             frag.write('}') # receiveShadow
-        if '_VoxelShadow' in wrd.world_defs and ('_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs):
-            frag.write('svisibility *= 1.0 - traceShadow(wposition, n, voxels, sunDir, eye);')
+        if '_VoxelShadow' in wrd.world_defs:
+            frag.write('svisibility *= 1.0 - traceShadow(wposition, n, voxels, sunDir, clipmaps);')
         frag.write('direct += (lambertDiffuseBRDF(albedo, sdotNL) + specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * specular) * sunCol * svisibility;')
         # sun
 
@@ -749,9 +753,9 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             frag.write(', 0, pointBias, receiveShadow')
         if '_Spot' in wrd.world_defs:
             frag.write(', true, spotData.x, spotData.y, spotDir, spotData.zw, spotRight')
-        if '_VoxelShadow' in wrd.world_defs and ('_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs):
+        if '_VoxelShadow' in wrd.world_defs:
             frag.write(', voxels')
-            frag.write(', eye')
+            frag.write(', clipmaps')
         if '_MicroShadowing' in wrd.world_defs:
             frag.write(', occlusion')
         frag.write(');')

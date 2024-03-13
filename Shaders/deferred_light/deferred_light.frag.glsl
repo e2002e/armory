@@ -38,9 +38,17 @@ uniform sampler2D gbuffer_refraction;
 #ifdef _VoxelGI
 uniform sampler2D voxels_diffuse;
 uniform sampler2D voxels_specular;
+#ifdef _VoxelShadow
+uniform float clipmaps[voxelgiClipmapCount * 10];
+uniform sampler3D voxels;
+#endif
 #endif
 #ifdef _VoxelAOvar
 uniform sampler2D voxels_ao;
+#ifdef _VoxelShadow
+uniform float clipmaps[voxelgiClipmapCount * 10];
+uniform sampler3D voxels;
+#endif
 #endif
 
 uniform float envmapStrength;
@@ -293,9 +301,7 @@ void main() {
 	envl.rgb *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).r;
 #endif
 
-#ifdef _VoxelGI
-	fragColor.rgb += envl;
-#else
+#ifndef _VoxelGI
 	fragColor.rgb = envl;
 #endif
 	// Show voxels
@@ -379,13 +385,13 @@ void main() {
 
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow
-	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, eye);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmaps);
 	#endif
 	#endif
 
 	#ifdef _VoxelGI
 	#ifdef _VoxelShadow
-	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, eye);
+	svisibility *= 1.0 - traceShadow(p, n, voxels, sunDir, clipmaps);
 	#endif
 	#endif
 	
@@ -453,13 +459,13 @@ void main() {
 		#ifdef _VoxelAOvar
 		#ifdef _VoxelShadow
 		, voxels 
-		, clipmap_center
+		, clipmaps
 		#endif
 		#endif
 		#ifdef _VoxelGI
 		#ifdef _VoxelShadow
 		, voxels
-		, eye
+		, clipmaps
 		#endif
 		#endif
 		#ifdef _MicroShadowing
@@ -520,13 +526,13 @@ void main() {
 			#ifdef _VoxelAOvar
 			#ifdef _VoxelShadow
 			, voxels
-			, clipmap_center
+			, clipmaps
 			#endif
 			#endif
 			#ifdef _VoxelGI
 			#ifdef _VoxelShadow
 			, voxels
-			, eye
+			, clipmaps
 			#endif
 			#endif
 			#ifdef _MicroShadowing

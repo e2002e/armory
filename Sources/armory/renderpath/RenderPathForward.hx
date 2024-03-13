@@ -11,7 +11,6 @@ class RenderPathForward {
 
 	#if (rp_voxels != "Off")
 	static var voxelsOut = "voxelsOut";
-	static var voxelsOutLast = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -23,7 +22,7 @@ class RenderPathForward {
 		#if rp_render_to_texture
 		{
 			path.setTarget("lbuffer0", [
-				#if (rp_ssr || rp_ssrefr) "lbuffer1",  #end
+				#if (rp_ssr || rp_ssrefr || rp_voxels != "Off") "lbuffer1",  #end
 				#if rp_ssrefr "gbuffer_refraction" #end]
 			);
 		}
@@ -291,7 +290,7 @@ class RenderPathForward {
 		}
 		#end
 
-		#if (rp_ssr_half || rp_ssgi_half)
+		#if (rp_ssr_half || rp_ssgi_half || rp_voxels != "Off")
 		{
 			path.loadShader("shader_datas/downsample_depth/downsample_depth");
 			var t = new RenderTargetRaw();
@@ -366,7 +365,6 @@ class RenderPathForward {
 			var path = RenderPath.active;
 
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
-			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			Inc.computeVoxelsBegin();
 
@@ -392,7 +390,7 @@ class RenderPathForward {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
+				Inc.computeVoxelsOffsetPrev(voxelsOut);
 			}
 
 			path.setTarget("");
@@ -455,6 +453,9 @@ class RenderPathForward {
 			path.bindTarget("voxels_diffuse", "voxels_diffuse");
 			path.bindTarget("voxels_specular", "voxels_specular");
 			#end
+			#if (arm_voxelgi_shadows)
+			path.bindTarget("voxelsOut", "voxels");
+			#end
 		}
 		#end
 
@@ -468,14 +469,17 @@ class RenderPathForward {
 		}
 		#end
 
-		#if rp_render_to_texture
+		#if (rp_render_to_texture || rp_voxels != "Off")
 		{
-			#if (rp_ssr_half || rp_ssgi_half)
+			#if (rp_ssr_half || rp_ssgi_half || rp_voxels != "Off")
 			path.setTarget("half");
 			path.bindTarget("_main", "texdepth");
 			path.drawShader("shader_datas/downsample_depth/downsample_depth");
 			#end
-
+		}
+		#end
+		#if rp_render_to_texture
+		{
 			#if rp_ssrefr
 			{
 				if (armory.data.Config.raw.rp_ssrefr != false)

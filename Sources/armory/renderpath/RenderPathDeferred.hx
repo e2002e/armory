@@ -11,7 +11,6 @@ class RenderPathDeferred {
 
 	#if (rp_voxels != "Off")
 	static var voxelsOut = "voxelsOut";
-	static var voxelsOutLast = "voxelsOut";
 	#end
 
 	#if rp_bloom
@@ -578,7 +577,6 @@ class RenderPathDeferred {
 			var path = RenderPath.active;
 
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
-			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			Inc.computeVoxelsBegin();
 
@@ -604,7 +602,7 @@ class RenderPathDeferred {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
+				Inc.computeVoxelsOffsetPrev(voxelsOut);
 			}
 
 			path.setTarget("");
@@ -678,6 +676,9 @@ class RenderPathDeferred {
 			#else
 			path.bindTarget("voxels_diffuse", "voxels_diffuse");
 			path.bindTarget("voxels_specular", "voxels_specular");
+			#end
+			#if (arm_voxelgi_shadows)
+			path.bindTarget("voxelsOut", "voxels");
 			#end
 		}
 		#end

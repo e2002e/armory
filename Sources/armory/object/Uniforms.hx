@@ -5,6 +5,8 @@ import iron.object.Object;
 import iron.data.MaterialData;
 import iron.math.Vec4;
 
+import kha.arrays.Float32Array;
+
 import armory.renderpath.Postprocess;
 
 using StringTools;
@@ -18,6 +20,7 @@ class Uniforms {
 		iron.object.Uniforms.externalVec3Links = [vec3Link];
 		iron.object.Uniforms.externalVec4Links = [];
 		iron.object.Uniforms.externalFloatLinks = [floatLink];
+		iron.object.Uniforms.externalFloatsLinks = [floatsLink];
 		iron.object.Uniforms.externalIntLinks = [intLink];
 	}
 
@@ -166,14 +169,6 @@ class Uniforms {
 				}
 			}
 			#end
-			#if (rp_voxels != "Off")
-			case "_clipmap_center": {
-				v = iron.object.Uniforms.helpVec;
-				v.x = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].center.x;
-				v.y = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].center.y;
-				v.z = armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].center.z;
-			}
-			#end
 		}
 		return v;
 	}
@@ -212,9 +207,29 @@ class Uniforms {
 				return Postprocess.bloom_uniforms[3];
 			}
 			#end
+		}
+		return null;
+	}
+
+	public static function floatsLink(object: Object, mat: MaterialData, link: String): Float32Array {
+		switch (link) {
 			#if (rp_voxels != "Off")
-			case "_voxelSize": {
-				return armory.renderpath.RenderPathCreator.clipmaps[armory.renderpath.RenderPathCreator.clipmapLevel].voxelSize;
+			case "_clipmaps": {
+				var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
+				var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
+				for (i in 0...Main.voxelgiClipmapCount) {
+					fa[i * 10] = clipmaps[i].voxelSize;
+					fa[i * 10 + 1] = clipmaps[i].extents.x;
+					fa[i * 10 + 2] = clipmaps[i].extents.y;
+					fa[i * 10 + 3] = clipmaps[i].extents.z;
+					fa[i * 10 + 4] = clipmaps[i].center.x;
+					fa[i * 10 + 5] = clipmaps[i].center.y;
+					fa[i * 10 + 6] = clipmaps[i].center.z;
+					fa[i * 10 + 7] = clipmaps[i].offset_prev.x;
+					fa[i * 10 + 8] = clipmaps[i].offset_prev.y;
+					fa[i * 10 + 9] = clipmaps[i].offset_prev.z;
+				}
+				return fa;
 			}
 			#end
 		}

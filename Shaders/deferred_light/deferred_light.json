@@ -21,6 +21,11 @@
 					"link": "_cameraLook"
 				},
 				{
+					"name": "clipmaps",
+					"link": "_clipmaps",
+					"ifdef": ["VoxelShadow"]
+				},
+				{
 					"name": "invVP",
 					"link": "_inverseViewProjectionMatrix"
 				},

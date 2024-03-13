@@ -100,10 +100,7 @@ def add_world_defs():
         wrd.world_defs += "_VoxelCones" + rpdat.arm_voxelgi_cones
         if rpdat.arm_voxelgi_shadows:
             wrd.world_defs += '_VoxelShadow'
-
-        if rpdat.arm_voxelgi_temporal:
-            wrd.world_defs += '_VoxelTemporal'
-            assets.add_khafile_def('arm_voxelgi_temporal')
+            assets.add_khafile_def('arm_voxelgi_shadows')
 
         if voxelgi:
             assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_resolve_diffuse/voxel_resolve_diffuse.comp.glsl')
