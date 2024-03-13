@@ -910,9 +910,7 @@ class Inc {
 		kha.compute.Compute.setShader(voxel_sh3);
 
 		kha.compute.Compute.setSampledTexture(voxel_ta3, rts.get("voxelsOut").image);
-		#if (rp_ssgi_half || rp_ssr_half)
 		kha.compute.Compute.setSampledTexture(voxel_tb3, rts.get("half").image);
-		#end
 		kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
 		kha.compute.Compute.setTexture(voxel_td3, rts.get("voxels_ao").image, kha.compute.Access.Write);
 
@@ -956,9 +954,7 @@ class Inc {
 		kha.compute.Compute.setShader(voxel_sh4);
 
 		kha.compute.Compute.setSampledTexture(voxel_ta4, rts.get("voxelsOut").image);
-		#if (rp_ssgi_half || rp_ssr_half)
 		kha.compute.Compute.setSampledTexture(voxel_tb4, rts.get("half").image);
-		#end
 		kha.compute.Compute.setSampledTexture(voxel_tc4, rts.get("gbuffer0").image);
 		kha.compute.Compute.setTexture(voxel_td4, rts.get("voxels_diffuse").image, kha.compute.Access.Write);
 
@@ -1001,9 +997,7 @@ class Inc {
 		kha.compute.Compute.setShader(voxel_sh5);
 
 		kha.compute.Compute.setSampledTexture(voxel_ta5, rts.get("voxelsOut").image);
-		#if (rp_ssgi_half || rp_ssr_half)
 		kha.compute.Compute.setSampledTexture(voxel_tb5, rts.get("half").image);
-		#end
 		kha.compute.Compute.setSampledTexture(voxel_tc5, rts.get("gbuffer0").image);
 		kha.compute.Compute.setTexture(voxel_td5, rts.get("voxels_specular").image, kha.compute.Access.Write);
 

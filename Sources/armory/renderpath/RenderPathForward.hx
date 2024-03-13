@@ -368,13 +368,6 @@ class RenderPathForward {
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
-			if (armory.renderpath.RenderPathCreator.clipmapLevel == 0) {
-				var camera = iron.Scene.active.camera;
-				armory.renderpath.RenderPathCreator.eye.x = camera.transform.worldx();
-				armory.renderpath.RenderPathCreator.eye.y = camera.transform.worldy();
-				armory.renderpath.RenderPathCreator.eye.z = camera.transform.worldz();
-			}
-
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.RenderPathCreator.pre_clear == true)

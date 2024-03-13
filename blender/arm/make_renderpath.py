@@ -410,7 +410,7 @@ def build():
         wrd.world_defs += '_SSS'
         assets.add_shader_pass('sss_pass')
 
-    if (rpdat.rp_ssr and rpdat.arm_ssr_half_res) or (rpdat.rp_ssgi != 'Off' and rpdat.arm_ssgi_half_res):
+    if (rpdat.rp_ssr and rpdat.arm_ssr_half_res) or (rpdat.rp_ssgi != 'Off' and rpdat.arm_ssgi_half_res) or rpdat.rp_voxels != "Off":
         assets.add_shader_pass('downsample_depth')
 
     if rpdat.rp_motionblur != 'Off':
