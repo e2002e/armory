@@ -760,7 +760,7 @@ class Inc {
 		#end
 	}
 
-	public static function computeVoxelsOffsetPrev(voxelsOut:String) {
+	public static function computeVoxelsOffsetPrev(voxelsOut:String, voxelsOutLast:String) {
 		var rts = path.renderTargets;
 	 	var res = Inc.getVoxelRes();
 	 	var clipmaps = armory.renderpath.RenderPathCreator.clipmaps;
@@ -768,7 +768,7 @@ class Inc {
 
 		kha.compute.Compute.setShader(voxel_sh0);
 
-		kha.compute.Compute.setTexture(voxel_ta0, rts.get("voxelsOutB").image, kha.compute.Access.Read);
+		kha.compute.Compute.setTexture(voxel_ta0, rts.get(voxelsOutLast).image, kha.compute.Access.Read);
 		kha.compute.Compute.setTexture(voxel_tb0, rts.get(voxelsOut).image, kha.compute.Access.Write);
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);

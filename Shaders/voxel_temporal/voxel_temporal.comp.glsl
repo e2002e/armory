@@ -120,7 +120,7 @@ void main() {
 			//clipmap to world
 			vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 			wposition = wposition * 2.0 - 1.0;
-			wposition *= voxelgiVoxelSize;
+			wposition *= float(clipmaps[int(clipmapLevel * 10)]);
 			wposition *= voxelgiResolution.x;
 			wposition += vec3(clipmaps[clipmapLevel * 10 + 4], clipmaps[clipmapLevel * 10 + 5], clipmaps[clipmapLevel * 10 + 6]);
 
@@ -204,14 +204,14 @@ void main() {
 				envl.rgb *= albedo;
 
 			#ifdef _Brdf
-				envl.rgb *= 1.0 - (f0 * envBRDF.x + envBRDF.y); //LV: We should take refracted light into account
+				envl.rgb *= 1.0 - (f0 * envBRDF.x + envBRDF.y);
 			#endif
 
 			#ifdef _Rad // Indirect specular
-				envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y); //LV: Removed "1.5 * occspec.y". Specular should be weighted only by FV LUT
+				envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y);
 			#else
 				#ifdef _EnvCol
-				envl.rgb += backgroundCol * (f0 * envBRDF.x + envBRDF.y); //LV: Eh, what's the point of weighting it only by F0?
+				envl.rgb += backgroundCol * (f0 * envBRDF.x + envBRDF.y);
 				#endif
 			#endif
 
