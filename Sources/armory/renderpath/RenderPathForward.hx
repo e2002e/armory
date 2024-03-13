@@ -366,7 +366,6 @@ class RenderPathForward {
 			var path = RenderPath.active;
 
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
-			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
 			Inc.computeVoxelsBegin();
 
@@ -392,7 +391,7 @@ class RenderPathForward {
 				path.clearImage("voxelsEmission", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				Inc.computeVoxelsOffsetPrev(voxelsOut, voxelsOutLast);
+				Inc.computeVoxelsOffsetPrev(voxelsOut);
 			}
 
 			path.setTarget("");

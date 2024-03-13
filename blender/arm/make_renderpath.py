@@ -106,9 +106,9 @@ def add_world_defs():
             assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_resolve_diffuse/voxel_resolve_diffuse.comp.glsl')
             assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_resolve_specular/voxel_resolve_specular.comp.glsl')
             wrd.world_defs += '_VoxelGI'
-            if rpdat.arm_voxelgi_refraction:
-                wrd.world_defs += '_VoxelRefract'
-                assets.add_khafile_def('rp_voxelgi_refract')
+            #if rpdat.arm_voxelgi_refraction:
+            #    wrd.world_defs += '_VoxelRefract'
+            #    assets.add_khafile_def('rp_voxelgi_refract')
 
         elif voxelao:
             assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_resolve_ao/voxel_resolve_ao.comp.glsl')

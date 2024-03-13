@@ -218,7 +218,7 @@ void main() {
 			envl.rgb *= envmapStrength * occspec.x;
 
 			float visibility;
-			vec3 lp = lightPos - wposition;
+			vec3 lp = lightPos - P;
 			vec3 l;
 			if (lightType == 0) { l = lightDir; visibility = 1.0; }
 			else { l = normalize(lp); visibility = attenuate(distance(wposition, lightPos)); }
@@ -228,12 +228,12 @@ void main() {
 
 		#ifdef _ShadowMap
 			if (lightShadow == 1) {
-				vec4 lightPosition = LVP * vec4(wposition, 1.0);
+				vec4 lightPosition = LVP * vec4(P, 1.0);
 				vec3 lPos = lightPosition.xyz / lightPosition.w;
 				visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).r;
 			}
 			else if (lightShadow == 2) {
-				vec4 lightPosition = LVP * vec4(wposition, 1.0);
+				vec4 lightPosition = LVP * vec4(P, 1.0);
 				vec3 lPos = lightPosition.xyz / lightPosition.w;
 				visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
 			}
