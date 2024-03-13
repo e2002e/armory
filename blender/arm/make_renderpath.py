@@ -151,7 +151,7 @@ def add_world_defs():
 
     if '_Rad' in wrd.world_defs and '_Brdf' not in wrd.world_defs:
         wrd.world_defs += '_Brdf'
-
+        assets.add_khafile_def("arm_brdf")
 
 def build():
     rpdat = arm.utils.get_rp()

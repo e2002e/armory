@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include "std/shadows.glsl"
 #include "std/imageatomic.glsl"
 #include "std/conetrace.glsl"
+#include "std/brdf.glsl"
 
 #ifdef _VoxelGI
 uniform vec3 lightPos;
@@ -52,6 +53,31 @@ uniform sampler2DShadow shadowMap;
 uniform sampler2DShadow shadowMapSpot;
 uniform samplerCubeShadow shadowMapPoint;
 #endif
+
+#include "std/shirr.glsl"
+uniform float envmapStrength;
+#ifdef _Irr
+uniform vec4 shirr[7];
+#endif
+#ifdef _Brdf
+uniform sampler2D senvmapBrdf;
+#endif
+#ifdef _Rad
+uniform sampler2D senvmapRadiance;
+uniform int envmapNumMipmaps;
+#endif
+#ifdef _EnvCol
+uniform vec3 backgroundCol;
+#endif
+uniform sampler2D gbuffer0;
+uniform sampler2D gbuffer1;
+uniform sampler2D gbufferD;
+#ifdef _gbuffer2
+uniform sampler2D gbuffer2;
+#endif
+
+uniform mat4 InvVP;
+uniform vec3 eye;
 #endif
 
 #ifdef _VoxelAOvar
@@ -91,15 +117,105 @@ void main() {
 
 		if (i < 6) {
 			#ifdef _VoxelGI
+			//clipmap to world
 			vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 			wposition = wposition * 2.0 - 1.0;
-			wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
+			wposition *= voxelgiVoxelSize;
 			wposition *= voxelgiResolution.x;
 			wposition += vec3(clipmaps[clipmapLevel * 10 + 4], clipmaps[clipmapLevel * 10 + 5], clipmaps[clipmapLevel * 10 + 6]);
 
 			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 			vec4 emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
 			vec3 normal = decNor(imageLoad(voxelsNor, src).r);
+
+			const vec2 pixel = gl_GlobalInvocationID.xy;
+			const vec2 uv = (pixel + 0.5) / postprocess_resolution;
+
+			vec4 g0 = textureLod(gbuffer0, uv, 0.0); // Normal.xy, roughness, metallic/matid
+			vec3 n;
+			n.z = 1.0 - abs(g0.x) - abs(g0.y);
+			n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
+			n = normalize(n);
+
+			float roughness = g0.b;
+			float metallic;
+			uint matid;
+			unpackFloatInt16(g0.a, metallic, matid);
+
+			vec4 g1 = textureLod(gbuffer1, uv, 0.0); // Basecolor.rgb, spec/occ
+			vec2 occspec = unpackFloat2(g1.a);
+			vec3 albedo = surfaceAlbedo(g1.rgb, metallic); // g1.rgb - basecolor
+			vec3 f0 = surfaceF0(g1.rgb, metallic);
+
+			float depth = textureLod(gbufferD, uv, 0.0).r * 2.0 - 1.0;
+			float x = uv.x * 2 - 1;
+			#ifdef _InvY
+			float y = (1 - uv.y) * 2 - 1;
+			#else
+			float y = uv.y * 2 - 1;
+			#endif
+			vec4 position_s = vec4(x, y, depth, 1);
+			vec4 position_v = InvVP * position_s;
+			vec3 P = position_v.xyz / position_v.w;
+			vec3 v = normalize(eye - P);
+			float dotNV = max(dot(n, v), 0.0);
+
+			#ifdef _gbuffer2
+				vec4 g2 = textureLod(gbuffer2, uv, 0.0);
+			#endif
+
+			#ifdef _Brdf
+				vec2 envBRDF = texelFetch(senvmapBrdf, ivec2(vec2(dotNV, 1.0 - roughness) * 256.0), 0).xy;
+			#endif
+
+				// Envmap
+			#ifdef _Irr
+
+				vec3 envl = shIrradiance(n, shirr);
+
+				#ifdef _gbuffer2
+					if (g2.b < 0.5) {
+						envl = envl;
+					} else {
+						envl = vec3(0.0);
+					}
+				#endif
+
+				#ifdef _EnvTex
+					envl /= PI;
+				#endif
+			#else
+				vec3 envl = vec3(0.0);
+			#endif
+
+			#ifdef _Rad
+				vec3 reflectionWorld = reflect(-v, n);
+				float lod = getMipFromRoughness(roughness, envmapNumMipmaps);
+				vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(reflectionWorld), lod).rgb;
+			#endif
+
+			#ifdef _EnvLDR
+				envl.rgb = pow(envl.rgb, vec3(2.2));
+				#ifdef _Rad
+					prefilteredColor = pow(prefilteredColor, vec3(2.2));
+				#endif
+			#endif
+
+				envl.rgb *= albedo;
+
+			#ifdef _Brdf
+				envl.rgb *= 1.0 - (f0 * envBRDF.x + envBRDF.y); //LV: We should take refracted light into account
+			#endif
+
+			#ifdef _Rad // Indirect specular
+				envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y); //LV: Removed "1.5 * occspec.y". Specular should be weighted only by FV LUT
+			#else
+				#ifdef _EnvCol
+				envl.rgb += backgroundCol * (f0 * envBRDF.x + envBRDF.y); //LV: Eh, what's the point of weighting it only by F0?
+				#endif
+			#endif
+
+			envl.rgb *= envmapStrength * occspec.x;
 
 			float visibility;
 			vec3 lp = lightPos - wposition;
@@ -133,9 +249,9 @@ void main() {
 				}
 			}
 
-			vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, clipmaps);
-			radiance.rgb *= (visibility * lightColor) / 3.1415 + indirect.rgb;
-			radiance += emission;
+			vec3 indirect = traceDiffuse(wposition, normal, voxelsSampler, clipmaps).rgb + envl.rgb * (1.0 - radiance.a);
+			radiance.rgb *= (visibility * lightColor) / PI + indirect.rgb;
+			radiance.rgb += emission.rgb;
 			radiance = clamp(radiance, vec4(0.0), vec4(1.0));
 
 			#else

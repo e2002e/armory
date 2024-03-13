@@ -82,6 +82,7 @@ def build():
                         if write_radiance:
                             # Set world def, everything else is handled by write_probes()
                             wrd.world_defs += '_Rad'
+                            assets.add_khafile_def("arm_radiance")
 
     write_probes.check_last_cmft_time()
 
