@@ -41,9 +41,6 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 
-uniform vec3 eye;
-uniform vec3 clipmap_center;
-
 uniform layout(r32ui) uimage3D voxels;
 uniform layout(rgba8) image3D voxelsB;
 uniform layout(r32ui) uimage3D voxelsNor;
@@ -63,8 +60,9 @@ uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
 #endif
 
-uniform vec3 clipmap_offset_prev;
 uniform int clipmapLevel;
+
+uniform float clipmaps[voxelgiClipmapCount * 10];
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
@@ -97,7 +95,7 @@ void main() {
 			wposition = wposition * 2.0 - 1.0;
 			wposition *= voxelgiVoxelSize * pow(2.0, clipmapLevel);
 			wposition *= voxelgiResolution.x;
-			wposition += clipmap_center;
+			wposition += vec3(clipmaps[clipmapLevel * 10 + 4], clipmaps[clipmapLevel * 10 + 5], clipmaps[clipmapLevel * 10 + 6]);
 
 			radiance = convRGBA8ToVec4(imageLoad(voxels, src).r);
 			vec4 emission = convRGBA8ToVec4(imageLoad(voxelsEmission, src).r);
@@ -135,7 +133,7 @@ void main() {
 				}
 			}
 
-			vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, eye);
+			vec4 indirect = traceDiffuse(wposition, normal, voxelsSampler, clipmaps);
 			radiance.rgb *= (visibility * lightColor) / 3.1415 + indirect.rgb;
 			radiance += emission;
 			radiance = clamp(radiance, vec4(0.0), vec4(1.0));
@@ -150,9 +148,9 @@ void main() {
 			if (opac > 0.0)
 			#endif
 			{
-				if (any(notEqual(clipmap_offset_prev, vec3(0.0))))
+				if (any(notEqual(vec3(clipmaps[clipmapLevel * 10 + 7], clipmaps[clipmapLevel * 10 + 8], clipmaps[clipmapLevel * 10 + 9]), vec3(0.0))))
 				{
-					ivec3 coords = ivec3(dst - clipmap_offset_prev);
+					ivec3 coords = ivec3(dst - vec3(clipmaps[clipmapLevel * 10 + 7], clipmaps[clipmapLevel * 10 + 8], clipmaps[clipmapLevel * 10 + 9]));
 					int aniso_face_start_x = i * res;
 					int aniso_face_end_x = aniso_face_start_x + res;
 					int clipmap_face_start_y = clipmapLevel * res;

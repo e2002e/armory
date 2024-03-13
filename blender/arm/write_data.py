@@ -772,7 +772,7 @@ const float compoDOFLength = 160.0;
 
         if rpdat.rp_voxels != 'Off':
             f.write("""const ivec3 voxelgiResolution = ivec3(""" + str(rpdat.rp_voxelgi_resolution) + """, """ + str(rpdat.rp_voxelgi_resolution) + """, """ + str(int(int(rpdat.rp_voxelgi_resolution) * float(rpdat.rp_voxelgi_resolution_z))) + """);
-const float voxelgiClipmapCount = """ + str(rpdat.arm_voxelgi_clipmap_count) + """;
+const int voxelgiClipmapCount = """ + str(rpdat.arm_voxelgi_clipmap_count) + """;
 const float voxelgiOcc = """ + str(round(rpdat.arm_voxelgi_occ * 100) / 100) + """;
 const float voxelgiVoxelSize = """ + str(round(rpdat.arm_voxelgi_size * 100) / 100) + """;
 const float voxelgiStep = """ + str(round(rpdat.arm_voxelgi_step * 100) / 100) + """;

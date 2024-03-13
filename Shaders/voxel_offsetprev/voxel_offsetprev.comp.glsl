@@ -37,9 +37,10 @@ uniform layout(r8) image3D voxelsB;
 uniform layout(r8) image3D voxelsOut;
 #endif
 
-uniform vec3 clipmap_offset_prev;
 uniform int clipmapLevel;
 uniform float voxelBlend;
+
+uniform float clipmaps[voxelgiClipmapCount * 10];
 
 void main() {
 	const int res = voxelgiResolution.x;
@@ -62,9 +63,9 @@ void main() {
 		ivec3 dst = src;
 		dst.x += i * res;
 
-		if (any(notEqual(clipmap_offset_prev, vec3(0.0))))
+		if (any(notEqual(vec3(clipmaps[clipmapLevel * 10 + 7], clipmaps[clipmapLevel * 10 + 8], clipmaps[clipmapLevel * 10 + 9]), vec3(0.0))))
 		{
-			ivec3 coords = ivec3(dst - clipmap_offset_prev);
+			ivec3 coords = ivec3(dst - vec3(clipmaps[clipmapLevel * 10 + 7], clipmaps[clipmapLevel * 10 + 8], clipmaps[clipmapLevel * 10 + 9]));
 			int aniso_face_start_x = i * res;
 			int aniso_face_end_x = aniso_face_start_x + res;
 			int clipmap_face_start_y = clipmapLevel * res;

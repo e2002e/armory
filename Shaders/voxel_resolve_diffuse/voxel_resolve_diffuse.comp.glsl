@@ -35,7 +35,7 @@ uniform sampler2D gbuffer0;
 uniform layout(rgba8) image2D voxels_diffuse;
 
 uniform mat4 InvVP;
-uniform vec3 eye;
+uniform float clipmaps[voxelgiClipmapCount * 10];
 
 void main() {
 	const vec2 pixel = gl_GlobalInvocationID.xy;
@@ -60,7 +60,7 @@ void main() {
 	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
 	n = normalize(n);
 
-	vec3 color = traceDiffuse(P, n, voxels, eye).rgb;
+	vec3 color = traceDiffuse(P, n, voxels, clipmaps).rgb;
 
 	imageStore(voxels_diffuse, ivec2(pixel), vec4(color, 1.0));
 }

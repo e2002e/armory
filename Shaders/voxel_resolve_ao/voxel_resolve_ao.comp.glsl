@@ -35,7 +35,8 @@ uniform sampler2D gbuffer0;
 uniform layout(r8) image2D voxels_ao;
 
 uniform mat4 InvVP;
-uniform vec3 eye;
+
+uniform float clipmaps[voxelgiClipmapCount * 10];
 
 void main() {
 	const vec2 pixel = gl_GlobalInvocationID.xy;
@@ -60,7 +61,7 @@ void main() {
 	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
 	n = normalize(n);
 
-	float occ = traceAO(P, n, voxels, eye);
+	float occ = traceAO(P, n, voxels, clipmaps);
 
 	imageStore(voxels_ao, ivec2(pixel), vec4(occ));
 }

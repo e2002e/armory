@@ -580,14 +580,6 @@ class RenderPathDeferred {
 			voxelsOut = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 			voxelsOutLast = voxelsOut == "voxelsOut" ? "voxelsOutB" : "voxelsOut";
 
-			//this tampers with the lagging due to eye being updated on a time scheduler
-			if (armory.renderpath.RenderPathCreator.clipmapLevel == 0) {
-				var camera = iron.Scene.active.camera;
-				armory.renderpath.RenderPathCreator.eye.x = camera.transform.worldx();
-				armory.renderpath.RenderPathCreator.eye.y = camera.transform.worldy();
-				armory.renderpath.RenderPathCreator.eye.z = camera.transform.worldz();
-			}
-
 			Inc.computeVoxelsBegin();
 
 			if (armory.renderpath.RenderPathCreator.pre_clear == true)
