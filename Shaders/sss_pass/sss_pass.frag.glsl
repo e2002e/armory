@@ -64,16 +64,15 @@ vec4 SSSSBlur(vec3 subsurface_color) {
             vec2 offset = texCoord + offsetScale * adaptiveStepSize * dir;
             vec4 color = textureLod(tex, offset, 0.0);
 
-			/*
-            // Optional: Follow surface depth to avoid bleeding
+			// Optional: Follow surface depth to avoid bleeding
             float sampleDepth = textureLod(gbufferD, offset, 0.0).r * 2.0 - 1.0;
             float sampleDepthM = cameraProj.y / (sampleDepth - cameraProj.x);
             float depthDifference = abs(depthM - sampleDepthM);
             float weight = exp(-depthDifference); // Adjust exponential factor for better surface following
-            color.rgb = mix(color.rgb, colorM.rgb, weight);
-			*/
+            color.rgb = mix(color.rgb * subsurface_color, colorM.rgb, weight);
+
             // Accumulate
-            colorBlurred.rgb += kernel[i] * color.rgb * subsurface_color;
+            colorBlurred.rgb += kernel[i] * color.rgb;
         }
     }
 
