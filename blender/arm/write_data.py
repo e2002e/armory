@@ -609,7 +609,8 @@ def write_compiledglsl(defs, make_variants):
                 idx_subsurface += 1
 
             if '_SSS' in wrd.world_defs:
-                f.write(f'#define GBUF_IDX_SUBSURFACE {idx_subsurface}\n')
+                f.write(f'#define GBUF_IDX_SUBSURFACE_1 {idx_subsurface}\n')
+                f.write(f'#define GBUF_IDX_SUBSURFACE_2 {idx_subsurface + 1}\n')
 
         f.write("""#if defined(HLSL) || defined(METAL)
 #define _InvY

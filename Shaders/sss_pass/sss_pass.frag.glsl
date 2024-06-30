@@ -6,7 +6,8 @@
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0;
 uniform sampler2D tex;
-uniform sampler2D gbufferS;
+uniform sampler2D gbuffer_subsurface_1;
+uniform sampler2D gbuffer_subsurface_2;
 
 uniform vec2 dir;
 uniform vec2 cameraProj;
@@ -14,30 +15,31 @@ uniform vec2 cameraProj;
 in vec2 texCoord;
 out vec4 fragColor;
 
-const float SSSS_FOVY = 45.0;
-const float SSSS_STRENGTH = 4.0; // Strength parameter to enhance SSS effect
-
+// Gaussian function for blur weights
 float gaussian(float x, float sigma) {
     return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * 3.141592653589793));
 }
 
-vec4 SSSSBlur(vec3 subsurface_color) {
-    const int SSSS_N_SAMPLES = 31; // Increased sample count
-    float kernel[SSSS_N_SAMPLES];
+// Function to perform SSS blur
+vec4 SSSSBlur(vec3 subsurface_color, vec3 subsurface_radius, float ior, float scale) {
+    const int SSSS_N_SAMPLES = 15;
+    vec4 kernel[SSSS_N_SAMPLES];
     float sigma = 0.2;
     float totalWeight = 0.0;
 
-    // Generate Gaussian weights
+    // Generate Gaussian weights and initialize kernel
     for (int i = 0; i < SSSS_N_SAMPLES; i++) {
         float x = (float(i) - float(SSSS_N_SAMPLES / 2)) / float(SSSS_N_SAMPLES / 2);
-        kernel[i] = gaussian(x, sigma);
-        totalWeight += kernel[i];
+        kernel[i] = vec4(subsurface_color, 0.0); // Initialize with subsurface radius
+        kernel[i].w = gaussian(x, sigma); // Gaussian weight
+        totalWeight += kernel[i].w;
     }
 
-    // Normalize weights and increase the influence
+    // Normalize weights and scale RGB with radius
     for (int i = 0; i < SSSS_N_SAMPLES; i++) {
-        kernel[i] /= totalWeight;
-        kernel[i] *= SSSS_STRENGTH; // Increase kernel influence
+        kernel[i].rgb *= subsurface_radius;
+        kernel[i].w /= totalWeight;
+		kernel[i].w *= scale;
     }
 
     vec4 colorM = textureLod(tex, texCoord, 0.0);
@@ -46,33 +48,20 @@ vec4 SSSSBlur(vec3 subsurface_color) {
     float depth = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
     float depthM = cameraProj.y / (depth - cameraProj.x);
 
-    // Calculate the sssWidth scale (1.0 for a unit plane sitting on the projection window)
-    float distanceToProjectionWindow = 1.0 / tan(0.5 * radians(SSSS_FOVY));
-    float scale = distanceToProjectionWindow / depthM;
-
-    // Calculate the adaptive step size
-    float adaptiveStepSize = sssWidth * scale;
-    adaptiveStepSize /= (SSSS_N_SAMPLES - 1); // Spread the kernel over the samples
+    float stepSize = cameraProj.y / depthM;
+    stepSize /= (SSSS_N_SAMPLES - 1);
 
     // Accumulate the center sample:
-    vec4 colorBlurred = colorM * kernel[SSSS_N_SAMPLES / 2] * vec4(subsurface_color, 1.0);
+    vec4 colorBlurred = colorM * kernel[SSSS_N_SAMPLES / 2];
 
-    // Accumulate the other samples with some random jittering
+    // Accumulate the other samples with offset
     for (int i = 0; i < SSSS_N_SAMPLES; i++) {
         if (i != SSSS_N_SAMPLES / 2) {
             float offsetScale = (float(i) - float(SSSS_N_SAMPLES / 2)) / float(SSSS_N_SAMPLES / 2);
-            vec2 offset = texCoord + offsetScale * adaptiveStepSize * dir;
+            vec2 offset = texCoord + offsetScale * dir * stepSize;
             vec4 color = textureLod(tex, offset, 0.0);
-
-			// Optional: Follow surface depth to avoid bleeding
-            float sampleDepth = textureLod(gbufferD, offset, 0.0).r * 2.0 - 1.0;
-            float sampleDepthM = cameraProj.y / (sampleDepth - cameraProj.x);
-            float depthDifference = abs(depthM - sampleDepthM);
-            float weight = exp(-depthDifference); // Adjust exponential factor for better surface following
-            color.rgb = mix(color.rgb * subsurface_color, colorM.rgb, weight);
-
-            // Accumulate
-            colorBlurred.rgb += kernel[i] * color.rgb;
+			float iorFactor = exp(-abs(ior * depthM));
+            colorBlurred.rgb += kernel[i].w * kernel[i].xyz * color.rgb * iorFactor;
         }
     }
 
@@ -80,16 +69,24 @@ vec4 SSSSBlur(vec3 subsurface_color) {
 }
 
 void main() {
-    // SSS only for masked objects
     float metallic;
     uint matid;
     unpackFloatInt16(textureLod(gbuffer0, texCoord, 0.0).a, metallic, matid);
 
     vec4 finalColor = textureLod(tex, texCoord, 0.0); // Default to background texture
+
     if (matid == 2) {
-        vec3 subsurface_color = textureLod(gbufferS, texCoord, 0.0).rgb;
-        vec4 sssColor = clamp(SSSSBlur(subsurface_color), 0.0, 1.0);
-        finalColor = mix(finalColor, sssColor, sssColor.a); // Blend SSS color with background
+        vec3 subsurface_color = textureLod(gbuffer_subsurface_1, texCoord, 0.0).rgb;
+        vec4 subsurface_data = textureLod(gbuffer_subsurface_2, texCoord, 0.0);
+        vec3 subsurface_radius = subsurface_data.rgb;
+        vec2 ior_scale = unpackFloat2(subsurface_data.a);
+
+        // Perform SSS blur and clamp result
+        vec4 sssColor = clamp(SSSSBlur(subsurface_color, subsurface_radius, ior_scale.x, ior_scale.y), 0.0, 1.0);
+
+        // Blend SSS color with background
+        finalColor = mix(finalColor, sssColor, sssColor.a);
     }
+
     fragColor = finalColor;
 }

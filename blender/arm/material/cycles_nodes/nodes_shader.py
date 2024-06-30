@@ -79,9 +79,10 @@ def parse_bsdfprincipled(node: bpy.types.ShaderNodeBsdfPrincipled, out_socket: N
     if state.parse_surface:
         c.write_normal(node.inputs[22])
         state.out_basecol = c.parse_vector_input(node.inputs[0])
-        # subsurface = c.parse_vector_input(node.inputs[1])
-        # subsurface_radius = c.parse_vector_input(node.inputs[2])
+        state.out_subsurface = c.parse_value_input(node.inputs[1])
+        state.out_subsurface_radius = c.parse_vector_input(node.inputs[2])
         state.out_subsurface_col = c.parse_vector_input(node.inputs[3])
+        state.out_subsurface_ior = c.parse_value_input(node.inputs[4])
         state.out_metallic = c.parse_value_input(node.inputs[6])
         state.out_specular = c.parse_value_input(node.inputs[7])
         # specular_tint = c.parse_vector_input(node.inputs[6])
@@ -107,8 +108,7 @@ def parse_bsdfprincipled(node: bpy.types.ShaderNodeBsdfPrincipled, out_socket: N
         # tangent = c.parse_vector_input(node.inputs[22])
     if state.parse_opacity:
         state.out_ior = c.parse_value_input(node.inputs[16])
-        if len(node.inputs) >= 21:
-            state.out_opacity = c.parse_value_input(node.inputs[21])
+        state.out_opacity = c.parse_value_input(node.inputs[21])
 
 def parse_bsdfdiffuse(node: bpy.types.ShaderNodeBsdfDiffuse, out_socket: NodeSocket, state: ParserState) -> None:
     if state.parse_surface:
