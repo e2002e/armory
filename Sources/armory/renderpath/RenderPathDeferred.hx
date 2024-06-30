@@ -21,7 +21,8 @@ class RenderPathDeferred {
 			"gbuffer1",
 			#if rp_gbuffer2 "gbuffer2", #end
 			#if rp_gbuffer_emission "gbuffer_emission", #end
-			#if rp_ssrefr "gbuffer_refraction" #end
+			#if rp_ssrefr "gbuffer_refraction", #end
+			#if rp_sss "gbuffer_subsurface" #end
 		]);
 	}
 
@@ -324,6 +325,15 @@ class RenderPathDeferred {
 		{
 			path.loadShader("shader_datas/sss_pass/sss_pass_x");
 			path.loadShader("shader_datas/sss_pass/sss_pass_y");
+
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer_subsurface";
+			t.width = 0;
+			t.height = 0;
+			t.displayp = Inc.getDisplayp();
+			t.format = Inc.getHdrFormat();
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
 		}
 		#end
 
@@ -788,12 +798,14 @@ class RenderPathDeferred {
 
 			path.setTarget("buf");
 			path.bindTarget("tex", "tex");
+			path.bindTarget("gbuffer_subsurface", "gbufferS");
 			path.bindTarget("_main", "gbufferD");
 			path.bindTarget("gbuffer0", "gbuffer0");
 			path.drawShader("shader_datas/sss_pass/sss_pass_x");
 
 			path.setTarget("tex");
 			path.bindTarget("buf", "tex");
+			path.bindTarget("gbuffer_subsurface", "gbufferS");
 			path.bindTarget("_main", "gbufferD");
 			path.bindTarget("gbuffer0", "gbuffer0");
 			path.drawShader("shader_datas/sss_pass/sss_pass_y");

@@ -83,6 +83,7 @@ def make_gi(context_id):
     frag.write('float occlusion;') #
     frag.write('float specular;') #
     frag.write('vec3 emissionCol = vec3(0.0);')
+    frag.write('vec3 subsurfaceCol = vec3(0.0);')
     parse_opacity = rpdat.arm_voxelgi_refraction
     if parse_opacity:
         frag.write('float opacity;')

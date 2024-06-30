@@ -256,6 +256,7 @@ def make_deferred(con_mesh, rpasses):
         if '_SSS' in wrd.world_defs or '_Hair' in wrd.world_defs:
             frag.add_uniform('int materialID')
             frag.write('if (materialID == 2) matid = 2;')
+            frag.write('fragColor[GBUF_IDX_SUBSURFACE] = vec4(subsurfaceCol, 1.0);')
     else:
         frag.write('const uint matid = 0;')
 
@@ -786,6 +787,7 @@ def _write_material_attribs_default(frag: shader.Shader, parse_opacity: bool):
     # We may not use emission, but the attribute will then be removed
     # by the shader compiler
     frag.write('vec3 emissionCol;')
+    frag.write('vec3 subsurfaceCol;')
     if parse_opacity:
         frag.write('float opacity;')
         frag.write('float ior = 1.450;')#case shader is arm we don't get an ior

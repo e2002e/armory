@@ -81,7 +81,7 @@ def parse_bsdfprincipled(node: bpy.types.ShaderNodeBsdfPrincipled, out_socket: N
         state.out_basecol = c.parse_vector_input(node.inputs[0])
         # subsurface = c.parse_vector_input(node.inputs[1])
         # subsurface_radius = c.parse_vector_input(node.inputs[2])
-        # subsurface_color = c.parse_vector_input(node.inputs[3])
+        state.out_subsurface_col = c.parse_vector_input(node.inputs[3])
         state.out_metallic = c.parse_value_input(node.inputs[6])
         state.out_specular = c.parse_value_input(node.inputs[7])
         # specular_tint = c.parse_vector_input(node.inputs[6])
@@ -180,6 +180,7 @@ def parse_bsdfrefraction(node: bpy.types.ShaderNodeBsdfRefraction, out_socket: N
     if state.parse_opacity:
         state.out_opacity = '0.0'
         state.out_ior = c.parse_value_input(node.inputs[2])
+
 
 def parse_subsurfacescattering(node: bpy.types.ShaderNodeSubsurfaceScattering, out_socket: NodeSocket, state: ParserState) -> None:
     if state.parse_surface:

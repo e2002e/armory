@@ -466,7 +466,7 @@ def get_num_gbuffer_rts_deferred()-> int:
     wrd = bpy.data.worlds['Arm']
 
     num = 2
-    for flag in ('_gbuffer2', '_EmissionShaded', '_SSRefraction'):
+    for flag in ('_gbuffer2', '_EmissionShaded', '_SSRefraction', '_SSS'):
         if flag in wrd.world_defs:
             num += 1
     return num
