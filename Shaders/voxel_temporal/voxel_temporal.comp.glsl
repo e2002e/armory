@@ -215,7 +215,7 @@ void main() {
 
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
-			vec3 diffuse_indirect = trace.rgb * max(light, envmapStrength) + envl * (1.0 - trace.a);
+			vec3 diffuse_indirect = (trace.rgb + envl * (1.0 - trace.a)) * max(light, envmapStrength);
 			radiance.rgb *= light / PI + diffuse_indirect;
 			radiance.rgb += emission.rgb;
 			#else
