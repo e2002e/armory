@@ -614,7 +614,7 @@ class Inc {
 						t.format = "R32";
 						t.width = res * 6;
 						t.height = res;
-						t.depth = res * 9;
+						t.depth = res * 11;
 					}
 				}
 				#end

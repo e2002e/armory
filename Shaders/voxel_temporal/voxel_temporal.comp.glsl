@@ -168,10 +168,6 @@ void main() {
 			vec3 v = normalize(eye - wposition);
 			float dotNV = max(dot(wnormal, v), 0.0);
 
-			#ifdef _gbuffer2
-				vec4 g2 = textureLod(gbuffer2, uv, 0.0);
-			#endif
-
 			#ifdef _Brdf
 				vec2 envBRDF = texelFetch(senvmapBrdf, ivec2(vec2(dotNV, 1.0 - roughness) * 256.0), 0).xy;
 			#endif
@@ -179,15 +175,6 @@ void main() {
 				// Envmap
 			#ifdef _Irr
 				vec3 envl = shIrradiance(wnormal, shirr);
-
-				#ifdef _gbuffer2
-					if (g2.b < 0.5) {
-						envl = envl;
-					} else {
-						envl = vec3(0.0);
-					}
-				#endif
-
 				#ifdef _EnvTex
 					envl /= PI;
 				#endif
@@ -221,15 +208,14 @@ void main() {
 				envl.rgb += backgroundCol * (f0 * envBRDF.x + envBRDF.y);
 				#endif
 			#endif
-
-			envl.rgb *= envmapStrength;
+			envl *= envmapStrength;
 			#else
 			vec3 envl = vec3(0.0);
 			#endif
 
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
-			vec3 diffuse_indirect = trace.rgb * mix(envl * (1.0 - trace.a), albedo, trace.a);
+			vec3 diffuse_indirect = trace.rgb * max(light, envmapStrength) + envl * (1.0 - trace.a);
 			radiance.rgb *= light / PI + diffuse_indirect;
 			radiance.rgb += emission.rgb;
 			#else
