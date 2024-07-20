@@ -1,3 +1,24 @@
+"""
+Copyright (c) 2024 Turánszki János
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""
 import bpy
 
 import arm.utils
@@ -191,6 +212,8 @@ def make_gi(context_id):
     frag.write('    vec4 basecol_direction = vec4(min(basecol * direction_weights.x, vec3(1.0)), opacity);')
     frag.write('    vec3 emission_direction = min(emissionCol * direction_weights.x, vec3(1.0));')
     frag.write('    vec2 normal_direction = encode_oct(n * direction_weights.x) * 0.5 + 0.5;')
+    frag.write('    float roughness_direction = roughness * direction_weights.x;')
+    frag.write('    float metallic_direction = metallic * direction_weights.x;')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, 0)), uint(basecol_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x)), uint(basecol_direction.g * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 2)), uint(basecol_direction.b * 255));')
@@ -200,13 +223,16 @@ def make_gi(context_id):
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 6)), uint(emission_direction.b * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 7)), uint(normal_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 8)), uint(normal_direction.g * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 9)), uint(roughness_direction * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.x, 0, voxelgiResolution.x * 10)), uint(metallic_direction * 255));')
     frag.write('}')
-
 
     frag.write('if (direction_weights.y > 0) {')
     frag.write('    vec4 basecol_direction = vec4(min(basecol * direction_weights.y, vec3(1.0)), opacity);')
     frag.write('    vec3 emission_direction = min(emissionCol * direction_weights.y, vec3(1.0));')
     frag.write('    vec2 normal_direction = encode_oct(n * direction_weights.y) * 0.5 + 0.5;')
+    frag.write('    float roughness_direction = roughness * direction_weights.y;')
+    frag.write('    float metallic_direction = metallic * direction_weights.y;')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, 0)), uint(basecol_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x)), uint(basecol_direction.g * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 2)), uint(basecol_direction.b * 255));')
@@ -216,6 +242,8 @@ def make_gi(context_id):
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 6)), uint(emission_direction.b * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 7)), uint(normal_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 8)), uint(normal_direction.g * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 9)), uint(roughness_direction * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.y, 0, voxelgiResolution.x * 10)), uint(metallic_direction * 255));')
 
     frag.write('}')
 
@@ -223,6 +251,8 @@ def make_gi(context_id):
     frag.write('    vec4 basecol_direction = vec4(min(basecol * direction_weights.z, vec3(1.0)), opacity);')
     frag.write('    vec3 emission_direction = min(emissionCol * direction_weights.z, vec3(1.0));')
     frag.write('    vec2 normal_direction = encode_oct(n * direction_weights.z) * 0.5 + 0.5;')
+    frag.write('    float roughness_direction = roughness * direction_weights.z;')
+    frag.write('    float metallic_direction = metallic * direction_weights.z;')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, 0)), uint(basecol_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x)), uint(basecol_direction.g * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 2)), uint(basecol_direction.b * 255));')
@@ -232,6 +262,8 @@ def make_gi(context_id):
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 6)), uint(emission_direction.b * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 7)), uint(normal_direction.r * 255));')
     frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 8)), uint(normal_direction.g * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 9)), uint(roughness_direction * 255));')
+    frag.write('    imageAtomicMax(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 10)), uint(metallic_direction * 255));')
     frag.write('}')
 
     return con_voxel
