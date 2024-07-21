@@ -108,13 +108,6 @@ void main() {
 		if (lightType == 0) { l = lightDir; visibility = vec3(1.0); }
 		else { l = normalize(lp); visibility = vec3(attenuate(distance(P, lightPos))); }
 
-		vec4 basecol = vec4(0.0);
-		basecol.r = float(imageLoad(voxels, src)) / 255;
-		basecol.g = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x))) / 255;
-		basecol.b = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 2))) / 255;
-		basecol.a = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 3))) / 255;
-		basecol /= 4;
-
 		// float dotNL = max(dot(wnormal, l), 0.0);
 		// if (dotNL == 0.0) return;
 
