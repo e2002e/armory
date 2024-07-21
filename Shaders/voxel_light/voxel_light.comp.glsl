@@ -146,7 +146,14 @@ void main() {
 			}
 		}
 
-		light[i].rgb = visibility * lightColor;
+		vec4 basecol = vec4(0.0);
+		basecol.r = float(imageLoad(voxels, src)) / 255;
+		basecol.g = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x))) / 255;
+		basecol.b = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 2))) / 255;
+		basecol.a = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 3))) / 255;
+		basecol /= 4;
+
+		light[i].rgb = basecol.rgb * visibility * lightColor;
 	}
 
 	for (int i = 0; i < 6; i++) {

@@ -198,7 +198,7 @@ void main() {
 				envl.rgb *= albedo;
 
 			#ifdef _Brdf
-				envl.rgb *= 1.0 - (f0 * envBRDF.x + envBRDF.y);
+				envl.rgb += 1.0 - (f0 * envBRDF.x + envBRDF.y);
 			#endif
 
 			#ifdef _Rad // Indirect specular
@@ -214,9 +214,8 @@ void main() {
 			#endif
 
 			radiance = basecol;
-			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
-			vec3 diffuse_indirect = trace.rgb * envmapStrength / PI + envl * (1.0 - trace.a);
-			radiance.rgb *= light / PI + diffuse_indirect;
+			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);;
+			radiance.rgb *= max(light, envl * (1.0 - trace.a)) / PI * trace.rgb;
 			radiance.rgb += emission.rgb;
 			#else
 			opac = float(imageLoad(voxels, src)) / 255;
