@@ -200,7 +200,7 @@ def make_gi(context_id):
     frag.write('if(any(notEqual(uvw, clamp(uvw, 0.0, 1.0)))) return;')
     frag.write('vec3 writecoords = floor(uvw * voxelgiResolution);')
     frag.write_attrib('vec3 n = normalize(voxnormal);')
-    frag.write('vec3 aniso_direction = -n;')
+    frag.write('vec3 aniso_direction = n;')
     frag.write('uvec3 face_offsets = uvec3(')
     frag.write('    aniso_direction.x > 0 ? 0 : 1,')
     frag.write('    aniso_direction.y > 0 ? 2 : 3,')
