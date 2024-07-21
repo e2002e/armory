@@ -153,7 +153,7 @@ void main() {
 			}
 		}
 
-		light[i].rgb = basecol.rgb * visibility * lightColor;
+		light[i].rgb = visibility * lightColor;
 	}
 
 	for (int i = 0; i < 6; i++) {

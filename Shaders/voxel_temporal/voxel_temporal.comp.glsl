@@ -202,10 +202,10 @@ void main() {
 			#endif
 
 			#ifdef _Rad // Indirect specular
-				envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y);
+				envl.rgb *= prefilteredColor * (f0 * envBRDF.x + envBRDF.y);
 			#else
 				#ifdef _EnvCol
-				envl.rgb += backgroundCol * (f0 * envBRDF.x + envBRDF.y);
+				envl.rgb *= backgroundCol * (f0 * envBRDF.x + envBRDF.y);
 				#endif
 			#endif
 			envl *= envmapStrength;
@@ -215,7 +215,7 @@ void main() {
 
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
-			vec3 diffuse_indirect = (trace.rgb + envl * (1.0 - trace.a)) * max(light, envmapStrength);
+			vec3 diffuse_indirect = trace.rgb * max(light, envmapStrength) + envl * (1.0 - trace.a);
 			radiance.rgb *= light / PI + diffuse_indirect;
 			radiance.rgb += emission.rgb;
 			#else
