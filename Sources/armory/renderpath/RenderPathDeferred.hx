@@ -585,7 +585,15 @@ class RenderPathDeferred {
 			}
 			else
 			{
+				#if (rp_voxels == "Voxel GI")
+				path.clearImage("voxelsLight", 0x00000000);
+				#end
 				path.clearImage("voxels", 0x00000000);
+				path.clearImage("voxelsOutB", 0x00000000);
+				#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
+				path.clearImage("voxelsSDF", 0x00000000);
+				path.clearImage("voxelsSDFtmp", 0x00000000);
+				#end
 				Inc.computeVoxelsOffsetPrev();
 			}
 
