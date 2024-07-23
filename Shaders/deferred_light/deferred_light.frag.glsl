@@ -277,13 +277,13 @@ void main() {
 	envl.rgb *= envmapStrength * occspec.x;
 
 #ifdef _VoxelGI
-	fragColor.rgb = textureLod(voxels_diffuse, texCoord, 0.0).rgb * voxelgiDiff * albedo;
+	fragColor.rgb = textureLod(voxels_diffuse, texCoord, 0.0).rgb * voxelgiDiff;
 	if(roughness < 1.0 && occspec.y > 0.0)
 		fragColor.rgb += textureLod(voxels_specular, texCoord, 0.0).rgb * voxelgiRefl * occspec.y;
 #endif
 
 #ifdef _VoxelAOvar
-	envl.rgb *= 1.0 - textureLod(voxels_ao, texCoord, 0.0).r;
+	envl.rgb *= textureLod(voxels_ao, texCoord, 0.0).r;
 #endif
 
 #ifndef _VoxelGI
