@@ -45,9 +45,8 @@ uniform sampler3D voxelsSampler;
 uniform sampler3D voxelsSDFSampler;
 uniform layout(r32ui) uimage3D voxels;
 uniform layout(r32ui) uimage3D voxelsLight;
-uniform layout(rgba16) image3D voxelsB;
-uniform layout(rgba16) image3D voxelsOut;
-uniform layout(rgba16) image3D voxelsBounce;
+uniform layout(rgba8) image3D voxelsB;
+uniform layout(rgba8) image3D voxelsOut;
 #ifdef _ShadowMap
 uniform sampler2DShadow shadowMap;
 uniform sampler2DShadow shadowMapSpot;
@@ -77,15 +76,15 @@ uniform vec3 eye;
 uniform vec3 eyeLook;
 uniform vec3 viewRay;
 uniform vec2 cameraProj;
-uniform layout(r16) image3D SDF;
+uniform layout(r8) image3D SDF;
 #else
 #ifdef _VoxelAOvar
 #ifdef _VoxelShadow
-uniform layout(r16) image3D SDF;
+uniform layout(r8) image3D SDF;
 #endif
 uniform layout(r32ui) uimage3D voxels;
-uniform layout(r16) image3D voxelsB;
-uniform layout(r16) image3D voxelsOut;
+uniform layout(r8) image3D voxelsB;
+uniform layout(r8) image3D voxelsOut;
 #endif
 #endif
 
@@ -208,7 +207,7 @@ void main() {
 				envl.rgb *= backgroundCol * (f0 * envBRDF.x + envBRDF.y);
 				#endif
 			#endif
-			envl *= envmapStrength;
+			envl *= envmapStrength * 100;
 			#else
 			vec3 envl = vec3(0.0);
 			#endif
@@ -216,7 +215,7 @@ void main() {
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
 			vec3 diffuse_indirect = trace.rgb + envl * (1.0 - trace.a);
-			radiance.rgb *= max(light, envmapStrength * trace.a) / PI * diffuse_indirect;
+			radiance.rgb *= light / PI + diffuse_indirect;
 			radiance.rgb += emission.rgb;
 			#else
 			opac = float(imageLoad(voxels, src)) / 255;

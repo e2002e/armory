@@ -569,8 +569,7 @@ class RenderPathDeferred {
 
 			Inc.computeVoxelsBegin();
 
-			if (iron.RenderPath.pre_clear == true)
-			{
+			if (iron.RenderPath.pre_clear == true) {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsLight", 0x00000000);
 				#end
@@ -583,17 +582,11 @@ class RenderPathDeferred {
 				#end
 				iron.RenderPath.pre_clear = false;
 			}
-			else
-			{
+			else {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsLight", 0x00000000);
 				#end
 				path.clearImage("voxels", 0x00000000);
-				path.clearImage("voxelsOutB", 0x00000000);
-				#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
-				path.clearImage("voxelsSDF", 0x00000000);
-				path.clearImage("voxelsSDFtmp", 0x00000000);
-				#end
 				Inc.computeVoxelsOffsetPrev();
 			}
 
@@ -606,6 +599,7 @@ class RenderPathDeferred {
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();
 			#end
+
 			Inc.computeVoxelsTemporal();
 
 			#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
