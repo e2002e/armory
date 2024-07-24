@@ -61,6 +61,9 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsSDF");
 			Inc.initGI("voxelsSDFtmp");
 			#end
+			#if arm_voxelgi_shadows
+			Inc.initGI("voxelsShadow");
+			#end
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsLight");
 			Inc.initGI("voxels_diffuse");
@@ -580,6 +583,9 @@ class RenderPathDeferred {
 				path.clearImage("voxelsSDF", 0x00000000);
 				path.clearImage("voxelsSDFtmp", 0x00000000);
 				#end
+				#if arm_voxelgi_shadows
+				path.clearImage("voxelsShadow", 0x00000000);
+				#end
 				iron.RenderPath.pre_clear = false;
 			}
 			else {
@@ -595,6 +601,7 @@ class RenderPathDeferred {
 			path.setViewport(res, res);
 
 			path.bindTarget("voxels", "voxels");
+			path.bindTarget("voxelsShadow", "voxelsShadow");
 			path.drawMeshes("voxel");
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();
@@ -671,6 +678,7 @@ class RenderPathDeferred {
 			#if arm_voxelgi_shadows
 			path.bindTarget("voxelsOut", "voxels");
 			path.bindTarget("voxelsSDF", "voxelsSDF");
+			path.bindTarget("voxelsShadow", "voxelsShadow");
 			#end
 		}
 		#end

@@ -38,7 +38,7 @@ uniform sampler2D voxels_ao;
 #endif
 #ifdef _VoxelShadow
 uniform float clipmaps[voxelgiClipmapCount * 10];
-uniform sampler3D voxels;
+uniform sampler3D voxelsShadow;
 uniform sampler3D voxelsSDF;
 #endif
 
@@ -369,7 +369,7 @@ void main() {
 	#endif
 
 	#ifdef _VoxelShadow
-	svisibility *= 1.0 - traceShadow(p, n, voxels, voxelsSDF, sunDir, clipmaps);
+	svisibility *= 1.0 - traceShadow(p, n, voxelsShadow, voxelsSDF, -sunDir, clipmaps, gl_FragCoord.xy);
 	#endif
 	
 	#ifdef _SSRS
@@ -434,7 +434,7 @@ void main() {
 		, true, spotData.x, spotData.y, spotDir, spotData.zw, spotRight
 		#endif
 		#ifdef _VoxelShadow
-		, voxels 
+		, voxelsShadow
 		, voxelsSDF
 		, clipmaps
 		#endif
@@ -494,7 +494,7 @@ void main() {
 			, lightsArraySpot[li * 2 + 1].xyz // right
 			#endif
 			#ifdef _VoxelShadow
-			, voxels
+			, voxelsShadow
 			, voxelsSDF
 			, clipmaps
 			#endif

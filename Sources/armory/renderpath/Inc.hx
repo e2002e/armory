@@ -617,6 +617,14 @@ class Inc {
 						t.depth = res * 11;
 					}
 				}
+				#if arm_voxelgi_shadows
+				if (t.name == "voxelsShadow") {
+					t.format = "R8";
+					t.width = res;
+					t.height = res * Main.voxelgiClipmapCount;
+					t.depth = res;
+				}
+				#end
 				#end
 			}
 		}

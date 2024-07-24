@@ -1710,9 +1710,8 @@ class ARM_PT_RenderPathVoxelsPanel(bpy.types.Panel):
         col2.enabled = rpdat.rp_voxels == 'Voxel GI'
         col3 = col.column()
         col3.enabled = rpdat.rp_voxels == 'Voxel AO'
-        #col.prop(rpdat, 'arm_voxelgi_shadows', text='Shadows')
+        col.prop(rpdat, 'arm_voxelgi_shadows', text='Shadows')
         #col2.prop(rpdat, 'arm_voxelgi_refraction', text='Refraction')
-        #col2.prop(rpdat, 'arm_voxelgi_bounces')
         col.prop(rpdat, 'arm_voxelgi_clipmap_count')
         #col.prop(rpdat, 'arm_voxelgi_cones')
         col.prop(rpdat, 'rp_voxelgi_resolution')
