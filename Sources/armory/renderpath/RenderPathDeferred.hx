@@ -601,7 +601,9 @@ class RenderPathDeferred {
 			path.setViewport(res, res);
 
 			path.bindTarget("voxels", "voxels");
+			#if arm_voxelgi_shadows
 			path.bindTarget("voxelsShadow", "voxelsShadow");
+			#end
 			path.drawMeshes("voxel");
 			#if (rp_voxels == "Voxel GI")
 			Inc.computeVoxelsLight();

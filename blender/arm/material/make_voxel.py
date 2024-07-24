@@ -75,7 +75,7 @@ def make_gi(context_id):
 
     rpdat = arm.utils.get_rp()
     frag.add_uniform('layout(r32ui) uimage3D voxels')
-    if '_voxelsShadow' in wrd.world_defs:
+    if '_voxelShadow' in wrd.world_defs:
         frag.add_uniform('layout(r8) image3D voxelsShadow')
 
     frag.write('vec3 n;')
@@ -211,7 +211,7 @@ def make_gi(context_id):
     frag.write('    ) * voxelgiResolution;')
     frag.write('vec3 direction_weights = abs(N);')
 
-    if '_voxelsShadow' in wrd.world_defs:
+    if '_voxelShadow' in wrd.world_defs:
         frag.write('imageStore(voxelsShadow, writecoords, 1.0);')
 
     frag.write('if (direction_weights.x > 0) {')
