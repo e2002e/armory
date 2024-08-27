@@ -736,12 +736,7 @@ class Inc {
 			t.width = 0;
 			t.height = 0;
 			t.displayp = getDisplayp();
-			//t.scale = Inc.getSuperSampling();
-			#if (rp_voxels == "Voxel AO")
 			t.format = (t.name == "voxels_ao" || t.name == "voxels_shadow") ? "R8" : "RGBA32";
-			#else
-			t.format = "RGBA32";
-			#end
 		}
 		else {
 			if (t.name == "voxelsSDF" || t.name == "voxelsSDFtmp") {
@@ -784,7 +779,7 @@ class Inc {
 						t.format = "R32";
 						t.width = res * 6;
 						t.height = res;
-						t.depth = res * 13;
+						t.depth = res * 12;
 					}
 				}
 				#end
