@@ -725,9 +725,9 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
                 frag.write('vec3 lPos = lightPosition.xyz / lightPosition.w;')
                 frag.write('const vec2 smSize = shadowmapSize;')
                 frag.write(f'svisibility = PCF({shadowmap_sun}, lPos.xy, lPos.z - shadowsBias, smSize);')
-        if '_VoxelShadow' in wrd.world_defs:
-            if not parse_opacity:
-                frag.write('svisibility *= textureLod(voxels_shadows, texCoord, 0.0).r * voxelgiShad;')
+            if '_VoxelShadow' in wrd.world_defs:
+                if not parse_opacity:
+                    frag.write('svisibility *= textureLod(voxels_shadows, texCoord, 0.0).r * voxelgiShad;')
             frag.write('}') # receiveShadow
         frag.write('direct += (lambertDiffuseBRDF(albedo, sdotNL) + specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * specular) * sunCol * svisibility;')
         # sun
