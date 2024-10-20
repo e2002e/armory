@@ -358,16 +358,6 @@ class RenderPathDeferred {
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 
-			// holds colors before refractive meshes are drawn
-			var t = new RenderTargetRaw();
-			t.name = "refr";
-			t.width = 0;
-			t.height = 0;
-			t.displayp = Inc.getDisplayp();
-			t.format = Inc.getHdrFormat();
-			t.scale = Inc.getSuperSampling();
-			path.createRenderTarget(t);
-
 			// holds background depth
 			var t = new RenderTargetRaw();
 			t.name = "gbufferD1";
@@ -824,17 +814,12 @@ class RenderPathDeferred {
 		{
 			if (armory.data.Config.raw.rp_ssrefr != false)
 			{
-				//save depth
 				path.setTarget("gbufferD1");
 				path.bindTarget("_main", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 
-				//save render
-				path.setTarget("refr");
-				path.bindTarget("tex", "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.setTarget("gbuffer0", ["gbuffer1", "gbuffer_refraction"]);
 
-				path.setTarget("tex", ["gbuffer0", "gbuffer_refraction"]);
 				#if (rp_voxels != "Off")
 				path.bindTarget("voxelsOut", "voxels");
 				path.bindTarget("voxelsSDF", "voxelsSDF");
@@ -843,8 +828,8 @@ class RenderPathDeferred {
 				path.drawMeshes("refraction");
 
 				path.setTarget("tex");
-				path.bindTarget("refr", "tex1");
 				path.bindTarget("tex", "tex");
+				path.bindTarget("gbuffer1", "tex1");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbufferD1", "gbufferD1");
 				path.bindTarget("gbuffer0", "gbuffer0");
