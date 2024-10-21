@@ -663,7 +663,6 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     frag.add_uniform('float envmapStrength', link='_envmapStrength')
     frag.write('envl *= envmapStrength * occlusion;')
 
-    # Computing texCoord in vertex shader from pos.xy doesn't work
     if '_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs:
         if parse_opacity:
             frag.add_include("std/conetrace.glsl")
@@ -687,13 +686,17 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             frag.write('envl *= textureLod(voxels_ao, texCoord, 0.0).rrr;')
 
     if '_VoxelGI' in wrd.world_defs:
-        frag.write('vec3 indirect = vec3(0.0);')
+        if parse_opacity:
+            if '_SSRefraction' in wrd.world_defs:
+                frag.write('vec3 indirect = vec3(0.0);')
+            else:
+                frag.write('vec3 indirect = envl;') #transluc
     else:
-        frag.write('vec3 indirect = envl;')
+        frag.write('vec3 indirect = vec3(0.0);')
 
     if '_VoxelGI' in wrd.world_defs:
         if parse_opacity:
-            frag.write("indirect = traceDiffuse(wposition, n, voxels, clipmaps).rgb * albedo * voxelgiDiff;")
+            frag.write("indirect += traceDiffuse(wposition, n, voxels, clipmaps).rgb * albedo * voxelgiDiff;")
             frag.write("if (roughness < 1.0 && specular > 0.0)")
             frag.write("    indirect += traceSpecular(wposition, n, voxels, voxelsSDF, vVec, roughness, clipmaps, texCoord).rgb * specular * voxelgiRefl;")
         else:

@@ -135,6 +135,10 @@ void main() {
 			wposition *= voxelgiResolution.x;
 			wposition += vec3(clipmaps[clipmapLevel * 10 + 4], clipmaps[clipmapLevel * 10 + 5], clipmaps[clipmapLevel * 10 + 6]);
 
+			#ifndef _SSRefraction
+			if (basecol.a < 1.0)
+				envl = vec3(0.0);
+			#endif
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
 			vec3 indirect = trace.rgb + envl.rgb * (1.0 - trace.a);
