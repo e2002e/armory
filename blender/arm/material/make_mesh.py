@@ -695,7 +695,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         if parse_opacity:
             frag.write("indirect = traceDiffuse(wposition, n, voxels, clipmaps).rgb * albedo * voxelgiDiff;")
             frag.write("if (roughness < 1.0 && specular > 0.0)")
-            frag.write("    indirect += traceSpecular(wposition, n, voxels, voxelsSDF, vVec, roughness, clipmaps, gl_FragCoord.xy).rgb * specular * voxelgiRefl;")
+            frag.write("    indirect += traceSpecular(wposition, n, voxels, voxelsSDF, vVec, roughness, clipmaps, texCoord).rgb * specular * voxelgiRefl;")
         else:
             frag.add_uniform("sampler2D voxels_diffuse")
             frag.add_uniform("sampler2D voxels_specular")
@@ -794,10 +794,6 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.write('indirect += emissionCol;')
 
     if '_VoxelRefract' in wrd.world_defs and parse_opacity:
-        frag.add_include('std/conetrace.glsl')
-        frag.add_uniform('float clipmaps[10 * voxelgiClipmapCount]', '_clipmaps')
-        frag.add_uniform('sampler3D voxels')
-        frag.add_uniform('sampler3D voxelsSDF')
         frag.write('if (opacity < 1.0) {')
         frag.write('    vec3 refraction = traceRefraction(wposition, n, voxels, voxelsSDF, vVec, ior, roughness, clipmaps, texCoord).rgb * voxelgiRefr;')
         frag.write('    indirect = mix(refraction, indirect, opacity);')
