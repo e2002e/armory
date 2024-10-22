@@ -87,7 +87,7 @@ void main() {
 
     float d = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
 
-    if (d == 0.0 || d == 1.0 || opac == 1.0 || ior == 1.0) {
+    if (d == 0.0 || opac == 1.0 || ior == 1.0) {
         fragColor.rgb = textureLod(tex1, texCoord, 0.0).rgb;
         return;
     }
@@ -121,8 +121,8 @@ void main() {
 	#endif
 	vec3 color = textureLod(tex, texCoord.xy, 0.0).rgb;
 	#ifdef _VoxelGI
-	color += textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
-	color += textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
+	color *= textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
+	color *= textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
 	#else
 	#ifdef _VoxelAO
 	color *= textureLod(voxels_ao, texCoord.xy, 0.0).r;

@@ -819,12 +819,10 @@ class RenderPathDeferred {
 		{
 			if (armory.data.Config.raw.rp_ssrefr != false)
 			{
-				//save depth
 				path.setTarget("gbufferD1");
 				path.bindTarget("_main", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 
-				//save render
 				path.setTarget("refr");
 				path.bindTarget("tex", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -863,8 +861,8 @@ class RenderPathDeferred {
 				path.bindTarget("voxels_shadows", "voxels_shadows");
 				#end
 
-				path.bindTarget("refr", "tex1");
 				path.bindTarget("tex", "tex");
+				path.bindTarget("refr", "tex1");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbufferD1", "gbufferD1");
 				path.bindTarget("gbuffer0", "gbuffer0");

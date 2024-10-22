@@ -668,7 +668,6 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     frag.add_uniform('float envmapStrength', link='_envmapStrength')
     frag.write('envl *= envmapStrength * occlusion;')
 
-    # Computing texCoord in vertex shader from pos.xy doesn't work
     if '_VoxelAOvar' in wrd.world_defs or '_VoxelGI' in wrd.world_defs:
         if '_VoxelShadow' in wrd.world_defs:
             frag.add_uniform("sampler2D voxels_shadows", top=True)
@@ -791,6 +790,5 @@ def _write_material_attribs_default(frag: shader.Shader, parse_opacity: bool):
     # We may not use emission, but the attribute will then be removed
     # by the shader compiler
     frag.write('vec3 emissionCol;')
-    if parse_opacity:
-        frag.write('float opacity;')
-        frag.write('float ior;')
+    frag.write('float opacity;')
+    frag.write('float ior;')
