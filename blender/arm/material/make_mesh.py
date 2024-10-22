@@ -790,5 +790,5 @@ def _write_material_attribs_default(frag: shader.Shader, parse_opacity: bool):
     # We may not use emission, but the attribute will then be removed
     # by the shader compiler
     frag.write('vec3 emissionCol;')
-    frag.write('float opacity;')
-    frag.write('float ior;')
+    frag.write('float opacity = 1.0;')
+    frag.write('float ior = 1.450;')

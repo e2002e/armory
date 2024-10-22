@@ -471,6 +471,13 @@ class RenderPathDeferred {
 		}
 		#end
 
+		#if (rp_ssrefr || arm_voxelgi_refract)
+		{
+			path.setTarget("gbuffer_refraction");
+			path.clearTarget(0xffff0000);
+		}
+		#end
+
 		RenderPathCreator.setTargetMeshes();
 
 		#if rp_dynres
