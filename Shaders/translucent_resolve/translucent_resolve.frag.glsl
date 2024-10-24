@@ -41,7 +41,7 @@ void main() {
     #ifdef _VoxelGI
     vec3 specular = textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
     vec3 diffuse = textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
-    accum.rgb *= specular + diffuse;
+    accum.rgb += (specular + diffuse) * f;
     #endif
 
     fragColor = vec4(accum.rgb / clamp(f, 0.001, 5000), revealage);
