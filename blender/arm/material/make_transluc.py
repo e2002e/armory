@@ -28,6 +28,7 @@ def make(context_id):
     frag = con_transluc.frag
     tese = con_transluc.tese
 
+    frag.add_include('std/gbuffer.glsl')
     frag.add_out('vec4 fragColor[2]')
 
     # Remove fragColor = ...;
@@ -40,6 +41,9 @@ def make(context_id):
     frag.write('vec4 premultipliedReflect = vec4(vec3(direct + indirect * 0.5) * opacity, opacity);');
 
     frag.write('float w = clamp(pow(min(1.0, premultipliedReflect.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - (gl_FragCoord.z) * 0.9, 3.0), 1e-2, 3e3);')
+    frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));')
+    frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);')
+
     frag.write('fragColor[0] = vec4(n.xy, premultipliedReflect.a * w, 1.0);')
     frag.write('fragColor[1] = vec4(premultipliedReflect.rgb * w, premultipliedReflect.a);')
 
