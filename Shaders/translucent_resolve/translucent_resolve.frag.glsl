@@ -39,9 +39,10 @@ void main() {
     #endif
 
     #ifdef _VoxelGI
-    accum.rgb += textureLod(voxels_specular, texCoord.xy, 0.0).rgb * f;
-    accum.rgb += textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb * f;
-    #endif
+    vec3 spec = textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
+    vec3 diff = textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
+    accum.rgb *= spec + diff;
+	#endif
 
     fragColor = vec4(accum.rgb / clamp(f, 0.001, 5000), revealage);
 }
