@@ -657,7 +657,7 @@ class Inc {
 		path.clearTarget(0xff000000);
 		path.setTarget("revealage");
 		path.clearTarget(0xff000000);
-		path.setTarget("accum", ["revealage"]);
+		path.setTarget("revealage", ["accum"]);
 		#if rp_shadowmap
 		{
 			#if arm_shadowmap_atlas
@@ -1414,11 +1414,15 @@ class Inc {
 
 		kha.compute.Compute.setSampledTexture(voxel_ta6, rts.get("voxelsOut").image);
 		kha.compute.Compute.setSampledTexture(voxel_tb6, rts.get("half").image);
-		#if arm_deferred
-		kha.compute.Compute.setSampledTexture(voxel_tc6, rts.get("gbuffer0").image);
-		#else
-		kha.compute.Compute.setSampledTexture(voxel_tc6, rts.get("lbuffer1").image);
-		#end
+		if (transluc == false) {
+			#if arm_deferred
+			kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("gbuffer0").image);
+			#else
+			kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("lbuffer1").image);
+			#end
+		}
+		else
+			kha.compute.Compute.setSampledTexture(voxel_tc3, rts.get("revealage").image);
 		kha.compute.Compute.setSampledTexture(voxel_td6, rts.get("voxelsSDF").image);
 		kha.compute.Compute.setTexture(voxel_te6, rts.get("voxels_refraction").image, kha.compute.Access.Write);
 		kha.compute.Compute.setSampledTexture(voxel_tf6, rts.get("gbuffer_refraction").image);
