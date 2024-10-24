@@ -24,24 +24,28 @@ in vec2 texCoord;
 out vec4 fragColor;
 
 void main() {
-	vec4 accum = texelFetch(gbuffer0, ivec2(texCoord * texSize), 0);
-	float revealage = 1.0 - accum.a;
+    vec4 accum = texelFetch(gbuffer0, ivec2(texCoord * texSize), 0);
+    float revealage = 1.0 - accum.a;
 
-	// Save the blending and color texture fetch cost
-	if (revealage == 0.0) {
-		discard;
-	}
+    // Save the blending and color texture fetch cost
+    if (revealage == 0.0) {
+        discard;
+    }
 
-	float f = texelFetch(gbuffer1, ivec2(texCoord * texSize), 0).b;
+    float f = texelFetch(gbuffer1, ivec2(texCoord * texSize), 0).z;
 
-	#ifdef _VoxelRefract
-	accum.rgb += textureLod(voxels_refraction, texCoord.xy, 0.0).rgb;
-	#endif
+    #ifdef _VoxelRefract
+    accum.rgb += textureLod(voxels_refraction, texCoord.xy, 0.0).rgb * f;
+    #endif
 
-	#ifdef _VoxelGI
-	accum.rgb *= textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
-	accum.rgb *= textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
-	#endif
+    #ifdef _VoxelGI
+    vec3 specular = textureLod(voxels_specular, texCoord.xy, 0.0).rgb;
+    vec3 diffuse = textureLod(voxels_diffuse, texCoord.xy, 0.0).rgb;
+    accum.rgb += (specular + diffuse) * f;
+    #endif
 
-	fragColor = vec4(accum.rgb / clamp(f, 0.0001, 5000), revealage);
+    // Ensure f is not too small to avoid division by zero
+    f = clamp(f, 0.001, 5000);
+
+    fragColor = vec4(accum.rgb / f, revealage);
 }
