@@ -42,6 +42,7 @@ uniform float shadowsBias;
 uniform mat4 LVP;
 #endif
 uniform sampler3D voxelsSampler;
+uniform sampler3D voxelsSDFSampler;
 uniform layout(r32ui) uimage3D voxels;
 uniform layout(r32ui) uimage3D voxelsLight;
 uniform layout(rgba8) image3D voxelsB;
@@ -81,7 +82,6 @@ void main() {
 		#else
 		float aniso_colors[6];
 		#endif
-
 		ivec3 src = ivec3(gl_GlobalInvocationID.xyz);
 		src.x += i * res;
 		ivec3 dst = src;
@@ -123,6 +123,9 @@ void main() {
 			envl /= 3;
 			envl *= 100;
 
+			#ifdef _HOSEK
+			envl *= 100;
+			#endif
 			//clipmap to world
 			vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 			wposition = wposition * 2.0 - 1.0;
@@ -132,10 +135,13 @@ void main() {
 
 			radiance = basecol;
 			vec4 trace = traceDiffuse(wposition, wnormal, voxelsSampler, clipmaps);
-			vec3 indirect = trace.rgb + envl.rgb * (1.0 - trace.a);
-			radiance.rgb *= light.rgb + indirect.rgb;
+			vec3 diffuse_indirect = trace.rgb + envl * (1.0 - trace.a);
+			#ifdef _ShadowMap
+			radiance.rgb *= light + diffuse_indirect;
+			#else
+			radiance.rgb *= diffuse_indirect;
+			#endif
 			radiance.rgb += emission.rgb;
-
 			#else
 			opac = float(imageLoad(voxels, src)) / 255;
 			#endif

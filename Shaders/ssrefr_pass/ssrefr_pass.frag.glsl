@@ -14,6 +14,9 @@ uniform sampler2D gbuffer0;
 uniform sampler2D gbufferD1;
 
 uniform sampler2D gbuffer_refraction; // ior\opacity
+#ifdef _VoxelRefract
+uniform sampler2D voxels_refraction;
+#endif
 uniform mat4 P;
 uniform mat3 V3;
 uniform vec2 cameraProj;
@@ -64,7 +67,7 @@ vec4 rayCast(vec3 dir) {
 		ddepth = getDeltaDepth(hitCoord);
 		if (ddepth > 0.0) return binarySearch(dir);
 	}
-	return vec4(0.0);
+	return vec4(texCoord, 0.0, 1.0);
 }
 
 void main() {
@@ -79,6 +82,11 @@ void main() {
         fragColor.rgb = textureLod(tex1, texCoord, 0.0).rgb;
         return;
     }
+
+    if (opac == 1.0) {
+		fragColor.rgb = textureLod(tex, texCoord, 0.0).rgb;
+        return;
+	}
 
     vec2 enc = g0.rg;
     vec3 n;

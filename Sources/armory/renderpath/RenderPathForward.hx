@@ -23,7 +23,7 @@ class RenderPathForward {
 		#if rp_render_to_texture
 		{
 			path.setTarget("lbuffer0", [
-				#if (rp_ssr || rp_ssrefr) "lbuffer1",  #end
+				#if (rp_ssr || rp_ssrefr || arm_voxelgi_refract) "lbuffer1",  #end
 				#if (rp_ssrefr || arm_voxelgi_refract) "gbuffer_refraction" #end]
 			);
 		}
@@ -132,7 +132,7 @@ class RenderPathForward {
 			}
 			#end
 
-			#if (rp_ssrefr)
+			#if rp_ssrefr
 			{
 				//holds colors before refractive meshes are drawn
 				var t = new RenderTargetRaw();
@@ -140,7 +140,7 @@ class RenderPathForward {
 				t.width = 0;
 				t.height = 0;
 				t.displayp = Inc.getDisplayp();
-				t.format = "RGBA64";
+				t.format = Inc.getHdrFormat();
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 
@@ -150,7 +150,7 @@ class RenderPathForward {
 				t.width = 0;
 				t.height = 0;
 				t.displayp = Inc.getDisplayp();
-				t.format = "R32";
+				t.format = "DEPTH24";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 			}
@@ -202,6 +202,9 @@ class RenderPathForward {
 			#if (arm_voxelgi_shadows || (rp_voxels == "Voxel GI"))
 			Inc.initGI("voxelsSDF");
 			Inc.initGI("voxelsSDFtmp");
+			#end
+			#if arm_voxelgi_shadows
+			Inc.initGI("voxels_shadows");
 			#end
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsLight");
@@ -490,6 +493,8 @@ class RenderPathForward {
 		#end
 		RenderPathCreator.setTargetMeshes();
 
+		RenderPathCreator.setTargetMeshes();
+
 		#if rp_shadowmap
 		{
 			#if arm_shadowmap_atlas
@@ -555,8 +560,14 @@ class RenderPathForward {
 
 					path.drawMeshes("refraction");
 
-					path.setTarget("lbuffer0");
+					#if arm_voxelgi_refract
+					path.setTarget("half");
+					path.bindTarget("_main", "texdepth");
+					path.drawShader("shader_datas/downsample_depth/downsample_depth");
+					Inc.resolveRefraction();
+					#end
 
+					path.setTarget("lbuffer0");
 					path.bindTarget("refr", "tex1");
 					path.bindTarget("lbuffer0", "tex");
 					path.bindTarget("_main", "gbufferD");

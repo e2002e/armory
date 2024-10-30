@@ -36,8 +36,8 @@ uniform sampler3D voxelsSDFSampler;
 
 #ifdef _ShadowMap
 uniform sampler2DShadow shadowMap;
-uniform sampler2DShadow shadowMapSpot;
 uniform sampler2D shadowMapTransparent;
+uniform sampler2DShadow shadowMapSpot;
 uniform sampler2D shadowMapSpotTransparent;
 #ifdef _ShadowMapAtlas
 uniform sampler2DShadow shadowMapPoint;
@@ -113,16 +113,17 @@ void main() {
 		if (lightType == 0) { l = lightDir; visibility = vec3(1.0); }
 		else { l = normalize(lp); visibility = vec3(attenuate(distance(P, lightPos))); }
 
-	bool transparent = bool((float(imageLoad(voxels, src).a) / 255) != 1.0);
+		bool transparent = bool((float(imageLoad(voxels, src).a) / 255) != 1.0);
 
-	vec3 N = vec3(0.0);
-			N.r = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 7))) / 255;
-			N.g = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 8))) / 255;
-			N /= 2;
-			vec3 wnormal = decode_oct(N.rg * 2 - 1);
+		vec3 N = vec3(0.0);
+		N.r = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 7))) / 255;
+		N.g = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 8))) / 255;
+		N /= 2;
+		vec3 wnormal = decode_oct(N.rg * 2 - 1);
 
-	// float dotNL = max(dot(wnormal, l), 0.0);
-	// if (dotNL == 0.0) return;
+
+		// float dotNL = max(dot(wnormal, l), 0.0);
+		// if (dotNL == 0.0) return;
 
 #ifdef _ShadowMap
 	if (lightShadow == 1) {

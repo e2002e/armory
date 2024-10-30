@@ -5,6 +5,7 @@
 
 uniform sampler2D gbuffer0; // accum
 uniform sampler2D gbuffer1; // revealage
+uniform sampler2D voxels_refration;
 
 uniform vec2 texSize;
 

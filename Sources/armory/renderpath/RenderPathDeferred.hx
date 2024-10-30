@@ -61,10 +61,16 @@ class RenderPathDeferred {
 			Inc.initGI("voxelsSDF");
 			Inc.initGI("voxelsSDFtmp");
 			#end
+			#if arm_voxelgi_shadows
+			Inc.initGI("voxels_shadows");
+			#end
 			#if (rp_voxels == "Voxel GI")
 			Inc.initGI("voxelsLight");
 			Inc.initGI("voxels_diffuse");
 			Inc.initGI("voxels_specular");
+			#if arm_voxelgi_refract
+			Inc.initGI("voxels_refraction");
+			#end
 			#else
 			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			Inc.initGI("voxels_ao");
@@ -346,7 +352,6 @@ class RenderPathDeferred {
 		t.width = 0;
 		t.height = 0;
 		t.displayp = Inc.getDisplayp();
-		//t.depth_buffer = "main";
 		t.format = "RGBA64";
 		t.scale = Inc.getSuperSampling();
 		path.createRenderTarget(t);
@@ -354,9 +359,9 @@ class RenderPathDeferred {
 
 		#if rp_ssrefr
 		{
+
 			path.loadShader("shader_datas/ssrefr_pass/ssrefr_pass");
 			path.loadShader("shader_datas/copy_pass/copy_pass");
-
 			// holds colors before refractive meshes are drawn
 			var t = new RenderTargetRaw();
 			t.name = "refr";
@@ -373,7 +378,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.displayp = Inc.getDisplayp();
-			t.format = "R32";
+			t.format = "DEPTH24";
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
@@ -456,6 +461,11 @@ class RenderPathDeferred {
 		{
 			path.clearTarget(null, 1.0);
 		}
+		#end
+
+		#if (rp_ssrefr || arm_voxelgi_refract)
+		path.setTarget("gbuffer_refraction");
+		path.clearTarget(0x00ffff00);
 		#end
 
 		#if rp_gbuffer2
@@ -577,8 +587,7 @@ class RenderPathDeferred {
 
 			Inc.computeVoxelsBegin();
 
-			if (iron.RenderPath.pre_clear == true)
-			{
+			if (iron.RenderPath.pre_clear == true) {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxelsLight", 0x00000000);
 				#end
@@ -612,7 +621,7 @@ class RenderPathDeferred {
 
 			Inc.computeVoxelsTemporal();
 
-			#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
+			#if (arm_voxelgi_shadows || (rp_voxels == "Voxel GI"))
 			Inc.computeVoxelsSDF();
 			#end
 
@@ -621,6 +630,9 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxels_diffuse", 0x00000000);
 				path.clearImage("voxels_specular", 0x00000000);
+				#if arm_voxelgi_refract
+				path.clearImage("voxels_refraction", 0x00000000);
+				#end
 				#else
 				path.clearImage("voxels_ao", 0x00000000);
 				#end
@@ -682,8 +694,8 @@ class RenderPathDeferred {
 			path.bindTarget("voxels_specular", "voxels_specular");
 			#end
 			#if arm_voxelgi_shadows
-			path.bindTarget("voxelsOut", "voxels");
-			path.bindTarget("voxelsSDF", "voxelsSDF");
+			Inc.resolveShadows();
+			path.bindTarget("voxels_shadows", "voxels_shadows");
 			#end
 		}
 		#end
@@ -840,8 +852,15 @@ class RenderPathDeferred {
 
 				path.drawMeshes("refraction");
 
-				path.setTarget("tex");
+				#if arm_voxelgi_refract
+				//we need the updated half depth to resolve the refraction objects writen by the 'refraction' pass
+				path.setTarget("half");
+				path.bindTarget("_main", "texdepth");
+				path.drawShader("shader_datas/downsample_depth/downsample_depth");
+				Inc.resolveRefraction();
+				#end
 
+				path.setTarget("tex");
 				path.bindTarget("tex", "tex");
 				path.bindTarget("refr", "tex1");
 				path.bindTarget("_main", "gbufferD");

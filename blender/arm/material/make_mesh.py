@@ -598,6 +598,9 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             opac = '0.9999' # 1.0 - eps
             frag.write('if (opacity < {0}) discard;'.format(opac))
 
+    else:
+        frag.write('float opacity = 1.0;')
+
     if blend:
         frag.add_out('vec4 fragColor[1]')
         if parse_opacity:
@@ -702,6 +705,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
             frag.write("if (roughness < 1.0 && specular > 0.0)")
             frag.write("    indirect += textureLod(voxels_specular, texCoord, 0.0).rgb * specular * voxelgiRefl;")
 
+
     frag.write('vec3 direct = vec3(0.0);')
 
     if '_Sun' in wrd.world_defs:
@@ -764,9 +768,11 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
                 # Skip world matrix, already in world-space
                 frag.add_uniform('mat4 LWVPSpot[1]', link='_biasLightViewProjectionMatrixSpotArray', included=True)
                 frag.add_uniform('sampler2DShadow shadowMapSpot[1]', included=True)
+                frag.add_uniform('sampler2D shadowMapSpotTransparent[1]', included=True)
             else:
                 frag.add_uniform('vec2 lightProj', link='_lightPlaneProj', included=True)
                 frag.add_uniform('samplerCubeShadow shadowMapPoint[1]', included=True)
+                frag.add_uniform('samplerCube shadowMapPointTransparent[1]', included=True)
         frag.write('direct += sampleLight(')
         frag.write('  wposition, n, vVec, dotNV, pointPos, pointCol, albedo, roughness, specular, f0')
         if is_shadows:

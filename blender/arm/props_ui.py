@@ -68,7 +68,7 @@ class ARM_PT_ObjectPropsPanel(bpy.types.Panel):
         col.prop(obj, 'arm_spawn')
         col.prop(obj, 'arm_mobile')
         col.prop(obj, 'arm_animation_enabled')
-        col.prop(obj, 'arm_lighting')
+        col.prop(obj, 'arm_visible_shadow')
 
         if obj.type == 'MESH':
             layout.prop(obj, 'arm_instanced')
@@ -1854,6 +1854,9 @@ class ARM_PT_RenderPathPostProcessPanel(bpy.types.Panel):
         col.prop(rpdat, 'arm_ss_refraction_search_dist')
         col.prop(rpdat, 'arm_ss_refraction_falloff_exp')
         col.prop(rpdat, 'arm_ss_refraction_jitter')
+        col2 = col.column()
+        col2.enabled = rpdat.rp_voxels == "Voxel GI"
+        col2.prop(rpdat, 'arm_voxelgi_refract', text='Voxels Refraction')
         layout.separator()
 
         col = layout.column()

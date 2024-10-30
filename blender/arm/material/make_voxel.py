@@ -307,6 +307,8 @@ def make_gi(context_id):
     frag.write('    imageAtomicAdd(voxels, ivec3(writecoords + ivec3(face_offsets.z, 0, voxelgiResolution.x * 11)), uint(envl_direction.b * 255));')
     frag.write('}')
 
+    frag.write('imageAtomicMax(voxels, ivec3(writecoords + ivec3(0, 0, voxelgiResolution.x * 12)), uint(float(opacity != 1.0) * 255));')
+
     return con_voxel
 
 

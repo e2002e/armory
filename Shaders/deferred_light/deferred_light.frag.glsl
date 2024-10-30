@@ -149,7 +149,7 @@ uniform vec2 cameraPlane;
 		//!uniform sampler2DShadow shadowMapSpot[4];
 		//!uniform sampler2D shadowMapSpotTransparent[4];
 		#endif
-	//!uniform mat4 LWVPSpotArray[4];
+	//!uniform mat4 LWVPSpotArray[maxLightsCluster];
 	#endif
 #endif
 #endif
