@@ -196,21 +196,21 @@ void main() {
 			light = sam;
 
 			if (direction_weights.x > 0) {
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.r * direction_weights.x * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.g * direction_weights.x * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.b * direction_weights.x * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.r * direction_weights.x * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.g * direction_weights.x * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.x, 0, 0), uint(light.b * direction_weights.x * 255));
 			}
 
 			if (direction_weights.y > 0) {
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.r * direction_weights.y * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.g * direction_weights.y * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.b * direction_weights.y * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.r * direction_weights.y * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.g * direction_weights.y * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.y, 0, 0), uint(light.b * direction_weights.y * 255));
 			}
 
 			if (direction_weights.z > 0) {
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.r * direction_weights.z * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.g * direction_weights.z * 255));
-				imageAtomicAdd(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.b * direction_weights.z * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.r * direction_weights.z * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.g * direction_weights.z * 255));
+				imageAtomicMax(voxelsLight, src + ivec3(face_offsets.z, 0, 0), uint(light.b * direction_weights.z * 255));
 			}
 
 		}

@@ -104,6 +104,7 @@ class Inc {
 	#end
 	#end
 	#end
+	#end
 	#end //rp_voxels
 
 	public static function init(_path: RenderPath) {
@@ -674,15 +675,12 @@ class Inc {
 		var res = iron.RenderPath.getVoxelRes();
 		var resZ =  iron.RenderPath.getVoxelResZ();
 
-		if (t.name == "voxels_diffuse" || t.name == "voxels_specular" || t.name == "voxels_refraction" || t.name == "voxels_shadows" || t.name == "voxels_ao") {
+		if (t.name == "voxels_diffuse" || t.name == "voxels_specular" || t.name == "voxels_ao") {
 			t.width = 0;
 			t.height = 0;
 			t.displayp = getDisplayp();
 			t.scale = Inc.getSuperSampling();
-			if (t.name == "voxels_ao" || t.name == "voxels_shadows")
-				t.format = "R8";
-			else
-				t.format = "RGBA32";
+			t.format = t.name == "voxels_ao" ? "R8" : "RGBA32";
 		}
 		else {
 			if (t.name == "voxelsSDF" || t.name == "voxelsSDFtmp") {
@@ -717,7 +715,7 @@ class Inc {
 					}
 					else if (t.name == "voxelsLight") {
 						t.format = "R32";
-						t.width = res;
+						t.width = res * 6;
 						t.height = res;
 						t.depth = res * 3;
 					}
@@ -1551,7 +1549,6 @@ class Inc {
 		}
 	}
 	#end // GI
-	#end // Voxels
 }
 
 #if arm_shadowmap_atlas

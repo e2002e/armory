@@ -122,10 +122,6 @@ void main() {
 			envl.b = float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 11))) / 255;
 			envl /= 3;
 			envl *= 100;
-
-			#ifdef _HOSEK
-			envl *= 100;
-			#endif
 			//clipmap to world
 			vec3 wposition = (gl_GlobalInvocationID.xyz + 0.5) / voxelgiResolution.x;
 			wposition = wposition * 2.0 - 1.0;
