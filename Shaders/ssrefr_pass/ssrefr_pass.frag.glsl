@@ -14,9 +14,6 @@ uniform sampler2D gbuffer0;
 uniform sampler2D gbufferD1;
 
 uniform sampler2D gbuffer_refraction; // ior\opacity
-#ifdef _VoxelRefract
-uniform sampler2D voxels_refraction;
-#endif
 uniform mat4 P;
 uniform mat3 V3;
 uniform vec2 cameraProj;

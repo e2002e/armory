@@ -150,7 +150,7 @@ class RenderPathForward {
 				t.width = 0;
 				t.height = 0;
 				t.displayp = Inc.getDisplayp();
-				t.format = "DEPTH24";
+				t.format = "R32";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 			}
@@ -556,13 +556,6 @@ class RenderPathForward {
 					#end
 
 					path.drawMeshes("refraction");
-
-					#if arm_voxelgi_refract
-					path.setTarget("half");
-					path.bindTarget("_main", "texdepth");
-					path.drawShader("shader_datas/downsample_depth/downsample_depth");
-					Inc.resolveRefraction();
-					#end
 
 					path.setTarget("lbuffer0");
 					path.bindTarget("refr", "tex1");

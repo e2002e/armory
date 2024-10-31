@@ -35,10 +35,6 @@ class Inc {
 	static var voxel_td1:kha.compute.TextureUnit;
 	static var voxel_te1:kha.compute.TextureUnit;
 	static var voxel_tf1:kha.compute.TextureUnit;
-	#else
-	#if arm_voxelgi_shadows
-	static var voxel_tf1:kha.compute.TextureUnit;
-	#end
 	#end
 	static var voxel_tl1:kha.compute.TextureUnit;
 	#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
@@ -834,7 +830,6 @@ class Inc {
 
 			#if (rp_voxels == "Voxel GI")
 			voxel_td1 = voxel_sh1.getTextureUnit("voxelsSampler");
-			voxel_tl1 = voxel_sh1.getTextureUnit("voxelsSDFSampler");
 			voxel_te1 = voxel_sh1.getTextureUnit("voxelsLight");
 			voxel_tf1 = voxel_sh1.getTextureUnit("SDF");
 			#else
@@ -892,39 +887,6 @@ class Inc {
 	 		voxel_cd4 = voxel_sh4.getConstantLocation("eye");
 	 		voxel_ce4 = voxel_sh4.getConstantLocation("eyeLook");
 	 		voxel_cf4 = voxel_sh4.getConstantLocation("postprocess_resolution");
-	 		#if arm_voxelgi_refract
-			voxel_sh6 = path.getComputeShader("voxel_resolve_refraction");
-			voxel_ta6 = voxel_sh6.getTextureUnit("voxels");
-			voxel_tb6 = voxel_sh6.getTextureUnit("gbufferD");
-			voxel_tc6 = voxel_sh6.getTextureUnit("gbuffer0");
-			voxel_td6 = voxel_sh6.getTextureUnit("voxelsSDF");
-			voxel_te6 = voxel_sh6.getTextureUnit("voxels_refraction");
-			voxel_tf6 = voxel_sh6.getTextureUnit("gbuffer_refraction");
-	 		voxel_ca6 = voxel_sh6.getConstantLocation("clipmaps");
-	 		voxel_cb6 = voxel_sh6.getConstantLocation("InvVP");
-	 		voxel_cc6 = voxel_sh6.getConstantLocation("cameraProj");
-	 		voxel_cd6 = voxel_sh6.getConstantLocation("eye");
-	 		voxel_ce6 = voxel_sh6.getConstantLocation("eyeLook");
-	 		voxel_cf6 = voxel_sh6.getConstantLocation("postprocess_resolution");
-	 		#end
-		}
-		#end
-		#if arm_voxelgi_shadows
-		if (voxel_sh7 == null)
-		{
-			voxel_sh7 = path.getComputeShader("voxel_resolve_shadows");
-			voxel_ta7 = voxel_sh7.getTextureUnit("voxels");
-			voxel_tb7 = voxel_sh7.getTextureUnit("gbufferD");
-			voxel_tc7 = voxel_sh7.getTextureUnit("gbuffer0");
-			voxel_td7 = voxel_sh7.getTextureUnit("voxelsSDF");
-			voxel_te7 = voxel_sh7.getTextureUnit("voxels_shadows");
-			voxel_ca7 = voxel_sh7.getConstantLocation("clipmaps");
-			voxel_cb7 = voxel_sh7.getConstantLocation("InvVP");
-			voxel_cc7 = voxel_sh7.getConstantLocation("cameraProj");
-			voxel_cd7 = voxel_sh7.getConstantLocation("eye");
-			voxel_ce7 = voxel_sh7.getConstantLocation("eyeLook");
-			voxel_cf7 = voxel_sh7.getConstantLocation("postprocess_resolution");
-			voxel_cg7 = voxel_sh7.getConstantLocation("lPos");
 		}
 		#end
 		#if (rp_voxels == "Voxel GI")
@@ -1315,87 +1277,7 @@ class Inc {
 
 		kha.compute.Compute.compute(Std.int((width + 7) / 8), Std.int((height + 7) / 8), 1);
 	}
-
-	#if arm_voxelgi_refract
-	public static function resolveRefraction() {
-		var rts = path.renderTargets;
-	 	var res = iron.RenderPath.getVoxelRes();
-	 	var camera = iron.Scene.active.camera;
-	 	var clipmaps = iron.RenderPath.clipmaps;
-	 	var clipmap = clipmaps[iron.RenderPath.clipmapLevel];
-
-		kha.compute.Compute.setShader(voxel_sh6);
-
-		kha.compute.Compute.setSampledTexture(voxel_ta6, rts.get("voxelsOut").image);
-		kha.compute.Compute.setSampledTexture(voxel_tb6, rts.get("half").image);
-		#if arm_deferred
-		kha.compute.Compute.setSampledTexture(voxel_tc6, rts.get("gbuffer0").image);
-		#else
-		kha.compute.Compute.setSampledTexture(voxel_tc6, rts.get("lbuffer1").image);
-		#end
-		kha.compute.Compute.setSampledTexture(voxel_td6, rts.get("voxelsSDF").image);
-		kha.compute.Compute.setTexture(voxel_te6, rts.get("voxels_refraction").image, kha.compute.Access.Write);
-		kha.compute.Compute.setSampledTexture(voxel_tf6, rts.get("gbuffer_refraction").image);
-
-		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
-		for (i in 0...Main.voxelgiClipmapCount) {
-			fa[i * 10] = clipmaps[i].voxelSize;
-			fa[i * 10 + 1] = clipmaps[i].extents.x;
-			fa[i * 10 + 2] = clipmaps[i].extents.y;
-			fa[i * 10 + 3] = clipmaps[i].extents.z;
-			fa[i * 10 + 4] = clipmaps[i].center.x;
-			fa[i * 10 + 5] = clipmaps[i].center.y;
-			fa[i * 10 + 6] = clipmaps[i].center.z;
-			fa[i * 10 + 7] = clipmaps[i].offset_prev.x;
-			fa[i * 10 + 8] = clipmaps[i].offset_prev.y;
-			fa[i * 10 + 9] = clipmaps[i].offset_prev.z;
-		}
-
-		kha.compute.Compute.setFloats(voxel_ca6, fa);
-
-		#if arm_centerworld
-		m.setFrom(vmat(camera.V));
-		#else
-		m.setFrom(camera.V);
-		#end
-		m.multmat(camera.P);
-		m.getInverse(m);
-
-		kha.compute.Compute.setMatrix(voxel_cb6, m.self);
-
-		var near = camera.data.raw.near_plane;
-		var far = camera.data.raw.far_plane;
-		var v = new iron.math.Vec2();
-		v.x = far / (far - near);
-		v.y = (-far * near) / (far - near);
-
-		kha.compute.Compute.setFloat2(voxel_cc6, v.x, v.y);
-
-
-		kha.compute.Compute.setFloat3(voxel_cd6, camera.transform.worldx(), camera.transform.worldy(), camera.transform.worldz());
-		var eyeLook = camera.lookWorld().normalize();
-		kha.compute.Compute.setFloat3(voxel_ce6, eyeLook.x, eyeLook.y, eyeLook.z);
-
-		var width = iron.App.w();
-		var height = iron.App.h();
-		var dp = getDisplayp();
-		if (dp != null) { // 1080p/..
-			if (width > height) {
-				width = Std.int(width * (dp / height));
-				height = dp;
-			}
-			else {
-				height = Std.int(height * (dp / width));
-				width = dp;
-			}
-		}
-		kha.compute.Compute.setFloat2(voxel_cf6, width, height);
-
-		kha.compute.Compute.compute(Std.int((width + 7) / 8), Std.int((height + 7) / 8), 1);
-	}
-	#end
 	#end // voxel ao
-	#end
 
 	#if (rp_voxels == "Voxel GI")
 	public static function computeVoxelsLight() {
@@ -1549,6 +1431,7 @@ class Inc {
 		}
 	}
 	#end // GI
+	#end
 }
 
 #if arm_shadowmap_atlas

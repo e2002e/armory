@@ -624,9 +624,6 @@ class RenderPathDeferred {
 				#if (rp_voxels == "Voxel GI")
 				path.clearImage("voxels_diffuse", 0x00000000);
 				path.clearImage("voxels_specular", 0x00000000);
-				#if arm_voxelgi_refract
-				path.clearImage("voxels_refraction", 0x00000000);
-				#end
 				#else
 				path.clearImage("voxels_ao", 0x00000000);
 				#end
@@ -686,10 +683,6 @@ class RenderPathDeferred {
 			Inc.resolveSpecular();
 			path.bindTarget("voxels_diffuse", "voxels_diffuse");
 			path.bindTarget("voxels_specular", "voxels_specular");
-			#end
-			#if arm_voxelgi_shadows
-			Inc.resolveShadows();
-			path.bindTarget("voxels_shadows", "voxels_shadows");
 			#end
 		}
 		#end
@@ -845,14 +838,6 @@ class RenderPathDeferred {
 				#end
 
 				path.drawMeshes("refraction");
-
-				#if arm_voxelgi_refract
-				//we need the updated half depth to resolve the refraction objects writen by the 'refraction' pass
-				path.setTarget("half");
-				path.bindTarget("_main", "texdepth");
-				path.drawShader("shader_datas/downsample_depth/downsample_depth");
-				Inc.resolveRefraction();
-				#end
 
 				path.setTarget("tex");
 				path.bindTarget("tex", "tex");
