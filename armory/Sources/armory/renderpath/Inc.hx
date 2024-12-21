@@ -710,20 +710,20 @@ class Inc {
 						t.format = "R32";
 						t.width = res;
 						t.height = res;
-						t.depth = res * 3;
+						t.depth = res;
 					}
 					else {
 						t.format = "R32";
 						t.width = res * 6;
 						t.height = res;
-						t.depth = res * 12;
+						t.depth = res * 4;
 					}
 				}
 				#end
 			}
 		}
 		t.is_image = true;
-		t.mipmaps = true;
+		t.mipmaps = false;
 		path.createRenderTarget(t);
 	}
 	#end

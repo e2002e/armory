@@ -132,7 +132,5 @@ void main() {
 
 	vec3 light = visibility * lightColor;
 
-	imageAtomicAdd(voxelsLight, dst + ivec3(0, 0, 0), uint(light.r * 255));
-	imageAtomicAdd(voxelsLight, dst + ivec3(0, 0, voxelgiResolution.x), uint(light.g * 255));
-	imageAtomicAdd(voxelsLight, dst + ivec3(0, 0, voxelgiResolution.x * 2), uint(light.b * 255));
+	imageAtomicAdd(voxelsLight, dst + ivec3(0, 0, 0), convVec4ToRGBA8(vec4(light, 1.0)));
 }
