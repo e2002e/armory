@@ -223,19 +223,23 @@ void main() {
 		}
 		#ifdef _VoxelGI
 		imageStore(voxelsOut, dst, radiance);
+		memoryBarrierImage();
 		#else
 		imageStore(voxelsOut, dst, vec4(opac));
+		memoryBarrierImage();
 		#endif
 	}
 	#ifdef _VoxelGI
 	ivec3 dst_sdf = ivec3(gl_GlobalInvocationID.xyz);
 	dst_sdf.y += clipmapLevel * res;
 	imageStore(SDF, dst_sdf, vec4(sdf));
+	memoryBarrierImage();
 	#else
 	#ifdef _VoxelShadow
 	ivec3 dst_sdf = ivec3(gl_GlobalInvocationID.xyz);
 	dst_sdf.y += clipmapLevel * res;
 	imageStore(SDF, dst_sdf, vec4(sdf));
+	memoryBarrierImage();
 	#endif
 	#endif
 }

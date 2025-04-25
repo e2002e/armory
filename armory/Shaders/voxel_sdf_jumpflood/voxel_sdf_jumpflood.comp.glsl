@@ -71,4 +71,5 @@ void main()
 		}
 	}
 	imageStore(output_sdf, dst, vec4(best_distance));
+	memoryBarrierImage();
 }
