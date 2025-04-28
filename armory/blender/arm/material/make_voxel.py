@@ -165,7 +165,7 @@ def make_gi(context_id):
     geom.write('maxi = facenormal[2] > facenormal[maxi] ? 2 : maxi;')
 
     geom.write('aabb_min = min(voxpositionGeom[0].xyz, min(voxpositionGeom[1].xyz, voxpositionGeom[2].xyz));')
-    geom.write('aabb_max = max(voxpositionGeom[0].xyz, min(voxpositionGeom[1].xyz, voxpositionGeom[2].xyz));')
+    geom.write('aabb_max = max(voxpositionGeom[0].xyz, max(voxpositionGeom[1].xyz, voxpositionGeom[2].xyz));')
 
     geom.write('for (uint i = 0; i < 3; ++i) {')
     geom.write('    voxposition[i].xyz = (voxpositionGeom[i] - vec3(clipmaps[int(clipmapLevel * 10 + 4)], clipmaps[int(clipmapLevel * 10 + 5)], clipmaps[int(clipmapLevel * 10 + 6)])) / (float(clipmaps[int(clipmapLevel * 10)]));')
