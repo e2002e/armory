@@ -88,11 +88,11 @@ def write(vert: shader.Shader, frag: shader.Shader):
     frag.write('    albedo,')
     frag.write('    roughness,')
     frag.write('    specular,')
-    frag.write('    f0')
-
+    frag.write('    f0,')
+    frag.write('    opacity != 1.0')
     if is_shadows:
         if parse_opacity:
-            frag.write('\t, li, lightsArray[li * 3 + 2].x, lightsArray[li * 3 + 2].z != 0.0, opacity != 1.0') # bias
+            frag.write('\t, li, lightsArray[li * 3 + 2].x, lightsArray[li * 3 + 2].z != 0.0') # bias
         else:
             frag.write('\t, li, lightsArray[li * 3 + 2].x, lightsArray[li * 3 + 2].z != 0.0, false') # bias
     if '_Spot' in wrd.world_defs:
@@ -103,13 +103,13 @@ def write(vert: shader.Shader, frag: shader.Shader):
         frag.write('\t, vec2(lightsArray[li * 3].w, lightsArray[li * 3 + 1].w)') # scale
         frag.write('\t, lightsArraySpot[li * 2 + 1].xyz') # right
     if '_VoxelShadow' in wrd.world_defs:
-        frag.write(', voxels, voxelsSDF, clipmaps')
+        frag.write(', voxels, voxelsSDF, clipmaps, posa, velocity')
     if '_MicroShadowing' in wrd.world_defs and not is_mobile:
         frag.write('\t, occlusion')
     if '_SSRS' in wrd.world_defs:
         frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix')
         frag.add_uniform('vec3 eye', '_cameraPosition')
-        frag.write(', wposition.z, inVP, eye')
+        frag.write(', wposition.z, invVP, eye')
     frag.write(');')
 
     frag.write('}') # for numLights

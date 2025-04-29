@@ -1,16 +1,12 @@
 #ifndef _AABB_GLSL
 #define _AABB_GLSL
 
-bool IntersectAABB(vec3[2] a, vec3[2] b)
-{
-	if (abs(a[0][0] - b[0][0]) > (a[1][0] + b[1][0]))
-		return false;
-	if (abs(a[0][1] - b[0][1]) > (a[1][1] + b[1][1]))
-		return false;
-	if (abs(a[0][2] - b[0][2]) > (a[1][2] + b[1][2]))
-		return false;
-
-	return true;
+bool IntersectAABB(vec3[2] a, vec3[2] b) {
+    const float EPSILON = 0.001; // Small tolerance to prevent false negatives
+    if (abs(a[0].x - b[0].x) > (a[1].x + b[1].x + EPSILON)) return false;
+    if (abs(a[0].y - b[0].y) > (a[1].y + b[1].y + EPSILON)) return false;
+    if (abs(a[0].z - b[0].z) > (a[1].z + b[1].z + EPSILON)) return false;
+    return true;
 }
 
 void AABBfromMinMax(inout vec3[2] aabb, vec3 _min, vec3 _max)

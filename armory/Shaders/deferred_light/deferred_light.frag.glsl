@@ -439,7 +439,7 @@ void main() {
 	#endif
 
 	#ifdef _VoxelShadow
-	svisibility *= (1.0 - traceShadow(p, n, voxels, voxelsSDF, sunDir, clipmaps, gl_FragCoord.xy, g2.rg).r) * voxelgiShad;
+	svisibility *= (1.0 - traceShadow(p, n, voxels, voxelsSDF, sunDir, clipmaps, texCoord, -g2.rg).r) * voxelgiShad;
 	#endif
 
 	#ifdef _SSRS
@@ -496,15 +496,15 @@ void main() {
 #ifdef _SinglePoint
 
 	fragColor.rgb += sampleLight(
-		p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0
+		p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0, false
 		#ifdef _ShadowMap
-			, 0, pointBias, true, false
+			, 0, pointBias, true
 		#endif
 		#ifdef _Spot
 		, true, spotData.x, spotData.y, spotDir, spotData.zw, spotRight
 		#endif
 		#ifdef _VoxelShadow
-			, voxels, voxelsSDF, clipmaps
+			, voxels, voxelsSDF, clipmaps, texCoord, -g2.rg
 		#endif
 		#ifdef _MicroShadowing
 		, occspec.x
@@ -548,10 +548,11 @@ void main() {
 			albedo,
 			roughness,
 			occspec.y,
-			f0
+			f0,
+			false
 			#ifdef _ShadowMap
 				// light index, shadow bias, cast_shadows
-				, li, lightsArray[li * 3 + 2].x, lightsArray[li * 3 + 2].z != 0.0, false
+				, li, lightsArray[li * 3 + 2].x, lightsArray[li * 3 + 2].z != 0.0
 			#endif
 			#ifdef _Spot
 			, lightsArray[li * 3 + 2].y != 0.0
@@ -562,7 +563,7 @@ void main() {
 			, lightsArraySpot[li * 2 + 1].xyz // right
 			#endif
 			#ifdef _VoxelShadow
-			, voxels, voxelsSDF, clipmaps
+			, voxels, voxelsSDF, clipmaps, texCoord, -g2.rg
 			#endif
 			#ifdef _MicroShadowing
 			, occspec.x
