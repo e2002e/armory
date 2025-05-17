@@ -800,9 +800,10 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         if '_MicroShadowing' in wrd.world_defs:
             frag.write(', occlusion')
         if '_SSRS' in wrd.world_defs:
+            frag.add_uniform('sampler2D gbufferD');
             frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix')
             frag.add_uniform('vec3 eye', '_cameraPosition')
-            frag.write(', wposition.z, invVP, eye')
+            frag.write(', gbufferD, invVP, eye')
         frag.write(');')
 
     if '_Clusters' in wrd.world_defs:
