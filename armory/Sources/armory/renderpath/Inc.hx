@@ -696,12 +696,12 @@ class Inc {
 			t.width = 0;
 			t.height = 0;
 			t.displayp = getDisplayp();
-			t.format = t.name == "voxels_shadows" ? #if (rp_voxels == "Voxel AO") "R8" #else "RGBA32" #end : "RGBA32";
+			t.format = t.name == "voxels_shadows" ? #if (rp_voxels == "Voxel AO") "L8" #else "RGBA32" #end : "RGBA32";
 			t.mipmaps = true;
 		}
 		else {
 			if (t.name == "voxelsSDF" || t.name == "voxelsSDFtmp") {
-				t.format = "R8";
+				t.format = "A16";
 				t.width = res;
 				t.height = res * Main.voxelgiClipmapCount;
 				t.depth = res;
@@ -714,11 +714,11 @@ class Inc {
 						t.width = res * (6 + 16);
 						t.height = res * Main.voxelgiClipmapCount;
 						t.depth = res;
-						t.format = "R8";
+						t.format = "A16";
 						t.mipmaps = true;
 					}
 					else {
-						t.format = "R32";
+						t.format = "A32";
 						t.width = res * 6;
 						t.height = res;
 						t.depth = res * 2;
@@ -728,14 +728,14 @@ class Inc {
 				#else
 				{
 					if (t.name == "voxelsOut" || t.name == "voxelsOutB") {
-						t.format = "RGBA32";
+						t.format = "RGBA64";
 						t.width = res * (6 + 16);
 						t.height = res * Main.voxelgiClipmapCount;
 						t.depth = res;
 						t.mipmaps = false;
 					}
 					else {
-						t.format = "R32";
+						t.format = "A32";
 						t.width = res * 6;
 						t.height = res;
 						t.depth = res * 6;
