@@ -38,7 +38,7 @@ const float MAX_DISTANCE = voxelgiRange;
 #ifdef _VoxelGI
 uniform sampler3D dummy;
 
-vec4 sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCount * 10], const float clipmap_index, const float step_dist, const int precomputed_direction, const vec3 face_offset, const vec3 direction_weight) {
+vec4 sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCount * 10], const float clipmap_index, const float step_dist, const int precomputed_direction, const vec3 face_offset, const vec3 direction_weight, const float lod) {
  	vec4 col = vec4(0.0);
 	vec3 tc = (P - vec3(clipmaps[int(clipmap_index * 10 + 4)], clipmaps[int(clipmap_index * 10 + 5)], clipmaps[int(clipmap_index * 10 + 6)])) / (float(clipmaps[int(clipmap_index * 10)]) * voxelgiResolution);
 	vec3 half_texel = vec3(0.5) / voxelgiResolution;
@@ -48,12 +48,12 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCo
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {
-		col = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), 0)
-			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), 0)
-			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), 0);
+		col = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), lod)
+			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), lod)
+			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), lod);
 	}
 	else
-		col = textureLod(voxels, tc, 0);
+		col = textureLod(voxels, tc, lod);
 
 	col *= step_dist / float(clipmaps[int(clipmap_index * 10)]);
 
@@ -62,7 +62,7 @@ vec4 sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCo
 
 #endif
 #ifdef _VoxelAOvar
-float sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCount * 10], const float clipmap_index, const float step_dist, const int precomputed_direction, const vec3 face_offset, const vec3 direction_weight) {
+float sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapCount * 10], const float clipmap_index, const float step_dist, const int precomputed_direction, const vec3 face_offset, const vec3 direction_weight, const float lod) {
  	float opac = 0.0;
 	vec3 tc = (P - vec3(clipmaps[int(clipmap_index * 10 + 4)], clipmaps[int(clipmap_index * 10 + 5)], clipmaps[int(clipmap_index * 10 + 6)])) / (float(clipmaps[int(clipmap_index * 10)]) * voxelgiResolution);
 	vec3 half_texel = vec3(0.5) / voxelgiResolution;
@@ -72,12 +72,12 @@ float sampleVoxel(sampler3D voxels, vec3 P, const float clipmaps[voxelgiClipmapC
 	tc.y = (tc.y + clipmap_index) / voxelgiClipmapCount;
 
 	if (precomputed_direction == 0) {
-		opac = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), 0).r
-			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), 0).r
-			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), 0).r;
+		opac = direction_weight.x * textureLod(voxels, vec3(tc.x + face_offset.x, tc.y, tc.z), , lod).r
+			+ direction_weight.y * textureLod(voxels, vec3(tc.x + face_offset.y, tc.y, tc.z), lod).r
+			+ direction_weight.z * textureLod(voxels, vec3(tc.x + face_offset.z, tc.y, tc.z), lod).r;
 	}
 	else
-		opac = textureLod(voxels, tc, 0).r;
+		opac = textureLod(voxels, tc, lod).r;
 
 	opac *= step_dist / float(clipmaps[int(clipmap_index * 10)]);
 
@@ -121,10 +121,10 @@ vec4 traceCone(const sampler3D voxels, const sampler3D voxelsSDF, const vec3 ori
 			continue;
 		}
 
-		mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight);
+		mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight);
+			vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
@@ -225,10 +225,10 @@ float traceConeAO(const sampler3D voxels, const vec3 origin, const vec3 n, const
 			continue;
 		}
 
-		mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight);
+		mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, precomputed_direction, face_offset, direction_weight, lod);
 
 		if(clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
-			float mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight);
+			float mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, precomputed_direction, face_offset, direction_weight, lod);
 			mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
 		}
 
@@ -321,14 +321,14 @@ traceConeShadow(
             continue;
         }
 
-        mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, 0, face_offset, direction_weight);
+        mipSample = sampleVoxel(voxels, p0, clipmaps, clipmap_index, step_dist, 0, face_offset, direction_weight, lod);
 
         if (clipmap_blend > 0.0 && clipmap_index < voxelgiClipmapCount - 1) {
             #ifdef _VoxelGI
-            vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, 0, face_offset, direction_weight);
+            vec4 mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, 0, face_offset, direction_weight, lod);
             mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
             #else
-            float mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, 0, face_offset, direction_weight);
+            float mipSampleNext = sampleVoxel(voxels, p0, clipmaps, clipmap_index + 1.0, step_dist, 0, face_offset, direction_weight, lod);
             mipSample = mix(mipSample, mipSampleNext, clipmap_blend);
             #endif
         }

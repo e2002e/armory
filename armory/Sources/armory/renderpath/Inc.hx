@@ -732,7 +732,7 @@ class Inc {
 						t.width = res * (6 + 16);
 						t.height = res * Main.voxelgiClipmapCount;
 						t.depth = res;
-						t.mipmaps = false;
+						t.mipmaps = true;
 					}
 					else {
 						t.format = "A32";
