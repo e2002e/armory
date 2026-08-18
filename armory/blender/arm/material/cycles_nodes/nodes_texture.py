@@ -439,7 +439,7 @@ def parse_sky_nishita(node: bpy.types.ShaderNodeTexSky, state: ParserState) -> v
         size = math.cos(theta)
         sun = f'* sun_disk(pos, sunDir, {size}, {node.sun_intensity})'
 
-    return f'nishita_atmosphere(pos, vec3(0, 0, {ray_origin_z}), sunDir, {planet_radius}){sun}'
+    return f'nishita_atmosphere(pos, vec3(0, 0, {ray_origin_z}), sunDir, {planet_radius}){sun} * envmapStrength'
 
 
 def parse_tex_environment(node: bpy.types.ShaderNodeTexEnvironment, out_socket: bpy.types.NodeSocket, state: ParserState) -> vec3str:
