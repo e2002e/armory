@@ -32,10 +32,6 @@ class Inc {
 	#if (rp_voxels == "Voxel GI")
 	static var voxel_td1:kha.compute.TextureUnit;
 	static var voxel_te1:kha.compute.TextureUnit;
-	#else
-	#if arm_voxelgi_shadows
-	static var voxel_te1:kha.compute.TextureUnit;
-	#end
 	#end
 	#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
 	static var voxel_sh2:kha.compute.Shader = null;
@@ -84,24 +80,6 @@ class Inc {
 	static var voxel_cb4:kha.compute.ConstantLocation;
 	static var voxel_cc4:kha.compute.ConstantLocation;
 	static var voxel_cd4:kha.compute.ConstantLocation;
-	#end
-	#if arm_voxelgi_shadows
-	static var voxel_sh5:kha.compute.Shader = null;
-	static var voxel_ta5:kha.compute.TextureUnit;
-	static var voxel_tb5:kha.compute.TextureUnit;
-	static var voxel_tc5:kha.compute.TextureUnit;
-	static var voxel_td5:kha.compute.TextureUnit;
-	static var voxel_te5:kha.compute.TextureUnit;
-	static var voxel_tf5:kha.compute.TextureUnit;
-	static var voxel_ca5:kha.compute.ConstantLocation;
-	static var voxel_cb5:kha.compute.ConstantLocation;
-	static var voxel_cc5:kha.compute.ConstantLocation;
-	static var voxel_cd5:kha.compute.ConstantLocation;
-	static var voxel_ce5:kha.compute.ConstantLocation;
-	static var voxel_cf5:kha.compute.ConstantLocation;
-	static var voxel_cg5:kha.compute.ConstantLocation;
-	static var voxel_ch5:kha.compute.ConstantLocation;
-	static var voxel_ci5:kha.compute.ConstantLocation;
 	#end
 	#end //rp_voxels
 
@@ -864,10 +842,6 @@ class Inc {
 			#if (rp_voxels == "Voxel GI")
 			voxel_td1 = voxel_sh1.getTextureUnit("voxelsSampler");
 			voxel_te1 = voxel_sh1.getTextureUnit("SDF");
-			#else
-			#if arm_voxelgi_shadows
-			voxel_te1 = voxel_sh1.getTextureUnit("SDF");
-			#end
 			#end
 		}
 		#if (arm_voxelgi_shadows || rp_voxels == "Voxel GI")
@@ -936,27 +910,6 @@ class Inc {
 	 		voxel_cd4 = voxel_sh4.getConstantLocation("postprocess_resolution");
 		}
 		#end
-		#if arm_voxelgi_shadows
-		if (voxel_sh5 == null)
-		{
-			voxel_sh5 = path.getComputeShader("voxel_resolve_shadows");
-			voxel_ta5 = voxel_sh5.getTextureUnit("voxels");
-			voxel_tb5 = voxel_sh5.getTextureUnit("gbufferD");
-			voxel_tc5 = voxel_sh5.getTextureUnit("gbuffer0");
-			voxel_td5 = voxel_sh5.getTextureUnit("gbuffer2");
-			voxel_te5 = voxel_sh5.getTextureUnit("voxelsSDF");
-			voxel_tf5 = voxel_sh5.getTextureUnit("voxels_shadows");
-			voxel_ca5 = voxel_sh5.getConstantLocation("clipmaps");
-			voxel_cb5 = voxel_sh5.getConstantLocation("InvVP");
-			voxel_cc5 = voxel_sh5.getConstantLocation("cameraProj");
-			voxel_cd5 = voxel_sh5.getConstantLocation("eye");
-			voxel_ce5 = voxel_sh5.getConstantLocation("eyeLook");
-			voxel_cf5 = voxel_sh5.getConstantLocation("postprocess_resolution");
-			voxel_cg5 = voxel_sh5.getConstantLocation("sunDir");
-			voxel_ch5 = voxel_sh5.getConstantLocation("lPos");
-			voxel_ci5 = voxel_sh5.getConstantLocation("lightType");
-		}
-		#end
 	}
 
 	public static function computeVoxelsOffsetPrev() {
@@ -1006,10 +959,6 @@ class Inc {
 		#if (rp_voxels == "Voxel GI")
 		kha.compute.Compute.setSampledTexture(voxel_td1, rts.get("voxelsOutB").image);
 		kha.compute.Compute.setTexture(voxel_te1, rts.get("voxelsSDF").image, kha.compute.Access.Write);
-		#else
-		#if arm_voxelgi_shadows
-		kha.compute.Compute.setTexture(voxel_te1, rts.get("voxelsSDF").image, kha.compute.Access.Write);
-		#end
 		#end
 
 		var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
