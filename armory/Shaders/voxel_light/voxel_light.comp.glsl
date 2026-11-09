@@ -80,6 +80,13 @@ vec2 sampleCube(vec3 dir, out int faceIndex) {
 }
 #endif
 
+#ifdef _ShadowMap
+// Voxels outside the shadow map frustum are left unshadowed instead of sampling clamped edge texels
+bool inShadowMap(const vec3 lPos) {
+	return all(greaterThanEqual(lPos, vec3(0.0))) && all(lessThanEqual(lPos, vec3(1.0)));
+}
+#endif
+
 float lpToDepth(vec3 lp, const vec2 lightProj) {
 	lp = abs(lp);
 	float zcomp = max(lp.x, max(lp.y, lp.z));
@@ -97,17 +104,28 @@ void main() {
 	P *= voxelgiResolution;
 	P += vec3(clipmaps[int(clipmapLevel * 10 + 4)], clipmaps[int(clipmapLevel * 10 + 5)], clipmaps[int(clipmapLevel * 10 + 6)]);
 
+	// Average the normal over all 6 anisotropic faces, weighted by sample count
+	vec2 N = vec2(0.0);
+	uint count = 0;
+	for (int i = 0; i < 6; i++) {
+		ivec3 src = dst + ivec3(i * res, 0, 0);
+		N.r += float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 7))) / 255;
+		N.g += float(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 8))) / 255;
+		count += uint(imageLoad(voxels, src + ivec3(0, 0, voxelgiResolution.x * 12)));
+	}
+	// Empty voxel, nothing to light
+	if (count == 0) return;
+	vec3 wnormal = decode_oct((N / float(count)) * 2 - 1);
+
 	vec3 visibility;
 	vec3 lp = lightPos - P;
 	vec3 l;
 	if (lightType == 0) { l = lightDir; visibility = vec3(1.0); }
-	else { l = normalize(lp); visibility = vec3(attenuate(distance(P, lightPos))); }
-
-	vec3 N = vec3(0.0);
-	N.r = float(imageLoad(voxels, dst + ivec3(0, 0, voxelgiResolution.x * 7))) / 255;
-	N.g = float(imageLoad(voxels, dst + ivec3(0, 0, voxelgiResolution.x * 8))) / 255;
-	N /= 2;
-	vec3 wnormal = decode_oct(N.rg * 2 - 1);
+	else {
+		l = normalize(lp);
+		// Clamp to one voxel to avoid the 1/d^2 singularity next to the light
+		visibility = vec3(attenuate(max(length(lp), clipmaps[int(clipmapLevel * 10)])));
+	}
 
 	// float dotNL = max(dot(wnormal, l), 0.0);
 	// if (dotNL == 0.0) return;
@@ -116,12 +134,12 @@ void main() {
 	if (lightShadow == 1) {
 		vec4 lightPosition = LVP * vec4(P, 1.0);
 		vec3 lPos = lightPosition.xyz / lightPosition.w;
-		visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).rrr;
+		if (inShadowMap(lPos)) visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).rrr;
 	}
 	else if (lightShadow == 2) {
 		vec4 lightPosition = LVP * vec4(P, 1.0);
 		vec3 lPos = lightPosition.xyz / lightPosition.w;
-		visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
+		if (inShadowMap(lPos)) visibility *= texture(shadowMapSpot, vec3(lPos.xy, lPos.z - shadowsBias)).r;
 	}
 	else if (lightShadow == 3) {
 		#ifdef _ShadowMapAtlas
@@ -146,12 +164,17 @@ void main() {
 			visibility *= smoothstep(spotData.y, spotData.x, spotEffect);
 		}
 	}
+	else if (lightType == 3) {
+		// Area lights only emit from their front side
+		visibility *= max(dot(lightDir, l), 0.0);
+	}
 
 	const vec2 pixel = gl_GlobalInvocationID.xy;
 	#ifdef _VoxelShadow
-	visibility *= traceShadow(P, wnormal, voxelsSampler, voxelsSDFSampler, lp, clipmaps, pixel);
+	visibility *= traceShadow(P, wnormal, voxelsSampler, voxelsSDFSampler, l, clipmaps, pixel);
 	#endif
-	vec3 light = visibility * lightColor;
+	// Keep the per-light contribution low enough that summing lights cannot overflow r32ui
+	vec3 light = min(visibility * lightColor, vec3(65535.0));
 
 	imageAtomicAdd(voxelsLight, dst, uint(light.r * 255));
 	imageAtomicAdd(voxelsLight, dst + ivec3(0, 0, voxelgiResolution.x), uint(light.g * 255));
