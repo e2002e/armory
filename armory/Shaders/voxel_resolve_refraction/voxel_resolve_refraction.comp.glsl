@@ -82,7 +82,7 @@ void main() {
 
 	vec3 color = vec3(0.0);
 	if(ior_opac.y < 1.0)
-		color = traceRefraction(P, n, voxels, voxelsSDF, normalize(eye - P), ior_opac.x, g0.b, clipmaps, pixel).rgb;
+		color = traceRefraction(P, n, voxels, voxelsSDF, normalize(eye - P), ior_opac.r, g0.b, clipmaps, pixel, velocity, ior_opac.g).rgb;
 
 	imageStore(voxels_refraction, ivec2(pixel), vec4(color, 1.0));
 }

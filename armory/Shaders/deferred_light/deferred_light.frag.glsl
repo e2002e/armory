@@ -33,9 +33,6 @@ uniform sampler2D voxels_specular;
 #ifdef _VoxelAOvar
 uniform sampler2D voxels_ao;
 #endif
-#ifdef _VoxelShadow
-uniform sampler2D voxels_shadows;
-#endif
 
 uniform float envmapStrength;
 #ifdef _Irr
@@ -366,10 +363,6 @@ void main() {
 			}
 		#endif
 	#endif
-
-	#ifdef _VoxelShadow
-	svisibility *= textureLod(voxels_shadows, texCoord, 0.0).r * voxelgiShad;
-	#endif
 	
 	#ifdef _SSRS
 	// vec2 coords = getProjectedCoord(hitCoord);
@@ -432,9 +425,6 @@ void main() {
 		#ifdef _Spot
 		, true, spotData.x, spotData.y, spotDir, spotData.zw, spotRight
 		#endif
-		#ifdef _VoxelShadow
-		, texCoord
-		#endif
 		#ifdef _MicroShadowing
 		, occspec.x
 		#endif
@@ -489,9 +479,6 @@ void main() {
 			, lightsArraySpot[li * 2].xyz // spotDir
 			, vec2(lightsArray[li * 3].w, lightsArray[li * 3 + 1].w) // scale
 			, lightsArraySpot[li * 2 + 1].xyz // right
-			#endif
-			#ifdef _VoxelShadow
-			, texCoord
 			#endif
 			#ifdef _MicroShadowing
 			, occspec.x

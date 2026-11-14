@@ -95,6 +95,7 @@ class Inc {
 	static var voxel_tc7:kha.compute.TextureUnit;
 	static var voxel_td7:kha.compute.TextureUnit;
 	static var voxel_te7:kha.compute.TextureUnit;
+	static var voxel_tf7:kha.compute.TextureUnit;
 	static var voxel_ca7:kha.compute.ConstantLocation;
 	static var voxel_cb7:kha.compute.ConstantLocation;
 	static var voxel_cc7:kha.compute.ConstantLocation;
@@ -126,6 +127,11 @@ class Inc {
 	static var voxel_ck5:kha.compute.ConstantLocation;
 	static var voxel_cl5:kha.compute.ConstantLocation;
 	static var voxel_cm5:kha.compute.ConstantLocation;
+	#if arm_csm
+	static var voxel_cn5:kha.compute.ConstantLocation;
+	static var voxel_co5:kha.compute.ConstantLocation;
+	static var casRects:kha.arrays.Float32Array = null;
+	#end
 	#if arm_shadowmap_atlas
 	static var m2 = iron.math.Mat4.identity();
 	#end
@@ -843,6 +849,7 @@ class Inc {
 			voxel_tc7 = voxel_sh7.getTextureUnit("gbuffer0");
 			voxel_td7 = voxel_sh7.getTextureUnit("voxelsSDF");
 			voxel_te7 = voxel_sh7.getTextureUnit("voxels_shadows");
+			voxel_tf7 = voxel_sh7.getTextureUnit("sveloc");
 			voxel_ca7 = voxel_sh7.getConstantLocation("clipmaps");
 			voxel_cb7 = voxel_sh7.getConstantLocation("InvVP");
 			voxel_cc7 = voxel_sh7.getConstantLocation("cameraProj");
@@ -881,6 +888,10 @@ class Inc {
 	 		#if arm_shadowmap_atlas
 	 		voxel_cl5 = voxel_sh5.getConstantLocation("index");
 	 		voxel_cm5 = voxel_sh5.getConstantLocation("pointLightDataArray");
+	 		#end
+	 		#if arm_csm
+	 		voxel_cn5 = voxel_sh5.getConstantLocation("casData");
+	 		voxel_co5 = voxel_sh5.getConstantLocation("casRects");
 	 		#end
 	 		#end
 		}
@@ -1344,6 +1355,7 @@ class Inc {
 			#end
 			kha.compute.Compute.setSampledTexture(voxel_td7, rts.get("voxelsSDF").image);
 			kha.compute.Compute.setTexture(voxel_te7, rts.get("voxels_shadows").image, kha.compute.Access.Write);
+			kha.compute.Compute.setSampledTexture(voxel_tf7, rts.get("gbuffer2").image);
 
 			var fa:Float32Array = new Float32Array(Main.voxelgiClipmapCount * 10);
 			for (i in 0...Main.voxelgiClipmapCount) {
@@ -1408,6 +1420,40 @@ class Inc {
 	#end
 
 	#if (rp_voxels == "Voxel GI")
+	#if (rp_shadowmap && arm_csm)
+	// Tile rect of each sun cascade in shadow map uv space (min.xy, max.xy),
+	// matching the tile transforms built in LightObject.getCascadeData()
+	static function getCascadeRects(l:iron.object.LightObject):kha.arrays.Float32Array {
+		var c = iron.object.LightObject.cascadeCount;
+		if (casRects == null) casRects = new kha.arrays.Float32Array(c * 4);
+		for (i in 0...c) {
+			#if arm_shadowmap_atlas
+			var x0 = l.tileOffsetX[i];
+			var y0 = l.tileOffsetY[i];
+			var x1 = x0 + l.tileScale[i];
+			var y1 = y0 + l.tileScale[i];
+			#if (!kha_opengl)
+			// getCascadeData flips y after tiling: y' = 1 - y
+			var t = y0;
+			y0 = 1.0 - y1;
+			y1 = 1.0 - t;
+			#end
+			#else
+			// Cascades side by side along x
+			var x0 = i / c;
+			var x1 = (i + 1) / c;
+			var y0 = 0.0;
+			var y1 = 1.0;
+			#end
+			casRects[i * 4] = x0;
+			casRects[i * 4 + 1] = y0;
+			casRects[i * 4 + 2] = x1;
+			casRects[i * 4 + 3] = y1;
+		}
+		return casRects;
+	}
+	#end
+
 	public static function computeVoxelsLight() {
 		var rts = path.renderTargets;
 	 	var res = iron.RenderPath.getVoxelRes();
@@ -1459,6 +1505,11 @@ class Inc {
 	 			kha.compute.Compute.setSampledTexture(voxel_tb5, rts.get("shadowMap").image);
 	 			#end
 	 			kha.compute.Compute.setInt(voxel_ch5, 1); // lightShadow
+				#if arm_csm
+				// Cascade matrices already include bias and the per-cascade tile offset
+				kha.compute.Compute.setFloats(voxel_cn5, l.getCascadeData());
+				kha.compute.Compute.setFloats(voxel_co5, getCascadeRects(l));
+				#end
 	 		}
 	 		else if (l.data.raw.type == "spot" || l.data.raw.type == "area") {
 				#if arm_shadowmap_atlas
@@ -1505,10 +1556,11 @@ class Inc {
 	 		m.setFrom(l.VP);
 	 		m.multmat(iron.object.Uniforms.biasMat);
 	 		#if arm_shadowmap_atlas
-			if (l.data.raw.type == "sun")
+			// Point lights index the atlas in the shader (pointLightDataArray); sun, spot and area use their tile here
+			if (l.data.raw.type != "point")
 			{
-				// tile matrix
-				m.setIdentity();
+				// tile matrix (m2, not m: m already holds VP * bias)
+				m2.setIdentity();
 				// scale [0-1] coords to [0-tilescale]
 				m2._00 = l.tileScale[0];
 				m2._11 = l.tileScale[0];

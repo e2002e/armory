@@ -20,6 +20,12 @@ uniform int lightShadow;
 uniform vec2 lightProj;
 uniform float shadowsBias;
 uniform mat4 LVP;
+#ifdef _CSM
+// Per cascade: biased (and tiled) light VP matrices + split distances, same layout as shadows.glsl
+uniform vec4 casData[shadowmapCascades * 4 + 4];
+// Per cascade: tile rect in shadow map uv space (xy = min, zw = max)
+uniform vec4 casRects[shadowmapCascades];
+#endif
 #ifdef _ShadowMapAtlas
 uniform int index;
 uniform vec4 pointLightDataArray[maxLightsCluster * 6];
@@ -31,8 +37,6 @@ uniform int clipmapLevel;
 
 uniform layout(r32ui) uimage3D voxelsLight;
 uniform layout(r32ui) uimage3D voxels;
-uniform sampler3D voxelsSampler;
-uniform sampler3D voxelsSDFSampler;
 
 #ifdef _ShadowMap
 uniform sampler2DShadow shadowMap;
@@ -87,6 +91,29 @@ bool inShadowMap(const vec3 lPos) {
 }
 #endif
 
+#ifdef _CSM
+// Sun shadow for a voxel. Cascades are nested (every slice starts at the camera
+// near plane), so the finest cascade whose tile contains P gives the best
+// resolution. Selecting by eye distance like shadowTestCascade would be wrong
+// here: voxels around and behind the camera are lit too, not just visible ones.
+float shadowTestCascadeVoxel(const vec3 P) {
+	// Keep the sample one texel away from the tile edge so filtering never reads the neighbouring cascade
+	vec2 texel = 1.0 / vec2(textureSize(shadowMap, 0));
+	for (int i = 0; i < shadowmapCascades; i++) {
+		mat4 LWVP = mat4(casData[i * 4], casData[i * 4 + 1], casData[i * 4 + 2], casData[i * 4 + 3]);
+		vec4 lPos = LWVP * vec4(P, 1.0);
+		lPos.xyz /= lPos.w;
+		vec4 rect = casRects[i];
+		if (all(greaterThanEqual(lPos.xy, rect.xy + texel)) && all(lessThanEqual(lPos.xy, rect.zw - texel)) &&
+			lPos.z >= 0.0 && lPos.z <= 1.0) {
+			return texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).r;
+		}
+	}
+	// Outside every cascade: leave unshadowed, as for the single shadow map
+	return 1.0;
+}
+#endif
+
 float lpToDepth(vec3 lp, const vec2 lightProj) {
 	lp = abs(lp);
 	float zcomp = max(lp.x, max(lp.y, lp.z));
@@ -132,9 +159,13 @@ void main() {
 
 #ifdef _ShadowMap
 	if (lightShadow == 1) {
+		#ifdef _CSM
+		visibility = vec3(shadowTestCascadeVoxel(P));
+		#else
 		vec4 lightPosition = LVP * vec4(P, 1.0);
 		vec3 lPos = lightPosition.xyz / lightPosition.w;
 		if (inShadowMap(lPos)) visibility = texture(shadowMap, vec3(lPos.xy, lPos.z - shadowsBias)).rrr;
+		#endif
 	}
 	else if (lightShadow == 2) {
 		vec4 lightPosition = LVP * vec4(P, 1.0);
@@ -170,9 +201,6 @@ void main() {
 	}
 
 	const vec2 pixel = gl_GlobalInvocationID.xy;
-	#ifdef _VoxelShadow
-	visibility *= traceShadow(P, wnormal, voxelsSampler, voxelsSDFSampler, l, clipmaps, pixel);
-	#endif
 	// Keep the per-light contribution low enough that summing lights cannot overflow r32ui
 	vec3 light = min(visibility * lightColor, vec3(65535.0));
 
