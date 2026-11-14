@@ -636,6 +636,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     if '_Brdf' in wrd.world_defs:
         frag.add_uniform('sampler2D senvmapBrdf', link='$brdf.png')
         frag.write('vec2 envBRDF = texelFetch(senvmapBrdf, ivec2(vec2(dotNV, 1.0 - roughness) * 256.0), 0).xy;')
+        frag.write('vec3 F = (f0 * envBRDF.x + envBRDF.y);')
 
     if '_Irr' in wrd.world_defs:
         frag.add_include('std/shirr.glsl')
@@ -661,12 +662,12 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
     frag.write('envl *= albedo;')
 
     if '_Brdf' in wrd.world_defs:
-        frag.write('envl.rgb *= 1.0 - (f0 * envBRDF.x + envBRDF.y);')
+        frag.write('envl.rgb *= 1.0 - F;')
     if '_Rad' in wrd.world_defs:
-        frag.write('envl += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;')
+        frag.write('envl += prefilteredColor * F * 1.5;')
     elif '_EnvCol' in wrd.world_defs:
         frag.add_uniform('vec3 backgroundCol', link='_backgroundCol')
-        frag.write('envl += backgroundCol * (f0 * envBRDF.x + envBRDF.y) * 1.5;')
+        frag.write('envl += backgroundCol * F * 1.5;')
 
     frag.add_uniform('float envmapStrength', link='_envmapStrength')
     frag.write('envl *= envmapStrength * occlusion;')
@@ -700,16 +701,45 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.write('vec3 indirect = envl;')
 
     if '_VoxelGI' in wrd.world_defs:
+        if '_gbuffer2' in wrd.world_defs: #always true
+            if tese is None:
+                vert.add_uniform('mat4 prevWVP', link='_prevWorldViewProjectionMatrix')
+                vert.add_out('vec4 wvpposition')
+                vert.add_out('vec4 prevwvpposition')
+                vert.write('wvpposition = gl_Position;')
+                if is_displacement:
+                    vert.add_uniform('mat4 invW', link='_inverseWorldMatrix')
+                    vert.write('prevwvpposition = prevWVP * (invW * vec4(wposition, 1.0));')
+                else:
+                    vert.write('prevwvpposition = prevWVP * spos;')
+            else:
+                tese.add_out('vec4 wvpposition')
+                tese.add_out('vec4 prevwvpposition')
+                tese.write('wvpposition = gl_Position;')
+                if is_displacement:
+                    tese.add_uniform('mat4 invW', link='_inverseWorldMatrix')
+                    tese.add_uniform('mat4 prevWVP', '_prevWorldViewProjectionMatrix')
+                    tese.write('prevwvpposition = prevWVP * (invW * vec4(wposition, 1.0));')
+                else:
+                    vert.add_uniform('mat4 prevW', link='_prevWorldMatrix')
+                    vert.add_out('vec3 prevwposition')
+                    vert.write('prevwposition = vec4(prevW * spos).xyz;')
+                    tese.add_uniform('mat4 prevVP', '_prevViewProjectionMatrix')
+                    make_tess.interpolate(tese, 'prevwposition', 3)
+                    tese.write('prevwvpposition = prevVP * vec4(prevwposition, 1.0);')
+            frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;')
+            frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;')
+            frag.write('vec2 velocity = -vec2(posa - posb);')
         if parse_opacity:
-            frag.write("indirect = traceDiffuse(wposition, n, voxels, clipmaps).rgb * albedo * voxelgiDiff;")
+            frag.write("indirect = traceDiffuse(wposition, n, voxels, clipmaps).rgb * albedo * (1.0 - F) * voxelgiDiff;")
             frag.write("if (roughness < 1.0 && specular > 0.0)")
-            frag.write("    indirect += traceSpecular(wposition, n, voxels, voxelsSDF, vVec, roughness, clipmaps, gl_FragCoord.xy).rgb * specular * voxelgiRefl;")
+            frag.write("    indirect += traceSpecular(wposition, n, voxels, voxelsSDF, vVec, roughness, clipmaps, gl_FragCoord.xy, velocity).rgb * specular * F * voxelgiRefl;")
         else:
             frag.add_uniform("sampler2D voxels_diffuse")
             frag.add_uniform("sampler2D voxels_specular")
-            frag.write("indirect = textureLod(voxels_diffuse, texCoord, 0.0).rgb * albedo * voxelgiDiff;")
+            frag.write("indirect = textureLod(voxels_diffuse, texCoord, 0.0).rgb * albedo * (1.0 - F) * voxelgiDiff;")
             frag.write("if (roughness < 1.0 && specular > 0.0)")
-            frag.write("    indirect += textureLod(voxels_specular, texCoord, 0.0).rgb * specular * voxelgiRefl;")
+            frag.write("    indirect += textureLod(voxels_specular, texCoord, 0.0).rgb * specular * F * voxelgiRefl;")
 
     frag.write('vec3 direct = vec3(0.0);')
 
@@ -807,7 +837,7 @@ def make_forward_base(con_mesh, parse_opacity=False, transluc_pass=False):
         frag.add_uniform('sampler3D voxels')
         frag.add_uniform('sampler3D voxelsSDF')
         frag.write('if (opacity < 1.0) {')
-        frag.write('    vec3 refraction = traceRefraction(wposition, n, voxels, voxelsSDF, vVec, ior, roughness, clipmaps, texCoord).rgb * voxelgiRefr;')
+        frag.write('    vec3 refraction = traceRefraction(wposition, n, voxels, voxelsSDF, vVec, ior, roughness, clipmaps, texCoord, velocity).rgb * (1.0 - F) * voxelgiRefr;')
         frag.write('    indirect = mix(refraction, indirect, opacity);')
         frag.write('    direct = mix(refraction, direct, opacity);')
         frag.write('}')

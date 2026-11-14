@@ -43,12 +43,22 @@ uniform vec3 eye;
 uniform vec3 eyeLook;
 uniform vec2 postprocess_resolution;
 
+uniform sampler2D sveloc;
+
 void main() {
 	const vec2 pixel = gl_GlobalInvocationID.xy;
 	vec2 uv = (pixel + 0.5) / postprocess_resolution;
 	#ifdef _InvY
 	uv.y = 1.0 - uv.y
 	#endif
+
+	// Velocity is assumed to be calculated for motion blur, so we need to inverse it for reprojection
+	vec2 velocity = -textureLod(sveloc, uv, 0.0).rg;
+
+	#ifdef _InvY
+	velocity.y = -velocity.y;
+	#endif
+
 
 	float depth = textureLod(gbufferD, uv, 0.0).r * 2.0 - 1.0;
 	if (depth == 0) return;
@@ -68,7 +78,7 @@ void main() {
 	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
 	n = normalize(n);
 
-	vec3 color = traceSpecular(P, n, voxels, voxelsSDF, normalize(eye - P), g0.b, clipmaps, pixel).rgb;
+	vec3 color = traceSpecular(P, n, voxels, voxelsSDF, normalize(eye - P), g0.b, clipmaps, pixel, velocity).rgb;
 
 	imageStore(voxels_specular, ivec2(pixel), vec4(color, 1.0));
 }
